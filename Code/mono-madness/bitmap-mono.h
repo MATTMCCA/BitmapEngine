@@ -77,15 +77,17 @@ int freeBMP(canvas* myCanvas);
 bool getPixle(canvas* myCanvas, size_t x, size_t y);
 /* write new pixle value to canvas */
 int setPixle(canvas* myCanvas, size_t x, size_t y, bool val);
-/* draw a horizontal line of x length, with a width of thick, with value of val */
+/* draw a horizontal line of width, 'width', thickness of 'thick', with value of 'val' */
 int drawHorizontalLine(canvas* mycavas, size_t x, size_t y, size_t width, size_t thick, bool val);
-/* draw a vertical line of x length, with a width of thick, with value of val */
+/* draw a vertical line of length, 'length', thickness of 'thick', with value of 'val' */
 int drawVerticalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t thick, bool val);
-/* draw a box at x,y, size of L&W, thickness of thick, val of value */
+/* draw a box at x,y, size of L&W, thickness of 'thick', value of 'val' */
 int drawBox(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, size_t thick, bool val);
+/* draw a filled box at x,y, size of L&W, value of 'val' */
+int drawBoxFill(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, bool val);
 
 /* invert bitmap */
-int invertAll(canvas* mycavas);
+int invertCanvas(canvas* mycavas);
 
 /* add canvas to another canvas, transparent alpha = 1, white becomes transparent */
 int addSpriteCanvas(canvas* mycavas, canvas* sprite, size_t x, size_t y, bool alpha);

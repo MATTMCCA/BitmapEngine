@@ -63,7 +63,7 @@ int setPixle(canvas* myCanvas, size_t x, size_t y, bool val)
 	return 0;
 }
 
-/* draw a horizontal line of x length, with a width of thick, with value of val */
+/* draw a horizontal line of width, 'width', thickness of 'thick', with value of 'val' */
 int drawHorizontalLine(canvas* mycavas, size_t x, size_t y, size_t width, size_t thick, bool val)
 {
 	if ((thick <= 0) || (x + width >= mycavas->x) || (y + thick >= mycavas->y))
@@ -76,7 +76,7 @@ int drawHorizontalLine(canvas* mycavas, size_t x, size_t y, size_t width, size_t
 	return 0;
 }
 
-/* draw a vertical line of x length, with a width of thick, with value of val */
+/* draw a vertical line of length, 'length', thickness of 'thick', with value of 'val' */
 int drawVerticalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t thick, bool val)
 {
 	if ((thick <= 0) || (y + length >= mycavas->y) || (x + thick >= mycavas->x))
@@ -89,7 +89,7 @@ int drawVerticalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t 
 	return 0;
 }
 
-/* draw a box at x,y, size of L&W, thickness of thick, value of val */
+/* draw a box at x,y, size of L&W, thickness of 'thick', value of 'va'l */
 int drawBox(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, size_t thick, bool val)
 {
 	if (drawHorizontalLine(mycavas, x,                 y,                   width,          thick, val))	return 1;
@@ -100,8 +100,21 @@ int drawBox(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, si
 	return 0;
 }
 
+/* draw a filled box at x,y, size of L&W, value of 'val' */
+int drawBoxFill(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, bool val)
+{
+	if ((y + length >= mycavas->y) || (x + width >= mycavas->x))
+		return 1;
+
+	for (size_t _y = 0; _y < length; _y++)
+		for (size_t _x = 0; _x < width; _x++)
+			setPixle(mycavas, x + _x, y + _y, val);
+	
+	return 0;
+}
+
 /* invert bitmap */
-int invertAll(canvas* mycavas)
+int invertCanvas(canvas* mycavas)
 {
 	for (size_t i = 0; i < mycavas->x * mycavas->y; i++)
 		mycavas->ptr[i] = !mycavas->ptr[i];
@@ -127,7 +140,6 @@ int addSpriteCanvas(canvas* mycavas, canvas* sprite, size_t x, size_t y, bool al
 
 	return 0;
 }
-
 
 /* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename)

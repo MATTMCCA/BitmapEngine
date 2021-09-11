@@ -11,41 +11,63 @@
 #include <string.h>
 #include "bitmap-mono.h" //mono bitmap lib
 
-#define TRASH_DIR "A:\\Users\\Matt\\Pictures\\TRASH\\test.bmp"
+int bmp_1(const char *path); //test bitmap creation
+int bmp_2(const char* path); //test bitmap set pixles
 
 int main()
 {
+    const char TRASH_DIR[] = "A:\\Users\\Matt\\Pictures\\TRASH\\";
+
     printf("1-bit Bitmap Creation Test\n");
+    printf("=====================================\n");
+    /*******************************************************/
+    printf("bmp_1: ");
+    if (bmp_1(TRASH_DIR)) printf("FAIL\n");
+    else                  printf("PASS\n");
+    /***************************************/
+    printf("bmp_2: ");
+    if (bmp_2(TRASH_DIR)) printf("FAIL\n");
+    else                  printf("PASS\n");
+    /***************************************/
+    printf("=====================================\n");
+
+    return 0;
+}
+
+int bmp_1(const char* path)
+{
+    char filename[500] = {0x00};
+    strcat_s(filename, 500, path);
+    strcat_s(filename, 500, "bmp_001.bmp");
 
     canvas myTest = { NULL };
-    createBMP(&myTest, 30, 30);    
+    if (createBMP(&myTest, 30, 30))
+        return 1;
 
-    /*
-    setPixle(&myTest, 0, 0, 1);
-    setPixle(&myTest, 3, 3, 1);
-    setPixle(&myTest, 4, 4, 1);
-    setPixle(&myTest, 7, 7, 1);
+    if (saveCanvas(&myTest, 300 /*DPI*/, filename))
+        return 1;
 
-    drawHorizontalLine(&myTest, 10, 20, 5, 1, 1);
-    drawVerticalLine(&myTest, 10, 20, 5, 1, 1);
-    */
-
-    drawBox(&myTest, 0, 0, 20, 20, 3, 1);
-
-    //invertAll(&myTest);
-
-    canvas sprite = { NULL };
-    createBMP(&sprite, 2, 2);
-
-    setPixle(&sprite, 0, 0, 1);
-
-    addSpriteCanvas(&myTest, &sprite, 25, 25, 1);
-
-
-    saveCanvas(&myTest, 300 /*DPI*/, TRASH_DIR);
     freeBMP(&myTest);
+    return 0;
+}
 
-    printf("Fin\n");
+int bmp_2(const char* path)
+{
+    char filename[500] = { 0x00 };
+    strcat_s(filename, 500, path);
+    strcat_s(filename, 500, "bmp_002.bmp");
 
+    canvas myTest = { NULL };
+    if (createBMP(&myTest, 30, 30))
+        return 1;
+
+    for (int i = 0; i < 30; i++)
+        if (setPixle(&myTest, i, i, 1))
+            return 1;
+    
+    if (saveCanvas(&myTest, 300 /*DPI*/, filename))
+        return 1;
+
+    freeBMP(&myTest);
     return 0;
 }
