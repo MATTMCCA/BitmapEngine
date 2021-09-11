@@ -71,7 +71,7 @@ int createBMP(canvas* myCanvas, size_t X, size_t Y);
 /* free created bitmap canvas */
 int freeBMP(canvas* myCanvas);
 
-/* accessor functions, bitmap goodness */
+/******** accessor functions, bitmap goodness ************/
 
 /* get pixle value from canvas */
 bool getPixle(canvas* myCanvas, size_t x, size_t y);
@@ -87,12 +87,12 @@ int drawBox(canvas* myCanvass, size_t x, size_t y, size_t length, size_t width, 
 int drawBoxFill(canvas* myCanvas, size_t x, size_t y, size_t length, size_t width, bool val);
 /* fill with val */
 int fillCanvas(canvas* myCanvas, bool val);
-
 /* invert bitmap */
 int invertCanvas(canvas* myCanvas);
-
 /* add canvas to another canvas, transparent alpha = 1, white becomes transparent */
 int addSpriteCanvas(canvas* myCanvas, canvas* sprite, size_t x, size_t y, bool alpha);
+
+
 
 /* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename);
