@@ -2,6 +2,8 @@
 // 
 // MJM - 2021
 // 
+// bitmaps from scratch, code should be pretty portable 
+// 
 //
 
 #include "bitmap-mono.h"
