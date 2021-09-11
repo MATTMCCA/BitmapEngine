@@ -16,16 +16,18 @@
 
 int main()
 {
-    printf("test\n");
+    printf("1-bit Bitmap Creation Test\n");
 
     canvas myTest = { NULL };
+    createBMP(&myTest, 8, 8);    
 
-    createBMP(&myTest, 2, 2);
+    myTest.ptr[0] = 1;
+    myTest.ptr[3] = 1;
 
-
-    
     saveCanvas(&myTest, 96, TRASH_DIR);
     freeBMP(&myTest);
+
+    printf("Fin\n");
 
     return 0;
 }

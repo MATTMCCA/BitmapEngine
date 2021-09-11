@@ -14,6 +14,18 @@
 #include <stdbool.h>
 #include <string.h>
 
+/* a=target variable, b=bit number to act upon 0-n */
+//https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
+#define BIT_SET(a,b)				((a) |= (1ULL<<(b)))
+#define BIT_CLEAR(a,b)				((a) &= ~(1ULL<<(b)))
+#define BIT_FLIP(a,b)				((a) ^= (1ULL<<(b)))
+#define BIT_CHECK(a,b)				(!!((a) & (1ULL<<(b))))        // '!!' to make sure this returns 0 or 1
+
+#define BITMASK_SET(x, mask)		((x) |= (mask))
+#define BITMASK_CLEAR(x, mask)		((x) &= (~(mask)))
+#define BITMASK_FLIP(x, mask)		((x) ^= (mask))
+#define BITMASK_CHECK_ALL(x, mask)	(!(~(x) & (mask)))
+#define BITMASK_CHECK_ANY(x, mask)	((x) & (mask))
 
 /****************** bitmap structs ******************/
 //ref: http://www.ece.ualberta.ca/~elliott/ee552/studentAppNotes/2003_w/misc/bmp_file_format/bmp_file_format.htm
@@ -40,7 +52,7 @@ typedef struct {
 
 } infoHeader;
 
-static const uint32_t COLOR_TABLE[2] = { 0x00000000, 0xFFFFFF00 }; //might need to flip
+static const uint32_t COLOR_TABLE[2] = { 0x00000000, 0x00FFFFFF };
 
 /************************************************/
 
@@ -54,5 +66,10 @@ typedef struct {
 
 int createBMP(canvas* myCanvas, size_t X, size_t Y);
 int freeBMP(canvas* myCanvas);
+
+/* accessor functions, bitmap goodness */
+
+bool getPixle(canvas* myCanvas, size_t x, size_t y);
+int setPixle(canvas* myCanvas, size_t x, size_t y, bool val);
 
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename);

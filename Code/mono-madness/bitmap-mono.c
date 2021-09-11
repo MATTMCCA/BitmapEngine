@@ -8,15 +8,19 @@
 
 int createBMP(canvas* myCanvas, size_t X, size_t Y)
 {
-	if (myCanvas->ptr != NULL)
+	if (myCanvas->ptr != NULL) 
 		return 1;
 
 	myCanvas->x = X;
 	myCanvas->y = Y;
-	myCanvas->ptr = malloc((myCanvas->x * myCanvas->y) * sizeof(bool));
-	
-	if (myCanvas->ptr == NULL)
+	size_t _asize = (myCanvas->x * myCanvas->y) * sizeof(bool);
+	myCanvas->ptr = malloc(_asize);
+
+	if (myCanvas->ptr == NULL) 
 		return 1;
+
+	if (myCanvas->ptr != NULL) 
+		memset(myCanvas->ptr, 0x00, _asize);
 
 	return 0;
 }
@@ -32,6 +36,26 @@ int freeBMP(canvas* myCanvas)
 	return 0;
 }
 
+bool getPixle(canvas* myCanvas, size_t x, size_t y)
+{
+	if ((x >= myCanvas->x) || (y >= myCanvas->y))
+		return 1;
+
+	return myCanvas->ptr[(y * myCanvas->x) + x];
+
+	return 0;
+}
+
+int setPixle(canvas* myCanvas, size_t x, size_t y, bool val)
+{
+	if ((x >= myCanvas->x) || (y >= myCanvas->y))
+		return 1;
+
+	myCanvas->ptr[(y * myCanvas->x) + x] = val;
+
+	return 0;
+}
+
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 {
 	uint32_t image_y =            myCanvas->y;
@@ -41,7 +65,7 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 	while ((image_x % 4))	image_x++;   //4 byte padding
 
 	header bmpHead;
-	bmpHead.Signature	= 0x4D42; //flip?
+	bmpHead.Signature	= 0x4D42;
 	bmpHead.FileSize	= 54 /*header*/ + 8 /*color table*/ + (image_x * image_y) /*bytes*/;
 	bmpHead.reserved	= 0x00;
 	bmpHead.DataOffset	= 62;
@@ -63,13 +87,18 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 	size_t BMPDATASIZE = image_x * image_y;
 	BMPDATA = malloc(BMPDATASIZE); //raw data for bmp
 
-	if(BMPDATA != NULL)
-		memset(BMPDATA, 0x00, BMPDATASIZE);
-	//TODO: copy canvase bits to byte array here
+	if (BMPDATA != NULL) {
+		memset(BMPDATA, 0xFF, BMPDATASIZE);
 
+		for (size_t _y = 0; _y < myCanvas->y; _y++) {
+			uint8_t* in_line = &myCanvas->ptr[(_y * myCanvas->x)];
+			uint8_t* out_line = &BMPDATA[(((image_y-1) - _y) * image_x)];
 
-
-
+			for (size_t _x = 0; _x < myCanvas->x; _x++) {
+				if (in_line[_x]) BIT_CLEAR(out_line[(_x / 8)], (7 - (_x % 8)));
+			}
+		}
+	}
 
 	FILE* fd;
 	fd = fopen(filename, "wb");
@@ -77,11 +106,12 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 	if ((fd != NULL) && (BMPDATA != NULL))
 	{
 		//TODO: add error handling, or not...
-		fwrite(&bmpHead.Signature,  sizeof(uint16_t), 1, fd);
-		fwrite(&bmpHead.FileSize,   sizeof(uint32_t), 1, fd);
-		fwrite(&bmpHead.reserved,   sizeof(uint32_t), 1, fd);
-		fwrite(&bmpHead.DataOffset, sizeof(uint32_t), 1, fd);
-
+		/*************************************************************/
+		fwrite(&bmpHead.Signature,            sizeof(uint16_t), 1, fd);
+		fwrite(&bmpHead.FileSize,             sizeof(uint32_t), 1, fd);
+		fwrite(&bmpHead.reserved,             sizeof(uint32_t), 1, fd);
+		fwrite(&bmpHead.DataOffset,           sizeof(uint32_t), 1, fd);
+		/*************************************************************/
 		fwrite(&bmpInfoHead.Size,             sizeof(uint32_t), 1, fd);
 		fwrite(&bmpInfoHead.Width,            sizeof(uint32_t), 1, fd);
 		fwrite(&bmpInfoHead.Height,           sizeof(uint32_t), 1, fd);
@@ -93,11 +123,11 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 		fwrite(&bmpInfoHead.YpixelsPerM,      sizeof(uint32_t), 1, fd);
 		fwrite(&bmpInfoHead.Colors_Used,      sizeof(uint32_t), 1, fd);
 		fwrite(&bmpInfoHead.Important_Colors, sizeof(uint32_t), 1, fd);
-
-		fwrite(&COLOR_TABLE, sizeof(uint32_t), 2, fd);
-
-		fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
-
+		/*************************************************************/
+		fwrite(&COLOR_TABLE,                  sizeof(uint32_t), 2, fd);
+		/**********************************************************************/
+		fwrite(BMPDATA,                       sizeof(uint8_t), BMPDATASIZE, fd);
+		/**********************************************************************/
 		fclose(fd);
 	}
 
@@ -106,3 +136,5 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 
 	return 0;
 }
+
+
