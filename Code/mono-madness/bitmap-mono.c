@@ -6,6 +6,8 @@
 
 #include "bitmap-mono.h"
 
+
+/* create a bitmap canvas */
 int createBMP(canvas* myCanvas, size_t X, size_t Y)
 {
 	if (myCanvas->ptr != NULL) 
@@ -25,6 +27,7 @@ int createBMP(canvas* myCanvas, size_t X, size_t Y)
 	return 0;
 }
 
+/* free created bitmap canvas */
 int freeBMP(canvas* myCanvas)
 {
 	if (myCanvas->ptr != NULL)
@@ -36,6 +39,7 @@ int freeBMP(canvas* myCanvas)
 	return 0;
 }
 
+/* get pixle value from canvas */
 bool getPixle(canvas* myCanvas, size_t x, size_t y)
 {
 	if ((x >= myCanvas->x) || (y >= myCanvas->y))
@@ -46,6 +50,7 @@ bool getPixle(canvas* myCanvas, size_t x, size_t y)
 	return 0;
 }
 
+/* write new pixle value to canvas */
 int setPixle(canvas* myCanvas, size_t x, size_t y, bool val)
 {
 	if ((x >= myCanvas->x) || (y >= myCanvas->y))
@@ -56,6 +61,7 @@ int setPixle(canvas* myCanvas, size_t x, size_t y, bool val)
 	return 0;
 }
 
+/* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 {
 	uint32_t image_y =            myCanvas->y;
@@ -136,5 +142,3 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 
 	return 0;
 }
-
-

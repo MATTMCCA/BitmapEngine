@@ -6,7 +6,8 @@
 
 #pragma once
 
-#define _CRT_SECURE_NO_DEPRECATE		//I just wanted to use fopen....
+/* don't use fopen in a secure application */
+#define _CRT_SECURE_NO_DEPRECATE				//I just wanted to use fopen....
 
 #include <stdint.h>
 #include <stdio.h>
@@ -56,20 +57,24 @@ static const uint32_t COLOR_TABLE[2] = { 0x00000000, 0x00FFFFFF };
 
 /************************************************/
 
-
 typedef struct {
 	bool* ptr;
 	size_t x;
 	size_t y;
 } canvas;
 
-
+/* create a bitmap canvas */
 int createBMP(canvas* myCanvas, size_t X, size_t Y);
+
+/* free created bitmap canvas */
 int freeBMP(canvas* myCanvas);
 
 /* accessor functions, bitmap goodness */
 
+/* get pixle value from canvas */
 bool getPixle(canvas* myCanvas, size_t x, size_t y);
+/* write new pixle value to canvas */
 int setPixle(canvas* myCanvas, size_t x, size_t y, bool val);
 
+/* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename);

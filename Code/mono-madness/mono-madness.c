@@ -7,12 +7,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-
 #include "bitmap-mono.h" //mono bitmap lib
 
-
 #define TRASH_DIR "A:\\Users\\Matt\\Pictures\\TRASH\\test.bmp"
-
 
 int main()
 {
@@ -21,10 +18,12 @@ int main()
     canvas myTest = { NULL };
     createBMP(&myTest, 8, 8);    
 
-    myTest.ptr[0] = 1;
-    myTest.ptr[3] = 1;
+    setPixle(&myTest, 0, 0, 1);
+    setPixle(&myTest, 3, 3, 1);
+    setPixle(&myTest, 4, 4, 1);
+    setPixle(&myTest, 7, 7, 1);
 
-    saveCanvas(&myTest, 96, TRASH_DIR);
+    saveCanvas(&myTest, 300 /*DPI*/, TRASH_DIR);
     freeBMP(&myTest);
 
     printf("Fin\n");
