@@ -63,28 +63,46 @@ int setPixle(canvas* myCanvas, size_t x, size_t y, bool val)
 	return 0;
 }
 
-/* draw a horizontal line of x length, with a width of n, with value of y */
-int drawHorizontalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, bool val)
+/* draw a horizontal line of x length, with a width of thick, with value of val */
+int drawHorizontalLine(canvas* mycavas, size_t x, size_t y, size_t width, size_t thick, bool val)
 {
-	if ((width <= 0) || (x + length >= mycavas->x) || (y + width >= mycavas->y))
+	if ((thick <= 0) || (x + width >= mycavas->x) || (y + thick >= mycavas->y))
 		return 1;
 
-	for (int _x = 0; _x < length; _x++)
-		for (int _y = 0; _y < width; _y++)
+	for (size_t _x = 0; _x < width; _x++)
+		for (size_t _y = 0; _y < thick; _y++)
 			setPixle(mycavas, x + _x, y + _y, val);
 
 	return 0;
 }
 
-/* draw a vertical line of x length, with a width of n, with value of y */
-int drawVerticalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, bool val)
+/* draw a vertical line of x length, with a width of thick, with value of val */
+int drawVerticalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t thick, bool val)
 {
-	if ((width <= 0) || (y + length >= mycavas->y) || (x + width >= mycavas->x))
+	if ((thick <= 0) || (y + length >= mycavas->y) || (x + thick >= mycavas->x))
 		return 1;
 
-	for (int _y = 0; _y < length; _y++)
-		for (int _x = 0; _x < width; _x++)
+	for (size_t _y = 0; _y < length; _y++)
+		for (size_t _x = 0; _x < thick; _x++)
 			setPixle(mycavas, x + _x, y + _y, val);
+
+	return 0;
+}
+
+/* draw a box at x,y, size of L&W, thickness of thick, value of val */
+int drawBox(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, size_t thick, bool val)
+{
+	if (drawHorizontalLine(mycavas, x,                 y,                   width,          thick, val))	return 1;
+	if (drawHorizontalLine(mycavas,	x,                 y + length - thick,	width,          thick, val))	return 1;
+	if (drawVerticalLine  (mycavas, x,                 y + thick,           length - thick, thick, val))	return 1;
+	if (drawVerticalLine  (mycavas, x + width - thick, y + thick,	        length - thick,	thick, val))	return 1;
+}
+
+/* invert bitmap */
+int invertAll(canvas* mycavas)
+{
+	for (size_t i = 0; i < mycavas->x * mycavas->y; i++)
+		mycavas->ptr[i] = !mycavas->ptr[i];
 
 	return 0;
 }

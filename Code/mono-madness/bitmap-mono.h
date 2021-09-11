@@ -77,10 +77,15 @@ int freeBMP(canvas* myCanvas);
 bool getPixle(canvas* myCanvas, size_t x, size_t y);
 /* write new pixle value to canvas */
 int setPixle(canvas* myCanvas, size_t x, size_t y, bool val);
-/* draw a horizontal line of x length, with a width of n, with value of y */
-int drawHorizontalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, bool val);
-/* draw a horizontal line of x length, with a width of n, with value of y */
-int drawVerticalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, bool val);
+/* draw a horizontal line of x length, with a width of thick, with value of val */
+int drawHorizontalLine(canvas* mycavas, size_t x, size_t y, size_t width, size_t thick, bool val);
+/* draw a vertical line of x length, with a width of thick, with value of val */
+int drawVerticalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t thick, bool val);
+/* draw a box at x,y, size of L&W, thickness of thick, val of value */
+int drawBox(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, size_t thick, bool val);
+
+/* invert bitmap */
+int invertAll(canvas* mycavas);
 
 /* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename);

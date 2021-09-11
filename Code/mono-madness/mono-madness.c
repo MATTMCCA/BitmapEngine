@@ -20,6 +20,7 @@ int main()
     canvas myTest = { NULL };
     createBMP(&myTest, 30, 30);    
 
+    /*
     setPixle(&myTest, 0, 0, 1);
     setPixle(&myTest, 3, 3, 1);
     setPixle(&myTest, 4, 4, 1);
@@ -27,6 +28,11 @@ int main()
 
     drawHorizontalLine(&myTest, 10, 20, 5, 1, 1);
     drawVerticalLine(&myTest, 10, 20, 5, 1, 1);
+    */
+
+    drawBox(&myTest, 0, 0, 20, 20, 3, 1);
+
+    invertAll(&myTest);
 
     saveCanvas(&myTest, 300 /*DPI*/, TRASH_DIR);
     freeBMP(&myTest);
