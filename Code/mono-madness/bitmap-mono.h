@@ -87,5 +87,8 @@ int drawBox(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, si
 /* invert bitmap */
 int invertAll(canvas* mycavas);
 
+/* add canvas to another canvas, transparent alpha = 1, white becomes transparent */
+int addSpriteCanvas(canvas* mycavas, canvas* sprite, size_t x, size_t y, bool alpha);
+
 /* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename);

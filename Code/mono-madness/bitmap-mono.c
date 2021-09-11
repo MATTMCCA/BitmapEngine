@@ -96,6 +96,8 @@ int drawBox(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, si
 	if (drawHorizontalLine(mycavas,	x,                 y + length - thick,	width,          thick, val))	return 1;
 	if (drawVerticalLine  (mycavas, x,                 y + thick,           length - thick, thick, val))	return 1;
 	if (drawVerticalLine  (mycavas, x + width - thick, y + thick,	        length - thick,	thick, val))	return 1;
+
+	return 0;
 }
 
 /* invert bitmap */
@@ -106,6 +108,26 @@ int invertAll(canvas* mycavas)
 
 	return 0;
 }
+
+/* add canvas to another canvas, transparent alpha = 1, white becomes transparent */
+int addSpriteCanvas(canvas* mycavas, canvas* sprite, size_t x, size_t y, bool alpha)
+{
+	if ((sprite->x + x > mycavas->x) || (sprite->y + y > mycavas->y))
+		return 1;
+
+	for (size_t _y = 0; _y < sprite->y; _y++)
+		for (size_t _x = 0; _x < sprite->x; _x++)
+			if (alpha) 	{
+				if(getPixle(sprite, _x, _y))
+					setPixle(mycavas, x + _x, y + _y, 1);
+			} 
+			else {
+				setPixle(mycavas, x + _x, y + _y, getPixle(sprite, _x, _y));
+			}
+
+	return 0;
+}
+
 
 /* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename)

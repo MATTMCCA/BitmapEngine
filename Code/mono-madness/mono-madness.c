@@ -32,7 +32,15 @@ int main()
 
     drawBox(&myTest, 0, 0, 20, 20, 3, 1);
 
-    invertAll(&myTest);
+    //invertAll(&myTest);
+
+    canvas sprite = { NULL };
+    createBMP(&sprite, 2, 2);
+
+    setPixle(&sprite, 0, 0, 1);
+
+    addSpriteCanvas(&myTest, &sprite, 25, 25, 1);
+
 
     saveCanvas(&myTest, 300 /*DPI*/, TRASH_DIR);
     freeBMP(&myTest);
