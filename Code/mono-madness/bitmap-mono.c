@@ -44,6 +44,9 @@ int freeBMP(canvas* myCanvas)
 /* get pixle value from canvas */
 bool getPixle(canvas* myCanvas, size_t x, size_t y)
 {
+	if (myCanvas->ptr == NULL)
+		return 1;
+
 	if ((x >= myCanvas->x) || (y >= myCanvas->y))
 		return 1;
 
@@ -55,6 +58,9 @@ bool getPixle(canvas* myCanvas, size_t x, size_t y)
 /* write new pixle value to canvas */
 int setPixle(canvas* myCanvas, size_t x, size_t y, bool val)
 {
+	if (myCanvas->ptr == NULL) 
+		return 1;
+
 	if ((x >= myCanvas->x) || (y >= myCanvas->y))
 		return 1;
 
@@ -64,79 +70,110 @@ int setPixle(canvas* myCanvas, size_t x, size_t y, bool val)
 }
 
 /* draw a horizontal line of width, 'width', thickness of 'thick', with value of 'val' */
-int drawHorizontalLine(canvas* mycavas, size_t x, size_t y, size_t width, size_t thick, bool val)
+int drawHorizontalLine(canvas* myCanvas, size_t x, size_t y, size_t width, size_t thick, bool val)
 {
-	if ((thick <= 0) || (x + width >= mycavas->x) || (y + thick >= mycavas->y))
+	if (myCanvas->ptr == NULL)
+		return 1;
+
+	if ((thick <= 0) || (x + width >= myCanvas->x) || (y + thick >= myCanvas->y))
 		return 1;
 
 	for (size_t _x = 0; _x < width; _x++)
 		for (size_t _y = 0; _y < thick; _y++)
-			setPixle(mycavas, x + _x, y + _y, val);
+			setPixle(myCanvas, x + _x, y + _y, val);
 
 	return 0;
 }
 
 /* draw a vertical line of length, 'length', thickness of 'thick', with value of 'val' */
-int drawVerticalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t thick, bool val)
+int drawVerticalLine(canvas* myCanvas, size_t x, size_t y, size_t length, size_t thick, bool val)
 {
-	if ((thick <= 0) || (y + length >= mycavas->y) || (x + thick >= mycavas->x))
+	if (myCanvas->ptr == NULL)
+		return 1;
+
+	if ((thick <= 0) || (y + length >= myCanvas->y) || (x + thick >= myCanvas->x))
 		return 1;
 
 	for (size_t _y = 0; _y < length; _y++)
 		for (size_t _x = 0; _x < thick; _x++)
-			setPixle(mycavas, x + _x, y + _y, val);
+			setPixle(myCanvas, x + _x, y + _y, val);
 
 	return 0;
 }
 
 /* draw a box at x,y, size of L&W, thickness of 'thick', value of 'va'l */
-int drawBox(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, size_t thick, bool val)
+int drawBox(canvas* myCanvas, size_t x, size_t y, size_t length, size_t width, size_t thick, bool val)
 {
-	if (drawHorizontalLine(mycavas, x,                 y,                   width,          thick, val))	return 1;
-	if (drawHorizontalLine(mycavas,	x,                 y + length - thick,	width,          thick, val))	return 1;
-	if (drawVerticalLine  (mycavas, x,                 y + thick,           length - thick, thick, val))	return 1;
-	if (drawVerticalLine  (mycavas, x + width - thick, y + thick,	        length - thick,	thick, val))	return 1;
+	if (drawHorizontalLine(myCanvas, x,                 y,                  width,          thick, val))	return 1;
+	if (drawHorizontalLine(myCanvas, x,                 y + length - thick,	width,          thick, val))	return 1;
+	if (drawVerticalLine  (myCanvas, x,                 y + thick,          length - thick, thick, val))	return 1;
+	if (drawVerticalLine  (myCanvas, x + width - thick, y + thick,	        length - thick,	thick, val))	return 1;
 
 	return 0;
 }
 
 /* draw a filled box at x,y, size of L&W, value of 'val' */
-int drawBoxFill(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, bool val)
+int drawBoxFill(canvas* myCanvas, size_t x, size_t y, size_t length, size_t width, bool val)
 {
-	if ((y + length >= mycavas->y) || (x + width >= mycavas->x))
+	if (myCanvas->ptr == NULL)
+		return 1;
+
+	if ((y + length >= myCanvas->y) || (x + width >= myCanvas->x))
 		return 1;
 
 	for (size_t _y = 0; _y < length; _y++)
 		for (size_t _x = 0; _x < width; _x++)
-			setPixle(mycavas, x + _x, y + _y, val);
+			setPixle(myCanvas, x + _x, y + _y, val);
 	
 	return 0;
 }
 
 /* invert bitmap */
-int invertCanvas(canvas* mycavas)
+int invertCanvas(canvas* myCanvas)
 {
-	for (size_t i = 0; i < mycavas->x * mycavas->y; i++)
-		mycavas->ptr[i] = !mycavas->ptr[i];
+	if (myCanvas->ptr == NULL) 
+		return 1;
+
+	for (size_t i = 0; i < myCanvas->x * myCanvas->y; i++)
+		myCanvas->ptr[i] = !myCanvas->ptr[i];
 
 	return 0;
 }
 
 /* add canvas to another canvas, transparent alpha = 1, white becomes transparent */
-int addSpriteCanvas(canvas* mycavas, canvas* sprite, size_t x, size_t y, bool alpha)
+int addSpriteCanvas(canvas* myCanvas, canvas* sprite, size_t x, size_t y, bool alpha)
 {
-	if ((sprite->x + x > mycavas->x) || (sprite->y + y > mycavas->y))
+	if ((myCanvas->ptr == NULL) || (sprite == NULL))
+		return 1;
+
+	if ((sprite->x + x > myCanvas->x) || (sprite->y + y > myCanvas->y))
 		return 1;
 
 	for (size_t _y = 0; _y < sprite->y; _y++)
 		for (size_t _x = 0; _x < sprite->x; _x++)
 			if (alpha) 	{
 				if(getPixle(sprite, _x, _y))
-					setPixle(mycavas, x + _x, y + _y, 1);
+					setPixle(myCanvas, x + _x, y + _y, 1);
 			} 
 			else {
-				setPixle(mycavas, x + _x, y + _y, getPixle(sprite, _x, _y));
+				setPixle(myCanvas, x + _x, y + _y, getPixle(sprite, _x, _y));
 			}
+
+	return 0;
+}
+
+int fillCanvas(canvas* myCanvas, bool val)
+{
+	if (myCanvas->ptr == NULL) 
+		return 1;
+
+	size_t _asize = myCanvas->x * myCanvas->y * sizeof(bool);
+
+	if (myCanvas->ptr != NULL) {
+		uint8_t value = 0x00;
+		if (val) value = 0xFF;
+		memset(myCanvas->ptr, value, _asize);
+	}
 
 	return 0;
 }
@@ -144,6 +181,9 @@ int addSpriteCanvas(canvas* mycavas, canvas* sprite, size_t x, size_t y, bool al
 /* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 {
+	if (myCanvas->ptr == NULL) 
+		return 1;
+
 	uint32_t image_y =            myCanvas->y;
 	uint32_t image_x = (uint32_t)(myCanvas->x / 8.0);
 	

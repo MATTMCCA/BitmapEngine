@@ -18,6 +18,8 @@ int bmp_4(const char* path); //test bitmap Vertical Line
 int bmp_5(const char* path); //test bitmap box
 int bmp_6(const char* path); //test bitmap boxfill
 int bmp_7(const char* path); //test invert
+int bmp_8(const char* path); //test sprite alpha = 0
+int bmp_9(const char* path); //test sprite alpha = 1
 
 
 int main()
@@ -53,6 +55,14 @@ int main()
     /***************************************/
     printf("bmp_7: ");
     if (bmp_7(TRASH_DIR)) printf("FAIL\n");
+    else                  printf("PASS\n");
+    /***************************************/
+    printf("bmp_8: ");
+    if (bmp_8(TRASH_DIR)) printf("FAIL\n");
+    else                  printf("PASS\n");
+    /***************************************/
+    printf("bmp_9: ");
+    if (bmp_9(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
     /***************************************/
     printf("=====================================\n");
@@ -222,5 +232,77 @@ int bmp_7(const char* path)
         return 1;
 
     freeBMP(&myTest);
+    return 0;
+}
+
+int bmp_8(const char* path)
+{
+    char filename[500] = { 0x00 };
+    strcat_s(filename, 500, path);
+    strcat_s(filename, 500, "bmp_008.bmp");
+
+    canvas myTest = { NULL };
+    canvas mysprite = { NULL };
+
+    /* create two canvases */
+    if (createBMP(&myTest, 20, 20)) return 1;
+    if (createBMP(&mysprite, 9, 9))   return 1;
+
+    /* mysprite = checkerboard */
+    bool toggle = 1;
+    for (size_t i = 0; i < (mysprite.x * mysprite.y); i++) {
+        mysprite.ptr[i] = toggle;
+        toggle = !toggle;
+    }
+
+    if (drawBox(&myTest, 5, 5, 10, 10, 1, 1))
+        return 1;
+
+    /* add sprite to mytest */
+    if (addSpriteCanvas(&myTest, &mysprite, 3, 3, 0)) return 1;
+
+    /* free sprite after copy */
+    freeBMP(&mysprite);
+
+    if (saveCanvas(&myTest, 300 /*DPI*/, filename)) return 1;
+
+    freeBMP(&myTest);
+
+    return 0;
+}
+
+int bmp_9(const char* path)
+{
+    char filename[500] = { 0x00 };
+    strcat_s(filename, 500, path);
+    strcat_s(filename, 500, "bmp_009.bmp");
+
+    canvas myTest = { NULL };
+    canvas mysprite = { NULL };
+
+    /* create two canvases */
+    if (createBMP(&myTest, 20, 20)) return 1;
+    if (createBMP(&mysprite, 9, 9))   return 1;
+
+    /* mysprite = checkerboard */
+    bool toggle = 1;
+    for (size_t i = 0; i < (mysprite.x * mysprite.y); i++) {
+        mysprite.ptr[i] = toggle;
+        toggle = !toggle;
+    }
+
+    if (drawBox(&myTest, 5, 5, 10, 10, 1, 1))
+        return 1;
+
+    /* add sprite to mytest */
+    if (addSpriteCanvas(&myTest, &mysprite, 3, 3, 1)) return 1;
+
+    /* free sprite after copy */
+    freeBMP(&mysprite);
+
+    if (saveCanvas(&myTest, 300 /*DPI*/, filename)) return 1;
+
+    freeBMP(&myTest);
+
     return 0;
 }

@@ -78,19 +78,21 @@ bool getPixle(canvas* myCanvas, size_t x, size_t y);
 /* write new pixle value to canvas */
 int setPixle(canvas* myCanvas, size_t x, size_t y, bool val);
 /* draw a horizontal line of width, 'width', thickness of 'thick', with value of 'val' */
-int drawHorizontalLine(canvas* mycavas, size_t x, size_t y, size_t width, size_t thick, bool val);
+int drawHorizontalLine(canvas* myCanvas, size_t x, size_t y, size_t width, size_t thick, bool val);
 /* draw a vertical line of length, 'length', thickness of 'thick', with value of 'val' */
-int drawVerticalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t thick, bool val);
+int drawVerticalLine(canvas* myCanvas, size_t x, size_t y, size_t length, size_t thick, bool val);
 /* draw a box at x,y, size of L&W, thickness of 'thick', value of 'val' */
-int drawBox(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, size_t thick, bool val);
+int drawBox(canvas* myCanvass, size_t x, size_t y, size_t length, size_t width, size_t thick, bool val);
 /* draw a filled box at x,y, size of L&W, value of 'val' */
-int drawBoxFill(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, bool val);
+int drawBoxFill(canvas* myCanvas, size_t x, size_t y, size_t length, size_t width, bool val);
+/* fill with val */
+int fillCanvas(canvas* myCanvas, bool val);
 
 /* invert bitmap */
-int invertCanvas(canvas* mycavas);
+int invertCanvas(canvas* myCanvas);
 
 /* add canvas to another canvas, transparent alpha = 1, white becomes transparent */
-int addSpriteCanvas(canvas* mycavas, canvas* sprite, size_t x, size_t y, bool alpha);
+int addSpriteCanvas(canvas* myCanvas, canvas* sprite, size_t x, size_t y, bool alpha);
 
 /* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename);
