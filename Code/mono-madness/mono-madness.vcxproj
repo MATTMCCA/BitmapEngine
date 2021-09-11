@@ -139,7 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bitmap-mono.c" />
     <ClCompile Include="mono-madness.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="bitmap-mono.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
