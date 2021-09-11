@@ -146,9 +146,10 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 {
 	uint32_t image_y =            myCanvas->y;
 	uint32_t image_x = (uint32_t)(myCanvas->x / 8.0);
-
-	if (image_x == 0)		image_x = 1; //non 0 byte width
-	while ((image_x % 4))	image_x++;   //4 byte padding
+	
+	if ((image_x * 8) < myCanvas->x) image_x++;   //math fix
+	if (image_x == 0)		         image_x = 1; //non 0 byte width
+	while ((image_x % 4))	         image_x++;   //4 byte padding
 
 	header bmpHead;
 	bmpHead.Signature	= 0x4D42;
