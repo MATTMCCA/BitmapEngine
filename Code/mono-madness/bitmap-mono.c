@@ -63,6 +63,32 @@ int setPixle(canvas* myCanvas, size_t x, size_t y, bool val)
 	return 0;
 }
 
+/* draw a horizontal line of x length, with a width of n, with value of y */
+int drawHorizontalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, bool val)
+{
+	if ((width <= 0) || (x + length >= mycavas->x) || (y + width >= mycavas->y))
+		return 1;
+
+	for (int _x = 0; _x < length; _x++)
+		for (int _y = 0; _y < width; _y++)
+			setPixle(mycavas, x + _x, y + _y, val);
+
+	return 0;
+}
+
+/* draw a vertical line of x length, with a width of n, with value of y */
+int drawVerticalLine(canvas* mycavas, size_t x, size_t y, size_t length, size_t width, bool val)
+{
+	if ((width <= 0) || (y + length >= mycavas->y) || (x + width >= mycavas->x))
+		return 1;
+
+	for (int _y = 0; _y < length; _y++)
+		for (int _x = 0; _x < width; _x++)
+			setPixle(mycavas, x + _x, y + _y, val);
+
+	return 0;
+}
+
 /* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 {

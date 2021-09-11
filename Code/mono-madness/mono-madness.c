@@ -18,12 +18,15 @@ int main()
     printf("1-bit Bitmap Creation Test\n");
 
     canvas myTest = { NULL };
-    createBMP(&myTest, 8, 8);    
+    createBMP(&myTest, 30, 30);    
 
     setPixle(&myTest, 0, 0, 1);
     setPixle(&myTest, 3, 3, 1);
     setPixle(&myTest, 4, 4, 1);
     setPixle(&myTest, 7, 7, 1);
+
+    drawHorizontalLine(&myTest, 10, 20, 5, 1, 1);
+    drawVerticalLine(&myTest, 10, 20, 5, 1, 1);
 
     saveCanvas(&myTest, 300 /*DPI*/, TRASH_DIR);
     freeBMP(&myTest);
