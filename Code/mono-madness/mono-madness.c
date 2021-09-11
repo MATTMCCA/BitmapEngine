@@ -16,6 +16,8 @@ int bmp_2(const char* path); //test bitmap set pixles
 int bmp_3(const char* path); //test bitmap Horizontal Line
 int bmp_4(const char* path); //test bitmap Vertical Line
 int bmp_5(const char* path); //test bitmap box
+int bmp_6(const char* path); //test bitmap boxfill
+int bmp_7(const char* path); //test invert
 
 
 int main()
@@ -43,6 +45,14 @@ int main()
     /***************************************/
     printf("bmp_5: ");
     if (bmp_5(TRASH_DIR)) printf("FAIL\n");
+    else                  printf("PASS\n");
+    /***************************************/
+    printf("bmp_6: ");
+    if (bmp_6(TRASH_DIR)) printf("FAIL\n");
+    else                  printf("PASS\n");
+    /***************************************/
+    printf("bmp_7: ");
+    if (bmp_7(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
     /***************************************/
     printf("=====================================\n");
@@ -98,13 +108,13 @@ int bmp_3(const char* path)
     if (createBMP(&myTest, 30, 30))
         return 1;
 
-    if (drawHorizontalLine(&myTest, 2, 1, 25, 1, 1))
+    if (drawHorizontalLine(&myTest, 2, 1, 25, 1, 1))  //1 pix wide
         return 1;
 
-    if (drawHorizontalLine(&myTest, 2, 4, 25, 3, 1))
+    if (drawHorizontalLine(&myTest, 2, 4, 25, 3, 1))  //3 pix wide
         return 1;
 
-    if (drawHorizontalLine(&myTest, 2, 10, 25, 5, 1))
+    if (drawHorizontalLine(&myTest, 2, 10, 25, 5, 1)) //4 pix wide
         return 1;
 
     if (saveCanvas(&myTest, 300 /*DPI*/, filename))
@@ -124,13 +134,13 @@ int bmp_4(const char* path)
     if (createBMP(&myTest, 30, 30))
         return 1;
 
-    if (drawVerticalLine(&myTest, 1, 2, 25, 1, 1))
+    if (drawVerticalLine(&myTest, 1, 2, 25, 1, 1))  //1 pix wide
         return 1;
 
-    if (drawVerticalLine(&myTest, 4, 2, 25, 3, 1))
+    if (drawVerticalLine(&myTest, 4, 2, 25, 3, 1))  //3 pix wide
         return 1;
 
-    if (drawVerticalLine(&myTest, 10, 2, 25, 4, 1))
+    if (drawVerticalLine(&myTest, 10, 2, 25, 4, 1)) //4 pix wide
         return 1;
 
     if (saveCanvas(&myTest, 300 /*DPI*/, filename))
@@ -150,13 +160,62 @@ int bmp_5(const char* path)
     if (createBMP(&myTest, 100, 80))
         return 1;
 
-    if (drawBox(&myTest, 1, 1, 20, 90, 1, 1))
+    if (drawBox(&myTest, 1, 1, 20, 90, 1, 1))       //1 pix thick
         return 1;
 
-    if (drawBox(&myTest, 3, 30, 40, 70, 5, 1))
+    if (drawBox(&myTest, 3, 30, 40, 70, 5, 1))      //5 pix thick
        return 1;
 
-    if (drawBox(&myTest, 20, 10, 50, 60, 2, 1))
+    if (drawBox(&myTest, 20, 10, 50, 60, 2, 1))     //2 pix thick
+        return 1;
+
+    if (saveCanvas(&myTest, 300 /*DPI*/, filename))
+        return 1;
+
+    freeBMP(&myTest);
+    return 0;
+}
+
+int bmp_6(const char* path)
+{
+    char filename[500] = { 0x00 };
+    strcat_s(filename, 500, path);
+    strcat_s(filename, 500, "bmp_006.bmp");
+
+    canvas myTest = { NULL };
+    if (createBMP(&myTest, 100, 80))
+        return 1;
+
+    if (drawBoxFill(&myTest, 1, 1, 20, 90, 1))      //black fill
+        return 1;
+
+    if (drawBoxFill(&myTest, 3, 30, 40, 70, 1))     //black fill
+        return 1;
+
+    if (drawBoxFill(&myTest, 20, 10, 50, 60, 0))    //white fill
+        return 1;
+
+    if (saveCanvas(&myTest, 300 /*DPI*/, filename))
+        return 1;
+
+    freeBMP(&myTest);
+    return 0;
+}
+
+int bmp_7(const char* path)
+{
+    char filename[500] = { 0x00 };
+    strcat_s(filename, 500, path);
+    strcat_s(filename, 500, "bmp_007.bmp");
+
+    canvas myTest = { NULL };
+    if (createBMP(&myTest, 20, 20))
+        return 1;
+
+    if (drawBox(&myTest, 1, 1, 15, 15, 2, 1))      //2 pix thick
+        return 1;
+    
+    if (invertCanvas(&myTest))
         return 1;
 
     if (saveCanvas(&myTest, 300 /*DPI*/, filename))
