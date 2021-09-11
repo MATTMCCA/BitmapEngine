@@ -32,23 +32,68 @@ int freeBMP(canvas* myCanvas)
 	return 0;
 }
 
-int saveCanvas(canvas* myCanvas, const char* filename)
+int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 {
-	uint32_t image_y = myCanvas->y;
-	uint32_t image_x = (myCanvas->x / 8.0);
+	uint32_t image_y =            myCanvas->y;
+	uint32_t image_x = (uint32_t)(myCanvas->x / 8.0);
 
 	if (image_x == 0)		image_x = 1; //non 0 byte width
 	while ((image_x % 4))	image_x++;   //4 byte padding
 
 	header bmpHead;
-	bmpHead.Signature	= 0x4D42;
+	bmpHead.Signature	= 0x4D42; //flip?
 	bmpHead.FileSize	= 54 /*header*/ + 8 /*color table*/ + (image_x * image_y) /*bytes*/;
 	bmpHead.reserved	= 0x00;
 	bmpHead.DataOffset	= 62;
 
+	infoHeader bmpInfoHead;
+	bmpInfoHead.Size				= 40;
+	bmpInfoHead.Width				= myCanvas->x;
+	bmpInfoHead.Height				= myCanvas->y;
+	bmpInfoHead.Planes				= 0x01;
+	bmpInfoHead.Bits_Per_Pixel		= 0x01;
+	bmpInfoHead.Compression			= 0x00;
+	bmpInfoHead.ImageSize			= image_x * image_y;
+	bmpInfoHead.XpixelsPerM			= (uint32_t)(DPI * 39.3701);
+	bmpInfoHead.YpixelsPerM			= (uint32_t)(DPI * 39.3701);
+	bmpInfoHead.Colors_Used			= 0x00;
+	bmpInfoHead.Important_Colors	= 0x00;
 
+	uint8_t* BMPDATA;
+	size_t BMPDATASIZE = image_x * image_y;
+	BMPDATA = malloc(sizeof(uint8_t) * BMPDATASIZE); //raw data for bmp
+	//TODO: copy canvase bits to byte array here
 
+	FILE* fd;
+	fd = fopen(filename, "wb");
 
+	if (fd != NULL)
+	{
+		//TODO: add error handling, or not...
+		fwrite(&bmpHead.Signature,  sizeof(uint16_t), 1, fd);
+		fwrite(&bmpHead.FileSize,   sizeof(uint32_t), 1, fd);
+		fwrite(&bmpHead.reserved,   sizeof(uint32_t), 1, fd);
+		fwrite(&bmpHead.DataOffset, sizeof(uint32_t), 1, fd);
 
+		fwrite(&bmpInfoHead.Size,             sizeof(uint32_t), 1, fd);
+		fwrite(&bmpInfoHead.Width,            sizeof(uint32_t), 1, fd);
+		fwrite(&bmpInfoHead.Height,           sizeof(uint32_t), 1, fd);
+		fwrite(&bmpInfoHead.Planes,           sizeof(uint16_t), 1, fd);
+		fwrite(&bmpInfoHead.Bits_Per_Pixel,   sizeof(uint16_t), 1, fd);
+		fwrite(&bmpInfoHead.Compression,      sizeof(uint32_t), 1, fd);
+		fwrite(&bmpInfoHead.ImageSize,        sizeof(uint32_t), 1, fd);
+		fwrite(&bmpInfoHead.XpixelsPerM,      sizeof(uint32_t), 1, fd);
+		fwrite(&bmpInfoHead.YpixelsPerM,      sizeof(uint32_t), 1, fd);
+		fwrite(&bmpInfoHead.Colors_Used,      sizeof(uint32_t), 1, fd);
+		fwrite(&bmpInfoHead.Important_Colors, sizeof(uint32_t), 1, fd);
+
+		fwrite(&COLOR_TABLE, sizeof(uint32_t), 2, fd);
+
+		fwrite(&BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
+
+		fclose(fd);
+	}
+	
+	free(BMPDATA); //release when done
 	return 0;
 }

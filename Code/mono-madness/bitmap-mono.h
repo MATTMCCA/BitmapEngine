@@ -5,6 +5,9 @@
 //
 
 #pragma once
+
+#define _CRT_SECURE_NO_DEPRECATE		//I just wanted to use fopen....
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,4 +54,4 @@ typedef struct {
 int createBMP(canvas* myCanvas, size_t X, size_t Y);
 int freeBMP(canvas* myCanvas);
 
-int saveCanvas(canvas* myCanvas, const char* filename);
+int saveCanvas(canvas* myCanvas, int DPI, const char* filename);
