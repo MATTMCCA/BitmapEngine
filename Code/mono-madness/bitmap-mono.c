@@ -59,15 +59,22 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 	bmpInfoHead.Colors_Used			= 0x00;
 	bmpInfoHead.Important_Colors	= 0x00;
 
-	uint8_t* BMPDATA;
+	uint8_t* BMPDATA = NULL;
 	size_t BMPDATASIZE = image_x * image_y;
-	BMPDATA = malloc(sizeof(uint8_t) * BMPDATASIZE); //raw data for bmp
+	BMPDATA = malloc(BMPDATASIZE); //raw data for bmp
+
+	if(BMPDATA != NULL)
+		memset(BMPDATA, 0x00, BMPDATASIZE);
 	//TODO: copy canvase bits to byte array here
+
+
+
+
 
 	FILE* fd;
 	fd = fopen(filename, "wb");
 
-	if (fd != NULL)
+	if ((fd != NULL) && (BMPDATA != NULL))
 	{
 		//TODO: add error handling, or not...
 		fwrite(&bmpHead.Signature,  sizeof(uint16_t), 1, fd);
@@ -89,11 +96,13 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 
 		fwrite(&COLOR_TABLE, sizeof(uint32_t), 2, fd);
 
-		fwrite(&BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
+		fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
 
 		fclose(fd);
 	}
-	
-	free(BMPDATA); //release when done
+
+	if (BMPDATA != NULL)
+		free(BMPDATA); //release when done
+
 	return 0;
 }
