@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 
 /* a=target variable, b=bit number to act upon 0-n */
 //https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
@@ -74,17 +75,19 @@ int freeBMP(canvas* myCanvas);
 /******** accessor functions, bitmap goodness ************/
 
 /* get pixle value from canvas */
-bool getPixle(canvas* myCanvas, size_t x, size_t y);
+bool getPixle(canvas* myCanvas, size_t x0, size_t y0);
 /* write new pixle value to canvas */
-int setPixle(canvas* myCanvas, size_t x, size_t y, bool val);
+int setPixle(canvas* myCanvas, size_t x0, size_t y0, bool val);
 /* draw a horizontal line of width, 'width', thickness of 'thick', with value of 'val' */
-int drawHorizontalLine(canvas* myCanvas, size_t x, size_t y, size_t width, size_t thick, bool val);
+int drawHorizontalLine(canvas* myCanvas, size_t x0, size_t y0, size_t width, size_t thick, bool val);
 /* draw a vertical line of length, 'length', thickness of 'thick', with value of 'val' */
-int drawVerticalLine(canvas* myCanvas, size_t x, size_t y, size_t length, size_t thick, bool val);
+int drawVerticalLine(canvas* myCanvas, size_t x0, size_t y0, size_t length, size_t thick, bool val);
+/* draw a line from x0,y0 -> x1, y1, with a thickness of 'thick', value of 'val' */
+int drawLine(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, size_t thick, bool val);
 /* draw a box at x,y, size of L&W, thickness of 'thick', value of 'val' */
-int drawBox(canvas* myCanvass, size_t x, size_t y, size_t length, size_t width, size_t thick, bool val);
+int drawBox(canvas* myCanvass, size_t x0, size_t y0, size_t length, size_t width, size_t thick, bool val);
 /* draw a filled box at x,y, size of L&W, value of 'val' */
-int drawBoxFill(canvas* myCanvas, size_t x, size_t y, size_t length, size_t width, bool val);
+int drawBoxFill(canvas* myCanvas, size_t x0, size_t y0, size_t length, size_t width, bool val);
 /* fill with val */
 int fillCanvas(canvas* myCanvas, bool val);
 /* invert bitmap */
@@ -92,7 +95,12 @@ int invertCanvas(canvas* myCanvas);
 /* add canvas to another canvas, transparent alpha = 1, white becomes transparent */
 int addSpriteCanvas(canvas* myCanvas, canvas* sprite, size_t x, size_t y, bool alpha);
 
-
-
 /* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename);
+
+
+
+/*********************************** helpers **********************************************/
+int _draw_low(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, bool val);
+int _draw_high(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, bool val);
+int _drawLine(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, bool val);

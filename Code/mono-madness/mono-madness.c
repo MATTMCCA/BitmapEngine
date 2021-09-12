@@ -11,7 +11,7 @@
 #include <string.h>
 #include "bitmap-mono.h" //mono bitmap lib
 
-int bmp_1(const char *path); //test bitmap creation
+int bmp_1(const char* path); //test bitmap creation
 int bmp_2(const char* path); //test bitmap set pixles
 int bmp_3(const char* path); //test bitmap Horizontal Line
 int bmp_4(const char* path); //test bitmap Vertical Line
@@ -20,6 +20,7 @@ int bmp_6(const char* path); //test bitmap boxfill
 int bmp_7(const char* path); //test invert
 int bmp_8(const char* path); //test sprite alpha = 0
 int bmp_9(const char* path); //test sprite alpha = 1
+int bmp_10(const char* path); //test new line code
 
 
 int main()
@@ -63,6 +64,10 @@ int main()
     /***************************************/
     printf("bmp_9: ");
     if (bmp_9(TRASH_DIR)) printf("FAIL\n");
+    else                  printf("PASS\n");
+    /***************************************/
+    printf("bmp_10: ");
+    if (bmp_10(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
     /***************************************/
     printf("=====================================\n");
@@ -304,5 +309,28 @@ int bmp_9(const char* path)
 
     freeBMP(&myTest);
 
+    return 0;
+}
+
+int bmp_10(const char* path)
+{
+    char filename[500] = { 0x00 };
+    strcat_s(filename, 500, path);
+    strcat_s(filename, 500, "bmp_010.bmp");
+
+    canvas myTest = { NULL };
+    if (createBMP(&myTest, 50, 50))
+        return 1;
+
+    if (drawLine(&myTest, 2, 2, 40, 40, 4, 1))
+        return 1;
+
+    if (drawLine(&myTest, 45, 2, 5, 40, 4, 1))
+        return 1;
+
+    if (saveCanvas(&myTest, 300 /*DPI*/, filename))
+        return 1;
+
+    freeBMP(&myTest);
     return 0;
 }
