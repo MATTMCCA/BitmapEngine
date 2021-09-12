@@ -21,6 +21,7 @@ int bmp_7(const char* path); //test invert
 int bmp_8(const char* path); //test sprite alpha = 0
 int bmp_9(const char* path); //test sprite alpha = 1
 int bmp_10(const char* path); //test new line code
+int bmp_11(const char* path); //test circle, no thick yet
 
 
 int main()
@@ -68,7 +69,11 @@ int main()
     /***************************************/
     printf("bmp_10: ");
     if (bmp_10(TRASH_DIR)) printf("FAIL\n");
-    else                  printf("PASS\n");
+    else                   printf("PASS\n");
+    /***************************************/
+    printf("bmp_11: ");
+    if (bmp_11(TRASH_DIR)) printf("FAIL\n");
+    else                   printf("PASS\n");
     /***************************************/
     printf("=====================================\n");
 
@@ -325,7 +330,33 @@ int bmp_10(const char* path)
     if (drawLine(&myTest, 2, 2, 40, 40, 4, 1))
         return 1;
 
-    if (drawLine(&myTest, 45, 2, 5, 40, 4, 1))
+    if (drawLine(&myTest, 45, 1, 5, 40, 4, 1))
+        return 1;
+
+    if (saveCanvas(&myTest, 300 /*DPI*/, filename))
+        return 1;
+
+    freeBMP(&myTest);
+    return 0;
+}
+
+int bmp_11(const char* path)
+{
+    char filename[500] = { 0x00 };
+    strcat_s(filename, 500, path);
+    strcat_s(filename, 500, "bmp_011.bmp");
+
+    canvas myTest = { NULL };
+    if (createBMP(&myTest, 100, 100))
+        return 1;
+
+    if (drawCircle(&myTest, 50, 50, 40, 1))
+        return 1;
+
+    if (drawCircle(&myTest, 50, 50, 30, 1))
+        return 1;
+
+    if (drawCircle(&myTest, 50, 50, 10, 1))
         return 1;
 
     if (saveCanvas(&myTest, 300 /*DPI*/, filename))

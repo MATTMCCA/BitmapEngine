@@ -88,12 +88,20 @@ int drawLine(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, size_
 int drawBox(canvas* myCanvass, size_t x0, size_t y0, size_t length, size_t width, size_t thick, bool val);
 /* draw a filled box at x,y, size of L&W, value of 'val' */
 int drawBoxFill(canvas* myCanvas, size_t x0, size_t y0, size_t length, size_t width, bool val);
+
+/* WIP, need to change a bunch of things with circle logic */
+/* draw circle @ x,y with radious of 'rad' */
+int drawCircle(canvas* myCanvas, size_t x0, size_t y0, size_t rad, bool val);
+
 /* fill with val */
 int fillCanvas(canvas* myCanvas, bool val);
 /* invert bitmap */
 int invertCanvas(canvas* myCanvas);
 /* add canvas to another canvas, transparent alpha = 1, white becomes transparent */
 int addSpriteCanvas(canvas* myCanvas, canvas* sprite, size_t x, size_t y, bool alpha);
+
+
+
 
 /* save canvase to fielsystem as a 1-bit monocrhome bitmap @ select DPI */
 int saveCanvas(canvas* myCanvas, int DPI, const char* filename);
@@ -104,3 +112,4 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename);
 int _draw_low(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, bool val);
 int _draw_high(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, bool val);
 int _drawLine(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, bool val);
+int _drawCircle(canvas* myCanvas, size_t x0, size_t y0, size_t xc, size_t yc, bool val);
