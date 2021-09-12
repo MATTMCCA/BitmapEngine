@@ -387,6 +387,9 @@ int _drawCircle(canvas* myCanvas, size_t x0, size_t y0, size_t xc, size_t yc, bo
 	if (myCanvas->ptr == NULL) 
 		return 1;
 
+
+	/* bounds check done in setPixle */
+
 	if (setPixle(myCanvas, xc + x0, yc + y0, val)) 		return 1;
 	if (setPixle(myCanvas, xc - x0, yc + y0, val)) 		return 1;
 	if (setPixle(myCanvas, xc + x0, yc - y0, val)) 		return 1;
@@ -399,6 +402,7 @@ int _drawCircle(canvas* myCanvas, size_t x0, size_t y0, size_t xc, size_t yc, bo
 	return 0;
 }
 
+//ref: https://www.geeksforgeeks.org/bresenhams-circle-drawing-algorithm/
 int drawCircle(canvas* myCanvas, size_t x0, size_t y0, size_t rad, bool val)
 {
 	int32_t x = 0;
