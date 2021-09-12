@@ -4,12 +4,32 @@
 // 
 // bitmaps from scratch, code should be pretty portable 
 // 
+// 
+// testing freetype
+// 
+// hacked apart: https://www.freetype.org/freetype2/docs/tutorial/example1.c
+// 
+// 
+// not sure how to turn off antialiasing.... learning curve, yay!
+// 
 //
 
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include "bitmap-mono.h" //mono bitmap lib
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+
+#define WIDTH   640
+#define HEIGHT  480
+
+/* origin is the upper left corner */
+unsigned char image[HEIGHT][WIDTH];
+
+
 
 int bmp_1(const char* path); //test bitmap creation
 int bmp_2(const char* path); //test bitmap set pixles
@@ -24,60 +44,190 @@ int bmp_10(const char* path); //test new line code
 int bmp_11(const char* path); //test circle, no thick yet
 
 
+
+/* Replace this function with something useful. */
+
+void draw_bitmap(FT_Bitmap* bitmap,
+    FT_Int      x,
+    FT_Int      y)
+{
+    FT_Int  i, j, p, q;
+    FT_Int  x_max = x + bitmap->width;
+    FT_Int  y_max = y + bitmap->rows;
+
+
+    /* for simplicity, we assume that `bitmap->pixel_mode' */
+    /* is `FT_PIXEL_MODE_GRAY' (i.e., not a bitmap font)   */
+
+    for (i = x, p = 0; i < x_max; i++, p++)
+    {
+        for (j = y, q = 0; j < y_max; j++, q++)
+        {
+            if (i < 0 || j < 0 ||
+                i >= WIDTH || j >= HEIGHT)
+                continue;
+
+            image[j][i] |= bitmap->buffer[q * bitmap->width + p];
+        }
+    }
+}
+
+void saveImage(const char* path)
+{
+    int  i, j;
+
+    char filename[500] = { 0x00 };
+    strcat_s(filename, 500, path);
+    strcat_s(filename, 500, "FreeTypeTest.bmp");
+
+    canvas myTest = { NULL };
+    createBMP(&myTest, WIDTH, HEIGHT);
+       
+    for (i = 0; i < HEIGHT; i++)
+        for (j = 0; j < WIDTH; j++) 
+            if (image[i][j] > 0)
+                setPixle(&myTest, j, i, 1);
+
+    saveCanvas(&myTest, 300 /*DPI*/, filename);
+    freeBMP(&myTest);
+}
+
+
 int main()
 {
     const char TRASH_DIR[] = "A:\\Users\\Matt\\Pictures\\TRASH\\";
 
+
+    const char FONT_NAME[] = "C:\\Windows\\Fonts\\consola.ttf";
+    const char TEXT_THIS[] = "MEOW!";
+
+
+    FT_Library    library;
+    FT_Face       face;
+
+    FT_GlyphSlot  slot;
+    FT_Matrix     matrix;                 /* transformation matrix */
+    FT_Vector     pen;                    /* untransformed origin  */
+    FT_Error      error;
+
+    char* filename;
+    char* text;
+
+    double        angle;
+    int           target_height;
+    int           n, num_chars;
+
+
+    filename = (char*) &FONT_NAME;
+    text = (char*) &TEXT_THIS;
+
+    num_chars = strlen(text);
+    angle = 0; // (25.0 / 360) * 3.14159 * 2;           /* use 25 degrees     */
+    target_height = HEIGHT;
+
+    error = FT_Init_FreeType(&library);                 /* initialize library */
+    /* error handling omitted */
+
+    error = FT_New_Face(library, filename, 0, &face);   /* create face object */
+    /* error handling omitted */
+
+    /* use 50pt at 100dpi */
+    error = FT_Set_Char_Size(face, 50 * 64, 0, 100, 0);   /* set character size */
+    /* error handling omitted */
+
+    /* cmap selection omitted;                                        */
+    /* for simplicity we assume that the font contains a Unicode cmap */
+
+    slot = face->glyph;
+
+    /* set up matrix */
+    matrix.xx = (FT_Fixed)(cos(angle) * 0x10000L);
+    matrix.xy = (FT_Fixed)(-sin(angle) * 0x10000L);
+    matrix.yx = (FT_Fixed)(sin(angle) * 0x10000L);
+    matrix.yy = (FT_Fixed)(cos(angle) * 0x10000L);
+
+    /* the pen position in 26.6 cartesian space coordinates; */
+    /* start at (300,200) relative to the upper left corner  */
+    pen.x = 300 * 64;
+    pen.y = (target_height - 200) * 64;
+
+    for (n = 0; n < num_chars; n++)
+    {
+        /* set transformation */
+        FT_Set_Transform(face, &matrix, &pen);
+
+        /* load glyph image into the slot (erase previous one) */
+        error = FT_Load_Char(face, text[n], FT_LOAD_RENDER); 
+        if (error)
+            continue;                 /* ignore errors */
+
+        /* now, draw to our target surface (convert position) */
+        draw_bitmap(&slot->bitmap, slot->bitmap_left, target_height - slot->bitmap_top);
+
+        /* increment pen position */
+        pen.x += slot->advance.x;
+        pen.y += slot->advance.y;
+    }
+
+    saveImage(TRASH_DIR);
+
+    FT_Done_Face(face);
+    FT_Done_FreeType(library);
+
+    return 0;
+
+    /*
     printf("1-bit Bitmap Creation Test\n");
     printf("=====================================\n");
-    /*******************************************************/
+    //=================================================
     printf("bmp_1: ");
     if (bmp_1(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("bmp_2: ");
     if (bmp_2(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("bmp_3: ");
     if (bmp_3(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("bmp_4: ");
     if (bmp_4(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("bmp_5: ");
     if (bmp_5(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("bmp_6: ");
     if (bmp_6(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("bmp_7: ");
     if (bmp_7(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("bmp_8: ");
     if (bmp_8(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("bmp_9: ");
     if (bmp_9(TRASH_DIR)) printf("FAIL\n");
     else                  printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("bmp_10: ");
     if (bmp_10(TRASH_DIR)) printf("FAIL\n");
     else                   printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("bmp_11: ");
     if (bmp_11(TRASH_DIR)) printf("FAIL\n");
     else                   printf("PASS\n");
-    /***************************************/
+    //=====================================
     printf("=====================================\n");
 
     return 0;
+    */
 }
 
 int bmp_1(const char* path)
