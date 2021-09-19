@@ -1,14 +1,13 @@
 #pragma once
 
-#include <stdio.h>
-#include <stdint.h>
-#include <ctype.h>
+#include <vector>
+#include <cstdio>
+#include <cstdint>
+#include <cctype>
 #include <ft2build.h>
 #include FT_GLYPH_H
 #include FT_MODULE_H
 #include FT_TRUETYPE_DRIVER_H
-
-#define _CRT_SECURE_NO_DEPRECATE
 
 typedef struct {               // Data stored PER GLYPH
 	uint16_t bitmapOffset;     // Pointer into GFXfont->bitmap
@@ -26,21 +25,25 @@ typedef struct {           // Data stored for FONT AS A WHOLE:
 } GFXfont;
 
 
-typedef struct {
-	uint8_t* ptr;
-	int _size;
-} DFB;
+class font
+{
 
-typedef struct {
-	const char* font;
-	int pointSize;
-	int dpi;
-} font_att;
+public:
 
-int grow_DFB(DFB* ptr, int concat);
-int free_DFB(DFB* ptr);
+	font();
 
-int free_font(GFXfont* font);
-int enbit(uint8_t value, DFB* ptr);
-//if this function return with an error, mem never gets freed
-int create_font(GFXfont* font, const char* fontName, int fontPoint, int dpi);
+	int create(const char* fontName, int point, int dpi);
+	GFXfont* getGFXfont(void);
+
+	~font();
+
+private:
+
+	void enbit(uint8_t value, std::vector<uint8_t> *bmp);
+
+protected:
+
+	GFXfont* myFont = nullptr;
+
+};
+

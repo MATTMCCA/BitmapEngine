@@ -18,22 +18,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="mono-madness.c">
+    <ClCompile Include="mono-madness.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bitmap-mono.c">
-      <Filter>Source Files\bitmap-lib</Filter>
+    <ClCompile Include="font.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="font-mono.c">
-      <Filter>Source Files\bitmap-lib</Filter>
+    <ClCompile Include="canvas.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bitmap-mono.h">
-      <Filter>Source Files\bitmap-lib</Filter>
+    <ClInclude Include="font.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="font-mono.h">
-      <Filter>Source Files\bitmap-lib</Filter>
+    <ClInclude Include="canvas.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

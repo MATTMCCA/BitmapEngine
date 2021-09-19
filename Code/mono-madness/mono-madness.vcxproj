@@ -145,13 +145,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="bitmap-mono.c" />
-    <ClCompile Include="font-mono.c" />
-    <ClCompile Include="mono-madness.c" />
+    <ClCompile Include="canvas.cpp" />
+    <ClCompile Include="font.cpp" />
+    <ClCompile Include="mono-madness.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bitmap-mono.h" />
-    <ClInclude Include="font-mono.h" />
+    <ClInclude Include="canvas.h" />
+    <ClInclude Include="font.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
