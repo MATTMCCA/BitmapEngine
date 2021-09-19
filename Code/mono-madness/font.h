@@ -9,6 +9,8 @@
 #include FT_MODULE_H
 #include FT_TRUETYPE_DRIVER_H
 
+#include "canvas.h"
+
 typedef struct {               // Data stored PER GLYPH
 	uint16_t bitmapOffset;     // Pointer into GFXfont->bitmap
 	uint8_t  width, height;    // Bitmap dimensions in pixels
@@ -34,6 +36,21 @@ public:
 
 	int create(const char* fontName, int point, int dpi);
 	GFXfont* getGFXfont(void);
+
+	int writeCanvas(canvas* ptr, const char* str);
+
+	int charBounds(unsigned char c, int32_t* x, int32_t* y,
+		int32_t* minx, int32_t* miny, int32_t* maxx,
+		int32_t* maxy);
+
+	int getTextBounds(const char* str, int32_t x, int32_t y,
+		int32_t* x1, int32_t* y1, uint32_t* w,
+		uint32_t* h);
+
+	int drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0);
+	int write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y);
+
+	int print(canvas* ptr, const char* str, int32_t x0, int32_t y0);
 
 	~font();
 

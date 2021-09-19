@@ -38,6 +38,16 @@ int canvas::fill(bool val)
 	return 0;
 }
 
+int32_t canvas::get_y(void)
+{
+	return _y;
+}
+
+int32_t canvas::get_x(void)
+{
+	return _x;
+}
+
 int canvas::addSprite(canvas* src, int32_t x, int32_t y, bool alpha)
 {
 	if ((src->ptr != nullptr) && (ptr != nullptr))

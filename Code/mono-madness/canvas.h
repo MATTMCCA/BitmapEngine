@@ -57,6 +57,8 @@ public:
 
 	int create(int32_t x, int32_t y, bool invert);
 	int getSize(int32_t* x, int32_t* y);
+	int32_t get_y(void);
+	int32_t get_x(void);
 	int fill(bool val);
 	int addSprite(canvas* src, int32_t x, int32_t y, bool alpha);
 	int save(const char* fileName, int DPI);

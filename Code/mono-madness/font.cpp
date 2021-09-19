@@ -127,6 +127,236 @@ GFXfont* font::getGFXfont(void)
 	return myFont;
 }
 
+int font::writeCanvas(canvas* ptr, const char* str)
+{
+	int32_t x, y;
+	uint32_t w, h;
+
+	getTextBounds(str, 0, 0, &x, &y, &w, &h);
+
+	ptr->create(w, h, 0);
+
+
+	if (x != 0) {
+		if (x > 0) {
+			x = 0 - x;
+		}
+		else {
+			x = abs(x);
+		}
+	}
+	if (y != 0) {
+		if (y > 0) {
+			y = 0 - y;
+		}
+		else {
+			y = abs(y);
+		}
+	}
+
+	print(ptr, str, x, y);
+
+	return 0;
+}
+
+/*!
+	@brief  Helper to determine size of a character with current font/size.
+			Broke this out as it's used by both the PROGMEM- and RAM-resident
+			getTextBounds() functions.
+	@param  c     The ASCII character in question
+	@param  x     Pointer to x location of character. Value is modified by
+				  this function to advance to next character.
+	@param  y     Pointer to y location of character. Value is modified by
+				  this function to advance to next character.
+	@param  minx  Pointer to minimum X coordinate, passed in to AND returned
+				  by this function -- this is used to incrementally build a
+				  bounding rectangle for a string.
+	@param  miny  Pointer to minimum Y coord, passed in AND returned.
+	@param  maxx  Pointer to maximum X coord, passed in AND returned.
+	@param  maxy  Pointer to maximum Y coord, passed in AND returned.
+*/
+
+int font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int32_t* miny, int32_t* maxx, int32_t* maxy)
+{
+	if (c == '\n') // Newline?
+	{ 
+		*x = 0;        // Reset x to zero, advance y by one line
+		*y += (uint8_t) myFont->yAdvance;
+	}
+
+	else if (c != '\r') // Not a carriage return; is normal char
+	{ 
+		uint8_t first = myFont->first;
+		uint8_t last = myFont->last;
+		if ((c >= first) && (c <= last)) // Char present in this font?
+		{ 
+			GFXglyph* glyph = &myFont->glyph[c - first];
+			uint8_t gw = glyph->width;
+			uint8_t gh = glyph->height;
+			uint8_t xa = glyph->xAdvance;
+
+			int8_t xo = glyph->xOffset;
+			int8_t yo = glyph->yOffset;
+			
+			/* fix at some point */
+
+			//if (/*wrap*/ true && ((*x + (((int16_t)xo + gw) )) > _width)) 
+			//{
+			//	*x = 0; // Reset x to zero, advance y by one line
+			//	*y += (uint8_t)myFont->yAdvance;
+			//}
+
+			int16_t tsx = 1, tsy = 1;
+			int16_t x1 = *x + xo * tsx;
+			int16_t y1 = *y + yo * tsy;
+			int16_t x2 = x1 + gw * tsx - 1;
+			int16_t y2 = y1 + gh * tsy - 1;
+			if (x1 < *minx)
+			*minx = x1;
+			if (y1 < *miny)
+			*miny = y1;
+			if (x2 > *maxx)
+			*maxx = x2;
+			if (y2 > *maxy)
+			*maxy = y2;
+			*x += xa * tsx;
+		}
+	}
+
+	return 0;
+}
+
+/*!
+	@brief  Helper to determine size of a string with current font/size.
+			Pass string and a cursor position, returns UL corner and W,H.
+	@param  str  The ASCII string to measure
+	@param  x    The current cursor X
+	@param  y    The current cursor Y
+	@param  x1   The boundary X coordinate, returned by function
+	@param  y1   The boundary Y coordinate, returned by function
+	@param  w    The boundary width, returned by function
+	@param  h    The boundary height, returned by function
+*/
+
+int font::getTextBounds(const char* str, int32_t x, int32_t y, int32_t* x1, int32_t* y1, uint32_t* w, uint32_t* h)
+{
+	uint8_t c; // Current character
+	int32_t minx = 0x7FFFFFFF, miny = 0x7FFFFFFF, maxx = -1, maxy = -1; // Bound rect
+	// Bound rect is intentionally initialized inverted, so 1st char sets it
+
+	*x1 = x; // Initial position is value passed in
+	*y1 = y;
+	*w = *h = 0; // Initial size is zero
+
+	while ((c = *str++)) {
+		// charBounds() modifies x/y to advance for each character,
+		// and min/max x/y are updated to incrementally build bounding rect.
+		charBounds(c, &x, &y, &minx, &miny, &maxx, &maxy);
+	}
+
+	if (maxx >= minx) {     // If legit string bounds were found...
+		*x1 = minx;           // Update x1 to least X coord,
+		*w = maxx - minx + 1; // And w to bound rect width
+	}
+	if (maxy >= miny) { // Same for height
+		*y1 = miny;
+		*h = maxy - miny + 1;
+	}
+
+	return 0;
+}
+
+int font::drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0)
+{
+	if (myFont != nullptr)
+	{
+		c -= (uint8_t)myFont->first;
+		GFXglyph* glyph = &myFont->glyph[c];
+		uint8_t* bitmap = myFont->bitmap;
+
+		uint16_t bo = glyph->bitmapOffset;
+		uint8_t w = glyph->width;
+		uint8_t h = glyph->height;
+		int8_t xo = glyph->xOffset;
+		int8_t yo = glyph->yOffset;
+
+		uint8_t xx, yy, bits = 0, bit = 0;
+		int16_t xo16 = 0, yo16 = 0;
+
+		for (yy = 0; yy < h; yy++) {
+			for (xx = 0; xx < w; xx++) {
+				if (!(bit++ & 7)) {
+					bits = bitmap[bo++];
+				}
+
+				if (bits & 0x80) {
+					//setPixle(myCanvas, (x0 + xo + xx), (y0 + yo + yy), 1);
+					ptr->setPixle((x0 + xo + xx), (y0 + yo + yy), 1);
+				}
+
+				bits <<= 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y)
+{
+	if (c == '\n')
+	{
+		*cursor_x = 0;
+		*cursor_y += (uint8_t)myFont->yAdvance;
+	}
+	else if (c != '\r')
+	{
+		uint8_t first = myFont->first;
+		if ((c >= first) && (c <= (uint8_t)myFont->last))
+		{
+			if (myFont->glyph != NULL)
+			{
+				GFXglyph* glyph = &myFont->glyph[c - first];
+
+				uint8_t w = glyph->width;
+				uint8_t	h = glyph->height;
+
+				if ((w > 0) && (h > 0))
+				{
+					int16_t xo = glyph->xOffset;
+					if ( /*wrap = */ true && ((*cursor_x + (xo + w)) > (int)ptr->get_x()))
+					{
+						*cursor_x = 0;
+						*cursor_y += myFont->yAdvance;
+					}
+
+					//if (drawChar(myCanvas, c, *cursor_x, *cursor_y))
+						//return 1;
+
+					drawChar(ptr, c, *cursor_x, *cursor_y);
+				}
+				*cursor_x += (uint8_t)glyph->xAdvance;
+			}
+		}
+	}
+	return 0;
+}
+
+int font::print(canvas* myCanvas, const char* str, int32_t x0, int32_t y0)
+{
+	size_t index = 0;
+	size_t n = strlen(str);
+	while (n--)
+	{
+		if (!write(myCanvas, str[index], &x0, &y0))
+			index++;
+		else
+			break;
+	}
+
+	return 0;
+}
+
 font::~font()
 {
 	if (myFont != nullptr)
