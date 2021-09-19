@@ -264,6 +264,111 @@ int saveCanvas(canvas* myCanvas, int DPI, const char* filename)
 	return 0;
 }
 
+int drawChar(canvas* myCanvas, GFXfont* _font, unsigned char c, int16_t x0, int16_t y0)
+{
+	//GFXfont test_font = { NULL };
+	//if (create_font(&test_font, _font->font, _font->pointSize, _font->dpi))
+		//return 1;
+
+	if ((_font->glyph != NULL) && (_font->bitmap != NULL))
+	{
+		c -= (uint8_t)_font->first;
+		GFXglyph* glyph = &_font->glyph[c];
+		uint8_t* bitmap = _font->bitmap;
+
+		uint16_t bo = glyph->bitmapOffset;
+		uint8_t w = glyph->width;
+		uint8_t h = glyph->height;
+		int8_t xo = glyph->xOffset;
+		int8_t yo = glyph->yOffset;
+
+		uint8_t xx, yy, bits = 0, bit = 0;
+		int16_t xo16 = 0, yo16 = 0;
+
+		for (yy = 0; yy < h; yy++) {
+			for (xx = 0; xx < w; xx++) {
+				if (!(bit++ & 7)) {
+					bits = bitmap[bo++];
+				}
+
+				if (bits & 0x80) {
+					setPixle(myCanvas, (x0 + xo + xx), (y0 + yo + yy), 1);
+				}
+
+				bits <<= 1;
+			}
+		}
+	}
+	//free_font(&test_font);
+	return 0;
+}
+
+
+int write(canvas* myCanvas, GFXfont* _font, unsigned char c, int16_t* cursor_x, int16_t* cursor_y)
+{
+	if (c == '\n')
+	{
+		*cursor_x = 0;
+		*cursor_y += (uint8_t)_font->yAdvance;
+	}
+	else if (c != '\r')
+	{
+		uint8_t first = _font->first;
+		if ((c >= first) && (c <= (uint8_t)_font->last))
+		{
+			if (_font->glyph != NULL)
+			{
+				GFXglyph* glyph = &_font->glyph[c - first];
+
+				uint8_t w = glyph->width;
+				uint8_t	h = glyph->height;
+
+				if ((w > 0) && (h > 0))
+				{
+					int16_t xo = glyph->xOffset;
+					if ( /*wrap = */ true && ((*cursor_x + (xo + w)) > (int)myCanvas->y))
+					{
+						*cursor_x = 0;
+						*cursor_y += _font->yAdvance;
+					}
+
+					if (drawChar(myCanvas, _font, c, *cursor_x, *cursor_y))
+						return 1;
+				}
+				*cursor_x += (uint8_t)glyph->xAdvance;
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+int print(canvas* myCanvas, font_att* _font, const char str[], int16_t x0, int16_t y0)
+{
+	GFXfont test_font = { NULL };
+	if (create_font(&test_font, _font->font, _font->pointSize, _font->dpi))
+		return 1;
+
+	size_t index = 0;
+	size_t n = strlen(str);
+	while (n--)
+	{
+		if (!write(myCanvas, &test_font, (unsigned char)str[index], &x0, &y0))
+			index++;
+		else
+			break;
+	}
+
+	free_font(&test_font);
+	return 0;
+}
+
+
+
+
+/*
+
 int drawLine(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, size_t thick, bool val)
 {
 	if (myCanvas->ptr == NULL)
@@ -277,7 +382,6 @@ int drawLine(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, size_
 }
 
 
-/**********************************************************************************************************/
 // ref: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 int _drawLine(canvas* myCanvas, size_t x0, size_t y0, size_t x1, size_t y1, bool val)
 {
@@ -388,7 +492,7 @@ int _drawCircle(canvas* myCanvas, size_t x0, size_t y0, size_t xc, size_t yc, bo
 		return 1;
 
 
-	/* bounds check done in setPixle */
+	// bounds check done in setPixle 
 
 	if (setPixle(myCanvas, xc + x0, yc + y0, val)) 		return 1;
 	if (setPixle(myCanvas, xc - x0, yc + y0, val)) 		return 1;
@@ -428,3 +532,6 @@ int drawCircle(canvas* myCanvas, size_t x0, size_t y0, size_t rad, bool val)
 
 	return 0;
 }
+
+*/
+

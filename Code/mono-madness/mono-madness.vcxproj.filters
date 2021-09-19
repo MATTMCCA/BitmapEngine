@@ -24,9 +24,15 @@
     <ClCompile Include="bitmap-mono.c">
       <Filter>Source Files\bitmap-lib</Filter>
     </ClCompile>
+    <ClCompile Include="font-mono.c">
+      <Filter>Source Files\bitmap-lib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bitmap-mono.h">
+      <Filter>Source Files\bitmap-lib</Filter>
+    </ClInclude>
+    <ClInclude Include="font-mono.h">
       <Filter>Source Files\bitmap-lib</Filter>
     </ClInclude>
   </ItemGroup>
