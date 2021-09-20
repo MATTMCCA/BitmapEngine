@@ -12,18 +12,18 @@
 #include "canvas.h"
 
 typedef struct {               // Data stored PER GLYPH
-	uint16_t bitmapOffset;     // Pointer into GFXfont->bitmap
-	uint8_t  width, height;    // Bitmap dimensions in pixels
-	uint8_t  xAdvance;         // Distance to advance cursor (x axis)
-	int8_t   xOffset, yOffset; // Dist from cursor pos to UL corner
+	uint32_t  bitmapOffset;     // Pointer into GFXfont->bitmap
+	uint32_t  width, height;    // Bitmap dimensions in pixels
+	uint32_t  xAdvance;         // Distance to advance cursor (x axis)
+	int32_t   xOffset, yOffset; // Dist from cursor pos to UL corner
 } GFXglyph;
 
 
 typedef struct {           // Data stored for FONT AS A WHOLE:
-	uint8_t* bitmap;       // Glyph bitmaps, concatenated
-	GFXglyph* glyph;       // Glyph array
-	uint8_t   first, last; // ASCII extents
-	uint8_t   yAdvance;    // Newline distance (y axis)
+	uint8_t*   bitmap;       // Glyph bitmaps, concatenated
+	GFXglyph*  glyph;       // Glyph array
+	uint32_t   first, last; // ASCII extents
+	uint32_t   yAdvance;    // Newline distance (y axis)
 } GFXfont;
 
 
@@ -35,6 +35,7 @@ public:
 	font();
 
 	int create(const char* fontName, int point, int dpi);
+	int changeCharOffset(int32_t x, int32_t y);
 	GFXfont* getGFXfont(void);
 
 	int writeCanvas(canvas* ptr, const char* str);

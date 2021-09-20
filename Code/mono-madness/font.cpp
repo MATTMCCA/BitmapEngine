@@ -9,7 +9,7 @@ int font::create(const char* fontName, int point, int dpi)
 	int					i, j, err, byte;
 	int					first = ' ';
 	int					last = '~';
-	int					bitmapOffset = 0;
+	int32_t			bitmapOffset = 0;
 	unsigned int		x, y;
 
 	FT_Library			library;
@@ -73,7 +73,7 @@ int font::create(const char* fontName, int point, int dpi)
 		myFont->glyph[j].bitmapOffset = bitmapOffset;
 		myFont->glyph[j].width = bitmap->width;
 		myFont->glyph[j].height = bitmap->rows;
-		myFont->glyph[j].xAdvance = (uint8_t)(face->glyph->advance.x >> 6);
+		myFont->glyph[j].xAdvance = (uint32_t)(face->glyph->advance.x >> 6);
 		myFont->glyph[j].xOffset = g->left;
 		myFont->glyph[j].yOffset = 1 - g->top;
 
@@ -101,10 +101,10 @@ int font::create(const char* fontName, int point, int dpi)
 		FT_Done_Glyph(glyph);
 	}
 
-	size_t h = BITMAP.size();
+	uint32_t h = BITMAP.size();
 	myFont->bitmap = new uint8_t[h] {0x00};
 
-	for (size_t i = 0; i < h; i++)
+	for (uint32_t i = 0; i < h; i++)
 		myFont->bitmap[i] = BITMAP[i];
 
 	myFont->first = first;
@@ -114,11 +114,26 @@ int font::create(const char* fontName, int point, int dpi)
 		myFont->yAdvance = myFont->glyph[0].height;
 	}
 	else {
-		myFont->yAdvance = (uint8_t)(face->size->metrics.height >> 6);
+		myFont->yAdvance = (uint32_t)(face->size->metrics.height >> 6);
 	}
 
 	FT_Done_FreeType(library);
 
+	return 0;
+}
+
+int font::changeCharOffset(int32_t x, int32_t y)
+{
+	int	i, j;
+	int	first = ' ';
+	int	last = '~';
+
+	if (myFont != nullptr) {
+		myFont->yAdvance += y;
+		for (i = first, j = 0; i <= last; i++, j++)	{
+			myFont->glyph[j].xAdvance += x;
+		}
+	}
 	return 0;
 }
 
@@ -181,7 +196,7 @@ int font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int
 	if (c == '\n') // Newline?
 	{ 
 		*x = 0;        // Reset x to zero, advance y by one line
-		*y += (uint8_t) myFont->yAdvance;
+		*y += (uint32_t) myFont->yAdvance;
 	}
 
 	else if (c != '\r') // Not a carriage return; is normal char
@@ -191,12 +206,12 @@ int font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int
 		if ((c >= first) && (c <= last)) // Char present in this font?
 		{ 
 			GFXglyph* glyph = &myFont->glyph[c - first];
-			uint8_t gw = glyph->width;
-			uint8_t gh = glyph->height;
-			uint8_t xa = glyph->xAdvance;
+			uint32_t gw = glyph->width;
+			uint32_t gh = glyph->height;
+			uint32_t xa = glyph->xAdvance;
 
-			int8_t xo = glyph->xOffset;
-			int8_t yo = glyph->yOffset;
+			int32_t xo = glyph->xOffset;
+			int32_t yo = glyph->yOffset;
 			
 			/* fix at some point */
 
@@ -206,11 +221,11 @@ int font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int
 			//	*y += (uint8_t)myFont->yAdvance;
 			//}
 
-			int16_t tsx = 1, tsy = 1;
-			int16_t x1 = *x + xo * tsx;
-			int16_t y1 = *y + yo * tsy;
-			int16_t x2 = x1 + gw * tsx - 1;
-			int16_t y2 = y1 + gh * tsy - 1;
+			int32_t tsx = 1, tsy = 1;
+			int32_t x1 = *x + xo * tsx;
+			int32_t y1 = *y + yo * tsy;
+			int32_t x2 = x1 + gw * tsx - 1;
+			int32_t y2 = y1 + gh * tsy - 1;
 			if (x1 < *minx)
 			*minx = x1;
 			if (y1 < *miny)
@@ -274,14 +289,15 @@ int font::drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0)
 		GFXglyph* glyph = &myFont->glyph[c];
 		uint8_t* bitmap = myFont->bitmap;
 
-		uint16_t bo = glyph->bitmapOffset;
-		uint8_t w = glyph->width;
-		uint8_t h = glyph->height;
-		int8_t xo = glyph->xOffset;
-		int8_t yo = glyph->yOffset;
+		uint32_t bo = glyph->bitmapOffset;
+		uint32_t w = glyph->width;
+		uint32_t h = glyph->height;
+		int32_t xo = glyph->xOffset;
+		int32_t yo = glyph->yOffset;
 
-		uint8_t xx, yy, bits = 0, bit = 0;
-		int16_t xo16 = 0, yo16 = 0;
+		uint32_t xx, yy;
+		uint8_t bits = 0, bit = 0;
+		int32_t xo16 = 0, yo16 = 0;
 
 		for (yy = 0; yy < h; yy++) {
 			for (xx = 0; xx < w; xx++) {
@@ -307,7 +323,7 @@ int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor
 	if (c == '\n')
 	{
 		*cursor_x = 0;
-		*cursor_y += (uint8_t)myFont->yAdvance;
+		*cursor_y += (uint32_t)myFont->yAdvance;
 	}
 	else if (c != '\r')
 	{
@@ -318,24 +334,21 @@ int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor
 			{
 				GFXglyph* glyph = &myFont->glyph[c - first];
 
-				uint8_t w = glyph->width;
-				uint8_t	h = glyph->height;
+				uint32_t w = glyph->width;
+				uint32_t h = glyph->height;
 
 				if ((w > 0) && (h > 0))
 				{
-					int16_t xo = glyph->xOffset;
-					if ( /*wrap = */ true && ((*cursor_x + (xo + w)) > (int)ptr->get_x()))
+					int32_t xo = glyph->xOffset;
+					if ( /*wrap = */ true && ((*cursor_x + (xo + w)) > (int32_t)ptr->get_x()))
 					{
 						*cursor_x = 0;
 						*cursor_y += myFont->yAdvance;
 					}
 
-					//if (drawChar(myCanvas, c, *cursor_x, *cursor_y))
-						//return 1;
-
 					drawChar(ptr, c, *cursor_x, *cursor_y);
 				}
-				*cursor_x += (uint8_t)glyph->xAdvance;
+				*cursor_x += (uint32_t)glyph->xAdvance;
 			}
 		}
 	}
