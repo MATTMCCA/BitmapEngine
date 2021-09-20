@@ -1,3 +1,9 @@
+// ! ref !
+//https://github.com/adafruit/Adafruit-GFX-Library/blob/master/Adafruit_GFX.cpp
+//https://github.com/adafruit/Adafruit-GFX-Library/blob/master/fontconvert/fontconvert.c
+//
+//MJM 2021
+
 #include "canvas.h"
 
 canvas::canvas()
@@ -197,4 +203,48 @@ canvas::~canvas()
 {
 	if (ptr != nullptr)
 		delete[] ptr;
+}
+
+int canvas::drawHorizontalLine(int32_t x0, int32_t y0, int32_t width, int32_t thick, bool val)
+{
+	if (ptr != nullptr)
+	{
+		for (int32_t __x = 0; __x < width; __x++)
+			for (int32_t __y = 0; __y < thick; __y++)
+				setPixle(x0 + __x, y0 + __y, val);
+	}
+
+	return 0;
+}
+
+int canvas::drawVerticalLine(int32_t x0, int32_t y0, int32_t length, int32_t thick, bool val)
+{
+	if (ptr != nullptr)
+	{
+		for (int32_t __y = 0; __y < length; __y++)
+			for (int32_t __x = 0; __x < thick; __x++)
+				setPixle(x0 + __x, y0 + __y, val);
+	}
+	return 0;
+}
+
+int canvas::drawBox(int32_t x0, int32_t y0, int32_t length, int32_t width, int32_t thick, bool val)
+{
+	if (drawHorizontalLine(x0, y0, width, thick, val))	return 1;
+	if (drawHorizontalLine(x0, y0 + length - thick, width, thick, val))	return 1;
+	if (drawVerticalLine(x0, y0 + thick, length - thick, thick, val))	return 1;
+	if (drawVerticalLine(x0 + width - thick, y0 + thick, length - thick, thick, val))	return 1;
+
+	return 0;
+}
+
+int canvas::drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val)
+{
+	if (ptr != nullptr)
+	{
+		for (int32_t __y = 0; __y < length; __y++)
+			for (int32_t __x = 0; __x < width; __x++)
+				setPixle(x0 + __x, y0 + __y, val);
+	}
+	return 0;
 }

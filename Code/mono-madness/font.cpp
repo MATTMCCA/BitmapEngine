@@ -1,3 +1,9 @@
+// ! ref !
+//https://github.com/adafruit/Adafruit-GFX-Library/blob/master/Adafruit_GFX.cpp
+//https://github.com/adafruit/Adafruit-GFX-Library/blob/master/fontconvert/fontconvert.c
+//
+//MJM 2021
+
 #include "font.h"
 
 font::font()
@@ -340,7 +346,7 @@ int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor
 				if ((w > 0) && (h > 0))
 				{
 					int32_t xo = glyph->xOffset;
-					if ( /*wrap = */ true && ((*cursor_x + (xo + w)) > (int32_t)ptr->get_x()))
+					if ( /*wrap = */ true && ((*cursor_x + (xo + w)) > (uint32_t)ptr->get_x()))
 					{
 						*cursor_x = 0;
 						*cursor_y += myFont->yAdvance;

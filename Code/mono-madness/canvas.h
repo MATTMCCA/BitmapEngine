@@ -1,3 +1,9 @@
+// ! ref !
+//https://github.com/adafruit/Adafruit-GFX-Library/blob/master/Adafruit_GFX.cpp
+//https://github.com/adafruit/Adafruit-GFX-Library/blob/master/fontconvert/fontconvert.c
+//
+//MJM 2021
+
 #pragma once
 
 #define _CRT_SECURE_NO_DEPRECATE
@@ -66,6 +72,11 @@ public:
 	bool getInvert(void);
 	bool getPixle(int32_t x, int32_t y);
 	int setPixle(int32_t x, int32_t y, bool val);
+
+	int drawHorizontalLine(int32_t x0, int32_t y0, int32_t width, int32_t thick, bool val);
+	int drawVerticalLine(int32_t x0, int32_t y0, int32_t length, int32_t thick, bool val);
+	int drawBox(int32_t x0, int32_t y0, int32_t length, int32_t width, int32_t thick, bool val);
+	int drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val);
 
 	~canvas();
 
