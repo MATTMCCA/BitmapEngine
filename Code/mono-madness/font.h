@@ -44,7 +44,7 @@ public:
 	int changeCharOffset(int32_t x, int32_t y);
 	GFXfont* getGFXfont(void);
 
-	int writeCanvas(canvas* ptr, const char* str);
+	int writeCanvas(canvas* ptr, const char* str, int32_t x0 = 0, int32_t y0 = 0);
 
 	int charBounds(unsigned char c, int32_t* x, int32_t* y,
 		int32_t* minx, int32_t* miny, int32_t* maxx,
@@ -55,9 +55,9 @@ public:
 		uint32_t* h);
 
 	int drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0);
-	int write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y);
+	int write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y, int32_t x_offset = 0);
 
-	int print(canvas* ptr, const char* str, int32_t x0, int32_t y0);
+	int print(canvas* ptr, const char* str, int32_t x0, int32_t y0, int32_t x_offset = 0);
 
 	~font();
 

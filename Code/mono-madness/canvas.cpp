@@ -1,6 +1,7 @@
 // ! ref !
 //https://github.com/adafruit/Adafruit-GFX-Library/blob/master/Adafruit_GFX.cpp
 //https://github.com/adafruit/Adafruit-GFX-Library/blob/master/fontconvert/fontconvert.c
+// 
 //
 //MJM 2021
 
@@ -246,5 +247,80 @@ int canvas::drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, b
 			for (int32_t __x = 0; __x < width; __x++)
 				setPixle(x0 + __x, y0 + __y, val);
 	}
+	return 0;
+}
+
+int canvas::import_24bit(const char* fileName)
+{
+	FILE* fd;
+	fd = fopen(fileName, "rb");
+
+	uint32_t image_size = 0;
+	uint8_t* image = nullptr;
+
+	header bmpHead;
+	infoHeader bmpInfoHead;
+
+	if (fd != NULL)
+	{
+		fseek(fd, 0, SEEK_END);
+		size_t file_size = ftell(fd);
+		fseek(fd, 0, SEEK_SET);
+
+		if (file_size >= 0x0036)
+		{
+			//no error checking, yet!
+			//fread will fail hard!
+			// 
+			/////////////////////////////////////////////////////////////////////////
+			fread(&bmpHead.Signature, sizeof(uint16_t), 1, fd);
+			fread(&bmpHead.FileSize, sizeof(uint32_t), 1, fd);
+			fread(&bmpHead.reserved, sizeof(uint32_t), 1, fd);
+			fread(&bmpHead.DataOffset, sizeof(uint32_t), 1, fd);
+			/////////////////////////////////////////////////////////////////////////
+			fread(&bmpInfoHead.Size, sizeof(uint32_t), 1, fd);
+			fread(&bmpInfoHead.Width, sizeof(uint32_t), 1, fd);
+			fread(&bmpInfoHead.Height, sizeof(uint32_t), 1, fd);
+			fread(&bmpInfoHead.Planes, sizeof(uint16_t), 1, fd);
+			fread(&bmpInfoHead.Bits_Per_Pixel, sizeof(uint16_t), 1, fd);
+			fread(&bmpInfoHead.Compression, sizeof(uint32_t), 1, fd);
+			fread(&bmpInfoHead.ImageSize, sizeof(uint32_t), 1, fd);
+			fread(&bmpInfoHead.XpixelsPerM, sizeof(uint32_t), 1, fd);
+			fread(&bmpInfoHead.YpixelsPerM, sizeof(uint32_t), 1, fd);
+			fread(&bmpInfoHead.Colors_Used, sizeof(uint32_t), 1, fd);
+			fread(&bmpInfoHead.Important_Colors, sizeof(uint32_t), 1, fd);
+
+			/* bmp check is not very good */
+			if ((bmpInfoHead.Bits_Per_Pixel != 24) || (bmpHead.Signature != 0x4D42) || 
+				(bmpInfoHead.Compression != 0) || (bmpInfoHead.Colors_Used != 0) ||
+				(bmpHead.FileSize - 0x36 != bmpInfoHead.ImageSize)) {
+				fclose(fd);				
+				printf("err");
+				return 1;
+			}
+
+			/* reads image */
+			image_size = bmpInfoHead.ImageSize;
+			image = new uint8_t[image_size];
+			fread(image, sizeof(uint8_t), image_size, fd);
+		}
+
+		/* convert to gray */
+		//https://drububu.com/tutorial/image-types.html
+		//https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
+		if (image != nullptr)
+		{
+			//got tired, went to bed
+		}
+
+		fclose(fd);
+	}
+
+	printf("test\n");
+
+	if (image != nullptr)			
+		delete[] image;
+
+
 	return 0;
 }

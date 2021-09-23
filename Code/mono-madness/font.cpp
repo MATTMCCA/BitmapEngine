@@ -15,7 +15,7 @@ int font::create(const char* fontName, int point, int dpi)
 	int					i, j, err, byte;
 	int					first = ' ';
 	int					last = '~';
-	int32_t			bitmapOffset = 0;
+	int32_t			    bitmapOffset = 0;
 	unsigned int		x, y;
 
 	FT_Library			library;
@@ -136,9 +136,8 @@ int font::changeCharOffset(int32_t x, int32_t y)
 
 	if (myFont != nullptr) {
 		myFont->yAdvance += y;
-		for (i = first, j = 0; i <= last; i++, j++)	{
+		for (i = first, j = 0; i <= last; i++, j++)
 			myFont->glyph[j].xAdvance += x;
-		}
 	}
 	return 0;
 }
@@ -148,34 +147,34 @@ GFXfont* font::getGFXfont(void)
 	return myFont;
 }
 
-int font::writeCanvas(canvas* ptr, const char* str)
+int font::writeCanvas(canvas* ptr, const char* str, int32_t x0, int32_t y0)
 {
 	int32_t x, y;
 	uint32_t w, h;
 
 	getTextBounds(str, 0, 0, &x, &y, &w, &h);
 
-	ptr->create(w, h, 0);
-
+	ptr->create(w, h, 0); //return 1
 
 	if (x != 0) {
 		if (x > 0) {
 			x = 0 - x;
 		}
 		else {
-			x = abs(x);
+			x *= -1;
 		}
 	}
+
 	if (y != 0) {
 		if (y > 0) {
 			y = 0 - y;
 		}
 		else {
-			y = abs(y);
+			y *= -1;
 		}
 	}
 
-	print(ptr, str, x, y);
+	print(ptr, str, x + x0, y + y0, x0);
 
 	return 0;
 }
@@ -201,7 +200,7 @@ int font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int
 {
 	if (c == '\n') // Newline?
 	{ 
-		*x = 0;        // Reset x to zero, advance y by one line
+		*x = 0;									// Reset x to zero, advance y by one line
 		*y += (uint32_t) myFont->yAdvance;
 	}
 
@@ -220,7 +219,6 @@ int font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int
 			int32_t yo = glyph->yOffset;
 			
 			/* fix at some point */
-
 			//if (/*wrap*/ true && ((*x + (((int16_t)xo + gw) )) > _width)) 
 			//{
 			//	*x = 0; // Reset x to zero, advance y by one line
@@ -312,7 +310,6 @@ int font::drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0)
 				}
 
 				if (bits & 0x80) {
-					//setPixle(myCanvas, (x0 + xo + xx), (y0 + yo + yy), 1);
 					ptr->setPixle((x0 + xo + xx), (y0 + yo + yy), 1);
 				}
 
@@ -324,11 +321,11 @@ int font::drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0)
 	return 0;
 }
 
-int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y)
+int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y, int32_t x_offset)
 {
 	if (c == '\n')
 	{
-		*cursor_x = 0;
+		*cursor_x = x_offset + 0;
 		*cursor_y += (uint32_t)myFont->yAdvance;
 	}
 	else if (c != '\r')
@@ -346,12 +343,14 @@ int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor
 				if ((w > 0) && (h > 0))
 				{
 					int32_t xo = glyph->xOffset;
-					if ( /*wrap = */ true && ((*cursor_x + (xo + w)) > (uint32_t)ptr->get_x()))
-					{
-						*cursor_x = 0;
-						*cursor_y += myFont->yAdvance;
-					}
 
+					/* fix at some point */
+					//if (true && ((*cursor_x + (xo + w)) > (uint32_t)ptr->get_x()))
+					//{
+					//	*cursor_x = 0;
+					//	*cursor_y += myFont->yAdvance;
+					//}
+					
 					drawChar(ptr, c, *cursor_x, *cursor_y);
 				}
 				*cursor_x += (uint32_t)glyph->xAdvance;
@@ -361,13 +360,13 @@ int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor
 	return 0;
 }
 
-int font::print(canvas* myCanvas, const char* str, int32_t x0, int32_t y0)
+int font::print(canvas* myCanvas, const char* str, int32_t x0, int32_t y0, int32_t x_offset)
 {
 	size_t index = 0;
 	size_t n = strlen(str);
 	while (n--)
 	{
-		if (!write(myCanvas, str[index], &x0, &y0))
+		if (!write(myCanvas, str[index], &x0, &y0, x_offset))
 			index++;
 		else
 			break;

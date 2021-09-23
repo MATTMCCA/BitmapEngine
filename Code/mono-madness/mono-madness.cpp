@@ -31,6 +31,11 @@ void add_time(canvas* mstr);
 
 int main(int argc, char* argv[]) 
 {
+
+	canvas g24_test;
+	g24_test.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\tst.bmp");
+
+
 	printf("Test Begin\n");
 
 	canvas master;
@@ -79,13 +84,17 @@ void add_rnd_text(canvas* mstr)
 		for (int j = 0; j < 21; j++) 
 			buffer[(i * 20) + j] = (rand() % 95) + 32;
 		
-	for (int j = 0; j < (21 * 20); j+=20) 
-		buffer[j] = '\n';
+	for (int j = 0; j < (21 * 20); j += 20) {
+		if(j != 0)
+			buffer[j] = '\n';
+	}
 
-	canvas rnd_text;
-	DejaVuSerif_20pt.writeCanvas(&rnd_text, buffer);
+	
+	//canvas rnd_text;
+	//DejaVuSerif_20pt.writeCanvas(&rnd_text, buffer);
+	//mstr->addSprite(&rnd_text, 35, 220, 1);
 
-	mstr->addSprite(&rnd_text, 30, 220, 1);
+	DejaVuSerif_20pt.writeCanvas(mstr, buffer, 35, 220);
 }
 
 void add_checkerboard(canvas* mstr)

@@ -78,6 +78,8 @@ public:
 	int drawBox(int32_t x0, int32_t y0, int32_t length, int32_t width, int32_t thick, bool val);
 	int drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val);
 
+	int import_24bit(const char* fileName);
+
 	~canvas();
 
 private:
