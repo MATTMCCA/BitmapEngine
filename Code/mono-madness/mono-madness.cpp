@@ -35,17 +35,23 @@ int main(int argc, char* argv[])
 	canvas g24_test;
 	g24_test.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\tst.bmp");
 
-
 	printf("Test Begin\n");
 
 	canvas master;
 	master.create(1200, 2400, 0);	//canvas 1200x2400, non-inverted
 
+	master.addSprite(&g24_test, 0, 0, 0);
+
+
+	/*
 	build_demo_outline(&master);
 	add_some_text(&master);
 	add_rnd_text(&master);
 	add_checkerboard(&master);
 	add_time(&master);
+	*/
+
+
 
 	strcat_s(filename, 500, TRASH_DIR);
 	strcat_s(filename, 500, "test_123.bmp");

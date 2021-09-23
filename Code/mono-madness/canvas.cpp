@@ -258,8 +258,8 @@ int canvas::import_24bit(const char* fileName)
 	uint32_t image_size = 0;
 	uint8_t* image = nullptr;
 
-	header bmpHead;
-	infoHeader bmpInfoHead;
+	header bmpHead = {0x00};
+	infoHeader bmpInfoHead = {0x00};
 
 	if (fd != NULL)
 	{
@@ -306,21 +306,58 @@ int canvas::import_24bit(const char* fileName)
 		}
 
 		/* convert to gray */
-		//https://drububu.com/tutorial/image-types.html
-		//https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
+		//needs work
+		uint32_t new_size = bmpInfoHead.Width * bmpInfoHead.Height;
+
 		if (image != nullptr)
 		{
-			//got tired, went to bed
-		}
+			uint8_t* gray_image = new uint8_t[new_size]{ 0x00 };
+			uint32_t old_w = bmpInfoHead.ImageSize / bmpInfoHead.Height;
 
+			uint32_t index = 0;
+			for (uint32_t i = 0; i < bmpInfoHead.Height; i++)
+			{
+				uint8_t* row = &image[(old_w * i)];
+				uint32_t y = bmpInfoHead.Width * 3;
+				for (uint32_t j = 0; j < y;)
+				{
+					//https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
+					double lum = (row[j++] * 0.30) + (row[j++] * 0.59) + (row[j++] * 0.11);
+					//chan vals might be off
+					if (lum < 0) lum = 0;
+					if (lum > 255) lum = 255;
+					gray_image[index++] = (uint8_t)(lum);
+				}
+			}
+
+			delete[] image;
+
+			if(gray_image != nullptr)
+				image = gray_image;
+
+			create(bmpInfoHead.Width, bmpInfoHead.Height, 0);
+			for (int32_t y = 0; y < _y; y++)
+			{
+				for (int32_t x = 0; x < _x; x++)
+				{
+					uint8_t jjj = (uint8_t)image[( (((_y-1) - y) * _x)) + x];
+
+					if (jjj < 127) 
+						setPixle(x, y, 1);
+				}
+			}
+
+			if(image != nullptr)
+				delete[] image;
+		}
+		
 		fclose(fd);
 	}
 
 	printf("test\n");
 
-	if (image != nullptr)			
-		delete[] image;
-
+	//if (image != nullptr)			
+		//delete[] image;
 
 	return 0;
 }
