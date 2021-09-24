@@ -59,8 +59,9 @@ int canvas::addSprite(canvas* src, int32_t x, int32_t y, bool alpha)
 {
 	if ((src->ptr != nullptr) && (ptr != nullptr))
 	{
-		for (int32_t __y = 0; __y < src->_y; __y++)
-			for (int32_t __x = 0; __x < src->_x; __x++)
+		int32_t __y = 0, __x = 0;
+		for (__y = 0; __y < src->_y; __y++)
+			for (__x = 0; __x < src->_x; __x++)
 				if (alpha) {
 					if (src->getPixle( __x, __y) ^ src->getInvert())
 						setPixle(x + __x, y + __y, 1);
@@ -198,7 +199,6 @@ int canvas::setPixle(uint32_t x, uint32_t y, bool val)
 			return 0;
 		}
 	}
-
 	return 1;
 }
 
@@ -217,7 +217,6 @@ int canvas::drawHorizontalLine(int32_t x0, int32_t y0, int32_t width, int32_t th
 			for (y = 0; y < thick; y++)
 				setPixle(x0 + x, y0 + y, val);
 	}
-
 	return 0;
 }
 
@@ -384,12 +383,11 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 					tmp = gray + ( ((((x1) - y0) * i_v)) + x0 );
 					s = *tmp;
 
-					if (s < 127) setPixle(x0, y0, 1);
+					if (s == 0) setPixle(x0, y0, 1);
 				}
 			}
 			delete[] gray;
 		}
-
 	}
 
 	return 0;
