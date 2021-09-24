@@ -55,6 +55,14 @@ typedef struct {
 
 static const uint32_t COLOR_TABLE[2] = { 0x00000000, 0x00FFFFFF };
 
+typedef struct {
+	uint8_t* __img;
+	uint32_t __img_x;
+	uint32_t __img_y;
+} img;
+
+
+enum DITHER { _Threshold, _FloydSteinberg, _Stucki };
 
 class canvas
 {
@@ -78,11 +86,25 @@ public:
 	int drawBox(int32_t x0, int32_t y0, int32_t length, int32_t width, int32_t thick, bool val);
 	int drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val);
 
-	int import_24bit(const char* fileName);
+	int import_24bit(const char* fileName, DITHER type = _Threshold);
+
+
 
 	~canvas();
 
 private:
+
+	uint8_t* img_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
+
+
+	/* DITHER!!!! */
+	uint8_t _img_get(img *image, uint32_t x0, uint32_t y0);
+	int _img_set(img* image, uint32_t x0, uint32_t y0, uint8_t value);
+
+	int Threshold(img *image, uint8_t value);
+	int FloydSteinberg(img *image);
+	int Stucki(img* image);
+
 
 
 protected:

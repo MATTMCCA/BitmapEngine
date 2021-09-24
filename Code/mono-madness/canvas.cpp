@@ -250,16 +250,16 @@ int canvas::drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, b
 	return 0;
 }
 
-int canvas::import_24bit(const char* fileName)
+uint8_t* canvas::img_open(const char* fileName, uint32_t *x0, uint32_t *y0, uint32_t *_size)
 {
-	FILE* fd;
-	fd = fopen(fileName, "rb");
-
 	uint32_t image_size = 0;
 	uint8_t* image = nullptr;
 
-	header bmpHead = {0x00};
-	infoHeader bmpInfoHead = {0x00};
+	header bmpHead = { 0x00 };
+	infoHeader bmpInfoHead = { 0x00 };
+
+	FILE* fd;
+	fd = fopen(fileName, "rb");
 
 	if (fd != NULL)
 	{
@@ -271,7 +271,6 @@ int canvas::import_24bit(const char* fileName)
 		{
 			//no error checking, yet!
 			//fread will fail hard!
-			// 
 			/////////////////////////////////////////////////////////////////////////
 			fread(&bmpHead.Signature, sizeof(uint16_t), 1, fd);
 			fread(&bmpHead.FileSize, sizeof(uint32_t), 1, fd);
@@ -291,12 +290,11 @@ int canvas::import_24bit(const char* fileName)
 			fread(&bmpInfoHead.Important_Colors, sizeof(uint32_t), 1, fd);
 
 			/* bmp check is not very good */
-			if ((bmpInfoHead.Bits_Per_Pixel != 24) || (bmpHead.Signature != 0x4D42) || 
+			if ((bmpInfoHead.Bits_Per_Pixel != 24) || (bmpHead.Signature != 0x4D42) ||
 				(bmpInfoHead.Compression != 0) || (bmpInfoHead.Colors_Used != 0) ||
 				(bmpHead.FileSize - 0x36 != bmpInfoHead.ImageSize)) {
-				fclose(fd);				
-				printf("err");
-				return 1;
+				fclose(fd);
+				return nullptr;
 			}
 
 			/* reads image */
@@ -304,60 +302,188 @@ int canvas::import_24bit(const char* fileName)
 			image = new uint8_t[image_size];
 			fread(image, sizeof(uint8_t), image_size, fd);
 		}
-
-		/* convert to gray */
-		//needs work
-		uint32_t new_size = bmpInfoHead.Width * bmpInfoHead.Height;
-
-		if (image != nullptr)
-		{
-			uint8_t* gray_image = new uint8_t[new_size]{ 0x00 };
-			uint32_t old_w = bmpInfoHead.ImageSize / bmpInfoHead.Height;
-
-			uint32_t index = 0;
-			for (uint32_t i = 0; i < bmpInfoHead.Height; i++)
-			{
-				uint8_t* row = &image[(old_w * i)];
-				uint32_t y = bmpInfoHead.Width * 3;
-				for (uint32_t j = 0; j < y;)
-				{
-					//https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
-					double lum = (row[j++] * 0.30) + (row[j++] * 0.59) + (row[j++] * 0.11);
-					//chan vals might be off
-					if (lum < 0) lum = 0;
-					if (lum > 255) lum = 255;
-					gray_image[index++] = (uint8_t)(lum);
-				}
-			}
-
-			delete[] image;
-
-			if(gray_image != nullptr)
-				image = gray_image;
-
-			create(bmpInfoHead.Width, bmpInfoHead.Height, 0);
-			for (int32_t y = 0; y < _y; y++)
-			{
-				for (int32_t x = 0; x < _x; x++)
-				{
-					uint8_t jjj = (uint8_t)image[( (((_y-1) - y) * _x)) + x];
-
-					if (jjj < 127) 
-						setPixle(x, y, 1);
-				}
-			}
-
-			if(image != nullptr)
-				delete[] image;
-		}
-		
 		fclose(fd);
 	}
 
-	printf("test\n");
+	/* got the image */
+	if (image != nullptr) {
+		*y0 = bmpInfoHead.Height;
+		*x0 = bmpInfoHead.Width;
+		*_size = bmpInfoHead.ImageSize;
+		return image;
+	}
 
-	//if (image != nullptr)			
-		//delete[] image;
+	return nullptr;
+}
+
+int canvas::import_24bit(const char* fileName, DITHER type)
+{
+	uint32_t x = 0, y = 0, s = 0;
+	uint8_t* gray = nullptr;
+
+	uint8_t* image_24 = img_open(fileName, &x, &y, &s);
+
+	if (image_24 != nullptr) 
+	{
+		uint32_t i_x = s / y, i_y = y, i_v = i_x / 3, gray_size = i_v * i_y;
+
+		gray = new uint8_t[gray_size];
+		uint8_t* tmp = gray;
+	
+		for (uint32_t y0 = 0; y0 < i_y; y0++) 
+		{
+			uint32_t x1 = 0;
+			uint8_t* row = &image_24[i_x * y0];
+
+			for (uint32_t x0 = 0; x0 < i_v; x0++) 
+			{
+				//https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
+				/*                blue?              green?               red?             */
+				double lum = (row[x1++] * 0.11) + (row[x1++] * 0.59) + (row[x1++] * 0.30);
+				if (lum < 0) lum = 0;
+				if (lum > 255) lum = 255;
+				*tmp = (uint8_t) lum;
+				tmp++;
+			}
+		}
+		delete[] image_24;
+
+		if (gray != nullptr) 
+		{
+			//create image struct
+			img _img = { gray, i_v, i_y }; 
+
+			/* dither */
+			switch (type)
+			{
+			case _FloydSteinberg:
+				FloydSteinberg(&_img);
+				break;
+
+			case _Stucki:
+				Stucki(&_img);
+				break;
+
+			default:
+				Threshold(&_img, 256 / 2);
+				break;
+			};
+
+			create(i_v, i_y, 0);
+			for (uint32_t b_y = 0; b_y < i_y; b_y++) {
+				for (uint32_t b_x = 0; b_x < i_v; b_x++) {
+					tmp = gray + ( ((((i_y - 1) - b_y) * i_v)) + b_x );
+					uint8_t j = *tmp;
+
+					if (j < 127) setPixle(b_x, b_y, 1);
+				}
+			}
+			delete[] gray;
+		}
+
+	}
 
 	return 0;
+}
+
+uint8_t canvas::_img_get(img* image, uint32_t x0, uint32_t y0)
+{
+	if (x0 < image->__img_x && y0 < image->__img_y) {
+		return image->__img[(image->__img_x * y0) + x0];
+	}
+	return 0;
+}
+
+int canvas::_img_set(img* image, uint32_t x0, uint32_t y0, uint8_t value)
+{
+	if (x0 < image->__img_x && y0 < image->__img_y)	{
+		image->__img[(image->__img_x * y0) + x0] = value;
+		return 0;
+	}
+	return 1;
+}
+
+int canvas::Threshold(img* image, uint8_t value)
+{
+	if (image->__img != nullptr)
+	{
+		uint8_t newpixel;
+		for (uint32_t y = 0; y < image->__img_y; y++) {
+			for (uint32_t x = 0; x < image->__img_x; x++) {
+				newpixel = (_img_get(image, x, y) < value) ? 0 : 255;
+				_img_set(image, x, y, newpixel);
+			}
+		}
+		return 0;
+	}
+	return 1;
+}
+
+/* https://imagej.net/Dithering */
+int canvas::FloydSteinberg(img* image)
+{	
+	if (image->__img != nullptr)
+	{
+		int16_t oldpixel, newpixel; //uint8_t ?
+		float quant_error;
+		float w1 = 7.0 / 16.0, w2 = 3.0 / 16.0, w3 = 5.0 / 16.0, w4 = 1.0 / 16.0;
+
+		for (uint32_t y = 0; y < image->__img_y; y++)
+		{
+			for (uint32_t x = 0; x < image->__img_x; x++)
+			{
+				oldpixel = _img_get(image, x, y);
+				newpixel = (oldpixel < 128) ? 0 : 255;
+				_img_set(image, x, y, (uint8_t)newpixel);
+				quant_error = (float)(oldpixel - newpixel);
+				_img_set(image, x + 1, y,     (uint8_t) (_img_get(image, x + 1, y)      + w1 * quant_error));
+				_img_set(image, x - 1, y + 1, (uint8_t) (_img_get(image, x - 1, y + 1)  + w2 * quant_error));
+				_img_set(image, x, y + 1,     (uint8_t) (_img_get(image, x, y + 1)      + w3 * quant_error));
+				_img_set(image, x + 1, y + 1, (uint8_t) (_img_get(image, x + 1, y + 1)  + w4 * quant_error));
+			}
+		}
+		return 0;
+	}
+	return 1;
+}
+
+/* https://imagej.net/Dithering */
+int canvas::Stucki(img* image)
+{
+	if (image->__img != nullptr)
+	{
+		float quant_error;
+		int16_t oldpixel, newpixel; //uint8_t ?
+		float w8 = (float)(8.0 / 42.0),
+			  w7 = (float)(7.0 / 42.0),
+			  w5 = (float)(5.0 / 42.0),
+			  w4 = (float)(4.0 / 42.0),
+			  w2 = (float)(2.0 / 42.0),
+			  w1 = (float)(1.0 / 42.0);
+
+		for (uint32_t y = 0; y < image->__img_y; y++)
+		{
+			for (uint32_t x = 0; x < image->__img_x; x++)
+			{
+				oldpixel = _img_get(image, x, y);
+				newpixel = (oldpixel < 128) ? 0 : 255;
+				_img_set(image, x, y, (uint8_t)newpixel);
+				quant_error = (int16_t)(oldpixel - newpixel);
+				_img_set(image, x + 1, y,     (uint8_t)(_img_get(image, x + 1, y)     + w7 * quant_error));
+				_img_set(image, x + 2, y,     (uint8_t)(_img_get(image, x + 2, y)     + w5 * quant_error));
+				_img_set(image, x - 2, y + 1, (uint8_t)(_img_get(image, x - 2, y + 1) + w2 * quant_error));
+				_img_set(image, x - 1, y + 1, (uint8_t)(_img_get(image, x - 1, y + 1) + w4 * quant_error));
+				_img_set(image, x, y + 1,     (uint8_t)(_img_get(image, x, y + 1)     + w8 * quant_error));
+				_img_set(image, x + 1, y + 1, (uint8_t)(_img_get(image, x + 1, y + 1) + w4 * quant_error));
+				_img_set(image, x + 2, y + 1, (uint8_t)(_img_get(image, x + 2, y + 1) + w2 * quant_error));
+				_img_set(image, x - 2, y + 2, (uint8_t)(_img_get(image, x - 2, y + 2) + w1 * quant_error));
+				_img_set(image, x - 1, y + 2, (uint8_t)(_img_get(image, x - 1, y + 2) + w2 * quant_error));
+				_img_set(image, x, y + 2,     (uint8_t)(_img_get(image, x, y + 2)     + w4 * quant_error));
+				_img_set(image, x + 1, y + 2, (uint8_t)(_img_get(image, x + 1, y + 2) + w2 * quant_error));
+				_img_set(image, x + 2, y + 2, (uint8_t)(_img_get(image, x + 2, y + 2) + w1 * quant_error));
+			}
+		}
+		return 0;
+	}
+	return 1;
 }

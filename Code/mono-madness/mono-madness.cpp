@@ -29,29 +29,24 @@ void add_rnd_text(canvas* mstr);
 void add_checkerboard(canvas* mstr);
 void add_time(canvas* mstr);
 
+void add_image(canvas* mstr);
+
+
 int main(int argc, char* argv[]) 
 {
-
-	canvas g24_test;
-	g24_test.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\tst.bmp");
-
 	printf("Test Begin\n");
 
 	canvas master;
 	master.create(1200, 2400, 0);	//canvas 1200x2400, non-inverted
 
-	master.addSprite(&g24_test, 0, 0, 0);
-
-
-	/*
+	//------------------------------------
+	add_image(&master);
 	build_demo_outline(&master);
 	add_some_text(&master);
 	add_rnd_text(&master);
 	add_checkerboard(&master);
 	add_time(&master);
-	*/
-
-
+	//------------------------------------
 
 	strcat_s(filename, 500, TRASH_DIR);
 	strcat_s(filename, 500, "test_123.bmp");
@@ -134,6 +129,18 @@ void add_time(canvas* mstr)
 
 	canvas time_date;
 	consola_10pt.writeCanvas(&time_date, c_time_string);
+	time_date.invert(1);
 
-	mstr->addSprite(&time_date, 40, 2300, 1);
+	mstr->addSprite(&time_date, 40, 2300, 0);
+}
+
+
+void add_image(canvas* mstr)
+{
+	/* create canvas */
+	canvas g24_test;
+	/* add 24-bit color image to canvas with stucki dithering */
+	g24_test.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\tst.bmp", _Stucki);
+	/* overlay onto master canvas */
+	mstr->addSprite(&g24_test, 0, 0, 0);
 }
