@@ -78,8 +78,8 @@ public:
 	int save(const char* fileName, int DPI);
 	int invert(bool invert);
 	bool getInvert(void);
-	bool getPixle(int32_t x, int32_t y);
-	int setPixle(int32_t x, int32_t y, bool val);
+	bool getPixle(uint32_t x, uint32_t y);
+	int setPixle(uint32_t x, uint32_t y, bool val);
 
 	int drawHorizontalLine(int32_t x0, int32_t y0, int32_t width, int32_t thick, bool val);
 	int drawVerticalLine(int32_t x0, int32_t y0, int32_t length, int32_t thick, bool val);

@@ -175,10 +175,10 @@ int canvas::invert(bool invert)
 	return 0;
 }
 
-bool canvas::getPixle(int32_t x, int32_t y)
+bool canvas::getPixle(uint32_t x, uint32_t y)
 {
 	if (ptr != nullptr) {
-		if ((x >= 0) && (y >= 0) && (y < _y) && (x < _x)) {
+		if ((y < _y) && (x < _x)) {
 			return ptr[(y * _x) + x];
 		}
 	}
@@ -190,10 +190,10 @@ bool canvas::getInvert(void)
 	return _inv;
 }
 
-int canvas::setPixle(int32_t x, int32_t y, bool val)
+int canvas::setPixle(uint32_t x, uint32_t y, bool val)
 {
 	if (ptr != nullptr)	{
-		if ((x >= 0) && (y >= 0) && (y < _y) && (x < _x)) {
+		if ((y < _y) && (x < _x)) {
 			ptr[(y * _x) + x] = val;
 			return 0;
 		}
@@ -212,9 +212,10 @@ int canvas::drawHorizontalLine(int32_t x0, int32_t y0, int32_t width, int32_t th
 {
 	if (ptr != nullptr)
 	{
-		for (int32_t __x = 0; __x < width; __x++)
-			for (int32_t __y = 0; __y < thick; __y++)
-				setPixle(x0 + __x, y0 + __y, val);
+		int32_t x = 0, y = 0;
+		for (x = 0; x < width; x++)
+			for (y = 0; y < thick; y++)
+				setPixle(x0 + x, y0 + y, val);
 	}
 
 	return 0;
@@ -224,9 +225,10 @@ int canvas::drawVerticalLine(int32_t x0, int32_t y0, int32_t length, int32_t thi
 {
 	if (ptr != nullptr)
 	{
-		for (int32_t __y = 0; __y < length; __y++)
-			for (int32_t __x = 0; __x < thick; __x++)
-				setPixle(x0 + __x, y0 + __y, val);
+		int32_t x = 0, y = 0;
+		for (y = 0; y < length; y++)
+			for (x = 0; x < thick; x++)
+				setPixle(x0 + x, y0 + y, val);
 	}
 	return 0;
 }
@@ -245,9 +247,10 @@ int canvas::drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, b
 {
 	if (ptr != nullptr)
 	{
-		for (int32_t __y = 0; __y < length; __y++)
-			for (int32_t __x = 0; __x < width; __x++)
-				setPixle(x0 + __x, y0 + __y, val);
+		int32_t x = 0, y = 0;
+		for (y = 0; y < length; y++)
+			for (x = 0; x < width; x++)
+				setPixle(x0 + x, y0 + y, val);
 	}
 	return 0;
 }
