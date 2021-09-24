@@ -59,7 +59,7 @@ int canvas::addSprite(canvas* src, int32_t x, int32_t y, bool alpha)
 {
 	if ((src->ptr != nullptr) && (ptr != nullptr))
 	{
-		int32_t __y = 0, __x = 0;
+		uint32_t __y = 0, __x = 0;
 		for (__y = 0; __y < src->_y; __y++)
 			for (__x = 0; __x < src->_x; __x++)
 				if (alpha) {
@@ -123,11 +123,14 @@ int canvas::save(const char* fileName, int DPI)
 
 		bool* in_line;
 		uint8_t* out_line;
-		for (int32_t __y = 0; __y < _y; __y++) {
-			/*bool*/ in_line = &ptr[(__y * _x)];
-			/*uint8_t*/ out_line = &BMPDATA[(((image_y - 1) - __y) * image_x)];
+		uint32_t __y = 0, __x = 0;
 
-			for (int32_t __x = 0; __x < _x; __x++) {
+		image_y--;
+		for (__y = 0; __y < _y; __y++) {
+			in_line = &ptr[(__y * _x)];
+			out_line = &BMPDATA[(((image_y) - __y) * image_x)];
+
+			for (__x = 0; __x < _x; __x++) {
 				if (in_line[__x] ^ _inv) BIT_CLEAR(out_line[(__x / 8)], (7 - (__x % 8)));
 			}
 		}
@@ -363,11 +366,11 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 			/* dither */
 			switch (type)
 			{
-			case _FloydSteinberg:
+			case DITHER::_FloydSteinberg:
 				FloydSteinberg(&_img);
 				break;
 
-			case _Stucki:
+			case DITHER::_Stucki:
 				Stucki(&_img);
 				break;
 

@@ -62,7 +62,7 @@ typedef struct {
 } img;
 
 
-enum DITHER { _Threshold, _FloydSteinberg, _Stucki };
+enum class DITHER { _Threshold, _FloydSteinberg, _Stucki };
 
 class canvas
 {
@@ -86,7 +86,7 @@ public:
 	int drawBox(int32_t x0, int32_t y0, int32_t length, int32_t width, int32_t thick, bool val);
 	int drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val);
 
-	int import_24bit(const char* fileName, DITHER type = _Threshold);
+	int import_24bit(const char* fileName, DITHER type = DITHER::_Threshold);
 
 	~canvas();
 
@@ -108,7 +108,7 @@ private:
 protected:
 	bool _inv = 0;
 	bool* ptr = nullptr;
-	int32_t _x = 0, _y = 0;
+	uint32_t _x = 0, _y = 0;
 
 };
 
