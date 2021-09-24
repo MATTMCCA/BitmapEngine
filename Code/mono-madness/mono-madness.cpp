@@ -79,13 +79,14 @@ void add_rnd_text(canvas* mstr)
 	font DejaVuSerif_20pt;
 	DejaVuSerif_20pt.create("C:\\Windows\\Fonts\\DejaVuSerif.ttf", 20, DPI);
 
+	int i, j;
 	char buffer[(20 * 21) + 1] = { 0x00 };
-
-	for (int i = 0; i < 20; i++) 
-		for (int j = 0; j < 21; j++) 
+	
+	for (i = 0; i < 20; i++) 
+		for (j = 0; j < 21; j++) 
 			buffer[(i * 20) + j] = (rand() % 95) + 32;
 		
-	for (int j = 0; j < (21 * 20); j += 20) {
+	for (j = 0; j < (21 * 20); j += 20) {
 		if(j != 0)
 			buffer[j] = '\n';
 	}
@@ -103,10 +104,11 @@ void add_checkerboard(canvas* mstr)
 	canvas checkerboard;
 	checkerboard.create(300, 340, 0);
 
+	int x, y;
 	bool tog = 0;
-	for (int y = 0; y < 340; y += 10) 
+	for (y = 0; y < 340; y += 10) 
 	{
-		for (int x = 0; x < 300; x += 10)
+		for (x = 0; x < 300; x += 10)
 		{
 			checkerboard.drawBoxFill(x, y, 10, 10, tog);
 			tog = !tog;

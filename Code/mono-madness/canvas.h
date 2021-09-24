@@ -88,8 +88,6 @@ public:
 
 	int import_24bit(const char* fileName, DITHER type = _Threshold);
 
-
-
 	~canvas();
 
 private:

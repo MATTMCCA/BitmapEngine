@@ -120,9 +120,11 @@ int canvas::save(const char* fileName, int DPI)
 	if (BMPDATA != nullptr) {
 		memset(BMPDATA, 0xFF, BMPDATASIZE);
 
+		bool* in_line;
+		uint8_t* out_line;
 		for (int32_t __y = 0; __y < _y; __y++) {
-			bool* in_line = &ptr[(__y * _x)];
-			uint8_t* out_line = &BMPDATA[(((image_y - 1) - __y) * image_x)];
+			/*bool*/ in_line = &ptr[(__y * _x)];
+			/*uint8_t*/ out_line = &BMPDATA[(((image_y - 1) - __y) * image_x)];
 
 			for (int32_t __x = 0; __x < _x; __x++) {
 				if (in_line[__x] ^ _inv) BIT_CLEAR(out_line[(__x / 8)], (7 - (__x % 8)));
@@ -318,9 +320,12 @@ uint8_t* canvas::img_open(const char* fileName, uint32_t *x0, uint32_t *y0, uint
 
 int canvas::import_24bit(const char* fileName, DITHER type)
 {
+	double lum;
+	uint32_t y0 = 0, x0 = 0, x1 = 0;
 	uint32_t x = 0, y = 0, s = 0;
 	uint8_t* gray = nullptr;
 
+	uint8_t* row = nullptr;
 	uint8_t* image_24 = img_open(fileName, &x, &y, &s);
 
 	if (image_24 != nullptr) 
@@ -330,16 +335,16 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 		gray = new uint8_t[gray_size];
 		uint8_t* tmp = gray;
 	
-		for (uint32_t y0 = 0; y0 < i_y; y0++) 
+		for (y0 = 0; y0 < i_y; y0++) 
 		{
-			uint32_t x1 = 0;
-			uint8_t* row = &image_24[i_x * y0];
+			x1 = 0;
+			row = &image_24[i_x * y0];
 
-			for (uint32_t x0 = 0; x0 < i_v; x0++) 
+			for (x0 = 0; x0 < i_v; x0++) 
 			{
 				//https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
 				/*                blue?              green?               red?             */
-				double lum = (row[x1++] * 0.11) + (row[x1++] * 0.59) + (row[x1++] * 0.30);
+				lum = (row[x1++] * 0.11) + (row[x1++] * 0.59) + (row[x1++] * 0.30);
 				if (lum < 0) lum = 0;
 				if (lum > 255) lum = 255;
 				*tmp = (uint8_t) lum;
@@ -369,13 +374,14 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 				break;
 			};
 
-			create(i_v, i_y, 0);
-			for (uint32_t b_y = 0; b_y < i_y; b_y++) {
-				for (uint32_t b_x = 0; b_x < i_v; b_x++) {
-					tmp = gray + ( ((((i_y - 1) - b_y) * i_v)) + b_x );
-					uint8_t j = *tmp;
+			x1 = i_y - 1; //reused, not x, but y
+			create(i_v, i_y, 0);			
+			for (y0 = 0; y0 < i_y; y0++) {
+				for (x0 = 0; x0 < i_v; x0++) {
+					tmp = gray + ( ((((x1) - y0) * i_v)) + x0 );
+					s = *tmp;
 
-					if (j < 127) setPixle(b_x, b_y, 1);
+					if (s < 127) setPixle(x0, y0, 1);
 				}
 			}
 			delete[] gray;
@@ -427,10 +433,11 @@ int canvas::FloydSteinberg(img* image)
 		int16_t oldpixel, newpixel; //uint8_t ?
 		float quant_error;
 		float w1 = 7.0 / 16.0, w2 = 3.0 / 16.0, w3 = 5.0 / 16.0, w4 = 1.0 / 16.0;
+		uint32_t y = 0, x = 0;
 
-		for (uint32_t y = 0; y < image->__img_y; y++)
+		for (y = 0; y < image->__img_y; y++)
 		{
-			for (uint32_t x = 0; x < image->__img_x; x++)
+			for (x = 0; x < image->__img_x; x++)
 			{
 				oldpixel = _img_get(image, x, y);
 				newpixel = (oldpixel < 128) ? 0 : 255;
@@ -461,9 +468,11 @@ int canvas::Stucki(img* image)
 			  w2 = (float)(2.0 / 42.0),
 			  w1 = (float)(1.0 / 42.0);
 
-		for (uint32_t y = 0; y < image->__img_y; y++)
+		uint32_t y = 0, x = 0;
+
+		for (y = 0; y < image->__img_y; y++)
 		{
-			for (uint32_t x = 0; x < image->__img_x; x++)
+			for (x = 0; x < image->__img_x; x++)
 			{
 				oldpixel = _img_get(image, x, y);
 				newpixel = (oldpixel < 128) ? 0 : 255;
