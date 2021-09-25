@@ -28,12 +28,25 @@ void add_some_text(canvas* mstr);
 void add_rnd_text(canvas* mstr);
 void add_checkerboard(canvas* mstr);
 void add_time(canvas* mstr);
-
 void add_image(canvas* mstr);
+
+/* debug test */
+void image_test(const char* input_bmp, const char* out_dir);
 
 
 int main(int argc, char* argv[]) 
 {
+	/**/
+	printf("==============================\n");
+	printf("image dither test\n");
+	image_test("A:\\Users\\Matt\\Pictures\\TRASH\\Lena.bmp", "A:\\Users\\Matt\\Pictures\\TRASH\\BMP_TEST\\");
+	printf("[end] image dither\n");
+	printf("==============================\n");
+	/**/
+	
+
+	/******************************************************************************/
+
 	printf("Test Begin\n");
 
 	canvas master;
@@ -48,8 +61,9 @@ int main(int argc, char* argv[])
 	add_time(&master);
 	//------------------------------------
 
-	strcat_s(filename, 500, TRASH_DIR);
-	strcat_s(filename, 500, "test_123.bmp");
+	memset(filename, 0, sizeof(filename));
+	strcat_s(filename,  sizeof(filename), TRASH_DIR);
+	strcat_s(filename,  sizeof(filename), "test_123.bmp");
 	master.save(filename, DPI);
 	printf("Test End\n");
 	return 0;
@@ -91,12 +105,11 @@ void add_rnd_text(canvas* mstr)
 			buffer[j] = '\n';
 	}
 
-	
 	//canvas rnd_text;
 	//DejaVuSerif_20pt.writeCanvas(&rnd_text, buffer);
 	//mstr->addSprite(&rnd_text, 35, 220, 1);
 
-	DejaVuSerif_20pt.writeCanvas(mstr, buffer, 35, 220);
+	DejaVuSerif_20pt.writeCanvas(mstr, buffer, 35, 220); //direct canvas string write
 }
 
 void add_checkerboard(canvas* mstr)
@@ -142,7 +155,56 @@ void add_image(canvas* mstr)
 	/* create canvas */
 	canvas g24_test;
 	/* add 24-bit color image to canvas with stucki dithering */
-	g24_test.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\tst.bmp", DITHER::_Stucki);
+	g24_test.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\tst.bmp", DITHER::Stucki);
 	/* overlay onto master canvas */
 	mstr->addSprite(&g24_test, 0, 0, 0);
+}
+
+
+void image_test(const char* input_bmp, const char* out_dir)
+{
+	canvas* img_test;
+
+	const char* str[10] = {
+		"FloydSteinberg.bmp",
+		"Stucki.bmp",
+		"Jarvi.bmp",
+		"Atkinson.bmp",
+		"Bayer_2x2.bmp",
+		"Bayer_4x4.bmp",
+		"Bayer_8x8.bmp",
+		"Bayer_16x16.bmp",
+		"Threshold.bmp",
+		"Cluster.bmp"
+	};
+
+	DITHER method[10] = {
+		DITHER::FloydSteinberg,
+		DITHER::Stucki,
+		DITHER::Jarvis,
+		DITHER::Atkinson,
+		DITHER::Bayer_2x2,
+		DITHER::Bayer_4x4,
+		DITHER::Bayer_8x8,
+		DITHER::Bayer_16x16,
+		DITHER::Threshold,
+		DITHER::Cluster
+	};
+
+	printf("-------------------------------\n");
+	for (int i = 0; i < 10; i++)
+	{
+		printf("%s\n", str[i]);
+		memset(filename, 0, sizeof(filename));
+		strcat_s(filename, sizeof(filename), out_dir);
+		strcat_s(filename, sizeof(filename), str[i]);
+		img_test = new canvas;
+		img_test->import_24bit(input_bmp, method[i]);
+		img_test->save(filename, DPI);
+		delete img_test;
+		printf("[end] %s\n", str[i]);
+		printf("-------------------------------\n");
+	}
+
+	return;
 }

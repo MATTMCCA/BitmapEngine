@@ -62,14 +62,12 @@ int canvas::addSprite(canvas* src, int32_t x, int32_t y, bool alpha)
 		uint32_t __y = 0, __x = 0;
 		for (__y = 0; __y < src->_y; __y++)
 			for (__x = 0; __x < src->_x; __x++)
-				if (alpha) {
+				if (alpha) 
 					if (src->getPixle( __x, __y) ^ src->getInvert())
 						setPixle(x + __x, y + __y, 1);
-				}
-				else {
+				else 
 					setPixle(x + __x, y + __y, src->getPixle(__x, __y) ^ src->getInvert());
-				}
-
+	
 		return 0;
 	}
 
@@ -126,12 +124,15 @@ int canvas::save(const char* fileName, int DPI)
 		uint32_t __y = 0, __x = 0;
 
 		image_y--;
-		for (__y = 0; __y < _y; __y++) {
+		for (__y = 0; __y < _y; __y++) 
+		{
 			in_line = &ptr[(__y * _x)];
 			out_line = &BMPDATA[(((image_y) - __y) * image_x)];
 
-			for (__x = 0; __x < _x; __x++) {
-				if (in_line[__x] ^ _inv) BIT_CLEAR(out_line[(__x / 8)], (7 - (__x % 8)));
+			for (__x = 0; __x < _x; __x++) 
+			{
+				if (in_line[__x] ^ _inv) 
+					BIT_CLEAR(out_line[(__x / 8)], (7 - (__x % 8)));
 			}
 		}
 
@@ -181,11 +182,10 @@ int canvas::invert(bool invert)
 
 bool canvas::getPixle(uint32_t x, uint32_t y)
 {
-	if (ptr != nullptr) {
-		if ((y < _y) && (x < _x)) {
+	if (ptr != nullptr) 
+		if ((y < _y) && (x < _x)) 
 			return ptr[(y * _x) + x];
-		}
-	}
+
 	return 1;
 }
 
@@ -194,10 +194,13 @@ bool canvas::getInvert(void)
 	return _inv;
 }
 
+//umm passing signed into this might be bad....
 int canvas::setPixle(uint32_t x, uint32_t y, bool val)
 {
-	if (ptr != nullptr)	{
-		if ((y < _y) && (x < _x)) {
+	if (ptr != nullptr)	
+	{
+		if ((y < _y) && (x < _x)) 
+		{
 			ptr[(y * _x) + x] = val;
 			return 0;
 		}
@@ -313,7 +316,8 @@ uint8_t* canvas::img_open(const char* fileName, uint32_t *x0, uint32_t *y0, uint
 	}
 
 	/* got the image */
-	if (image != nullptr) {
+	if (image != nullptr) 
+	{
 		*y0 = bmpInfoHead.Height;
 		*x0 = bmpInfoHead.Width;
 		*_size = bmpInfoHead.ImageSize;
@@ -364,25 +368,14 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 			img _img = { gray, i_v, i_y }; 
 
 			/* dither */
-			switch (type)
-			{
-			case DITHER::_FloydSteinberg:
-				FloydSteinberg(&_img);
-				break;
-
-			case DITHER::_Stucki:
-				Stucki(&_img);
-				break;
-
-			default:
-				Threshold(&_img, 256 / 2);
-				break;
-			};
+			dither(&_img, type);
 
 			x1 = i_y - 1; //reused, not x, but y
 			create(i_v, i_y, 0);			
-			for (y0 = 0; y0 < i_y; y0++) {
-				for (x0 = 0; x0 < i_v; x0++) {
+			for (y0 = 0; y0 < i_y; y0++) 
+			{
+				for (x0 = 0; x0 < i_v; x0++) 
+				{
 					tmp = gray + ( ((((x1) - y0) * i_v)) + x0 );
 					s = *tmp;
 
@@ -396,30 +389,64 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 	return 0;
 }
 
+int canvas::dither(img* image, DITHER type)
+{
+	switch (type)
+	{
+	case DITHER::FloydSteinberg:
+		return floydSteinberg(image);
+	case DITHER::Stucki:
+		return stucki(image);
+	case DITHER::Jarvis:
+		return jarvis(image);
+	case DITHER::Atkinson:
+		return atkinson(image);
+	case DITHER::Bayer_2x2:
+		return bayer(image, 0);
+	case DITHER::Bayer_4x4:
+		return bayer(image, 1);
+	case DITHER::Bayer_8x8:
+		return bayer(image, 2);
+	case DITHER::Bayer_16x16:
+		return bayer(image, 3);
+	case DITHER::Cluster:
+		return cluster(image);
+	default:
+		return threshold(image, 256 / 2);
+	};
+
+	return 1;
+}
+
+
 uint8_t canvas::_img_get(img* image, uint32_t x0, uint32_t y0)
 {
-	if (x0 < image->__img_x && y0 < image->__img_y) {
+	if (x0 < image->__img_x && y0 < image->__img_y) 
 		return image->__img[(image->__img_x * y0) + x0];
-	}
+	
 	return 0;
 }
 
 int canvas::_img_set(img* image, uint32_t x0, uint32_t y0, uint8_t value)
 {
-	if (x0 < image->__img_x && y0 < image->__img_y)	{
+	if (x0 < image->__img_x && y0 < image->__img_y)	
+	{
 		image->__img[(image->__img_x * y0) + x0] = value;
 		return 0;
 	}
 	return 1;
 }
 
-int canvas::Threshold(img* image, uint8_t value)
+int canvas::threshold(img* image, uint8_t value)
 {
 	if (image->__img != nullptr)
 	{
 		uint8_t newpixel;
-		for (uint32_t y = 0; y < image->__img_y; y++) {
-			for (uint32_t x = 0; x < image->__img_x; x++) {
+		uint32_t y = 0, x = 0;
+		for (y = 0; y < image->__img_y; y++) 
+		{
+			for (x = 0; x < image->__img_x; x++) 
+			{
 				newpixel = (_img_get(image, x, y) < value) ? 0 : 255;
 				_img_set(image, x, y, newpixel);
 			}
@@ -430,14 +457,14 @@ int canvas::Threshold(img* image, uint8_t value)
 }
 
 /* https://imagej.net/Dithering */
-int canvas::FloydSteinberg(img* image)
+int canvas::floydSteinberg(img* image)
 {	
 	if (image->__img != nullptr)
 	{
-		int16_t oldpixel, newpixel; //uint8_t ?
+		uint32_t y = 0, x = 0;
+		int16_t oldpixel, newpixel;
 		float quant_error;
 		float w1 = 7.0 / 16.0, w2 = 3.0 / 16.0, w3 = 5.0 / 16.0, w4 = 1.0 / 16.0;
-		uint32_t y = 0, x = 0;
 
 		for (y = 0; y < image->__img_y; y++)
 		{
@@ -459,10 +486,11 @@ int canvas::FloydSteinberg(img* image)
 }
 
 /* https://imagej.net/Dithering */
-int canvas::Stucki(img* image)
+int canvas::stucki(img* image)
 {
 	if (image->__img != nullptr)
 	{
+		uint32_t y = 0, x = 0;
 		float quant_error;
 		int16_t oldpixel, newpixel; //uint8_t ?
 		float w8 = (float)(8.0 / 42.0),
@@ -471,8 +499,6 @@ int canvas::Stucki(img* image)
 			  w4 = (float)(4.0 / 42.0),
 			  w2 = (float)(2.0 / 42.0),
 			  w1 = (float)(1.0 / 42.0);
-
-		uint32_t y = 0, x = 0;
 
 		for (y = 0; y < image->__img_y; y++)
 		{
@@ -486,17 +512,132 @@ int canvas::Stucki(img* image)
 				_img_set(image, x + 2, y,     (uint8_t)(_img_get(image, x + 2, y)     + w5 * quant_error));
 				_img_set(image, x - 2, y + 1, (uint8_t)(_img_get(image, x - 2, y + 1) + w2 * quant_error));
 				_img_set(image, x - 1, y + 1, (uint8_t)(_img_get(image, x - 1, y + 1) + w4 * quant_error));
-				_img_set(image, x, y + 1,     (uint8_t)(_img_get(image, x, y + 1)     + w8 * quant_error));
+				_img_set(image, x,     y + 1, (uint8_t)(_img_get(image, x,     y + 1) + w8 * quant_error));
 				_img_set(image, x + 1, y + 1, (uint8_t)(_img_get(image, x + 1, y + 1) + w4 * quant_error));
 				_img_set(image, x + 2, y + 1, (uint8_t)(_img_get(image, x + 2, y + 1) + w2 * quant_error));
 				_img_set(image, x - 2, y + 2, (uint8_t)(_img_get(image, x - 2, y + 2) + w1 * quant_error));
 				_img_set(image, x - 1, y + 2, (uint8_t)(_img_get(image, x - 1, y + 2) + w2 * quant_error));
-				_img_set(image, x, y + 2,     (uint8_t)(_img_get(image, x, y + 2)     + w4 * quant_error));
+				_img_set(image, x,     y + 2, (uint8_t)(_img_get(image, x,     y + 2) + w4 * quant_error));
 				_img_set(image, x + 1, y + 2, (uint8_t)(_img_get(image, x + 1, y + 2) + w2 * quant_error));
 				_img_set(image, x + 2, y + 2, (uint8_t)(_img_get(image, x + 2, y + 2) + w1 * quant_error));
 			}
 		}
 		return 0;
 	}
+	return 1;
+}
+
+/* https://imagej.net/Dithering */
+int canvas::jarvis(img* image)
+{
+	if (image->__img != nullptr)
+	{
+		uint32_t y = 0, x = 0;
+		float quant_error;
+		int16_t oldpixel, newpixel; //uint8_t ?
+		float w7 = (float)(7.0 / 48.0),
+			  w5 = (float)(5.0 / 48.0),
+			  w3 = (float)(3.0 / 48.0),
+			  w1 = (float)(1.0 / 48.0);
+
+		for (y = 0; y < image->__img_y; y++)
+		{
+			for (x = 0; x < image->__img_x; x++)
+			{
+				oldpixel = _img_get(image, x, y);
+				newpixel = (oldpixel < 128) ? 0 : 255;
+				_img_set(image, x, y, (uint8_t)newpixel);
+				quant_error = (int16_t)(oldpixel - newpixel);
+				_img_set(image, x + 1, y,     (uint8_t)(_img_get(image, x + 1, y)     + w7 * quant_error));
+				_img_set(image, x + 2, y,     (uint8_t)(_img_get(image, x + 2, y)     + w5 * quant_error));
+				_img_set(image, x - 2, y + 1, (uint8_t)(_img_get(image, x - 2, y + 1) + w3 * quant_error));
+				_img_set(image, x - 1, y + 1, (uint8_t)(_img_get(image, x - 1, y + 1) + w5 * quant_error));
+				_img_set(image, x,     y + 1, (uint8_t)(_img_get(image, x,     y + 1) + w7 * quant_error));
+				_img_set(image, x + 1, y + 1, (uint8_t)(_img_get(image, x + 1, y + 1) + w5 * quant_error));
+				_img_set(image, x + 2, y + 1, (uint8_t)(_img_get(image, x + 2, y + 1) + w3 * quant_error));
+				_img_set(image, x - 2, y + 2, (uint8_t)(_img_get(image, x - 2, y + 2) + w1 * quant_error));
+				_img_set(image, x - 1, y + 2, (uint8_t)(_img_get(image, x - 1, y + 2) + w3 * quant_error));
+				_img_set(image, x,     y + 2, (uint8_t)(_img_get(image, x,     y + 2) + w5 * quant_error));
+				_img_set(image, x + 1, y + 2, (uint8_t)(_img_get(image, x + 1, y + 2) + w3 * quant_error));
+				_img_set(image, x + 2, y + 2, (uint8_t)(_img_get(image, x + 2, y + 2) + w1 * quant_error));
+			}
+		}
+		return 0;
+	}
+	return 1;
+}
+
+/* https://imagej.net/Dithering */
+int canvas::atkinson(img* image)
+{
+	if (image->__img != nullptr)
+	{
+		uint32_t y = 0, x = 0;
+		float quant_error;
+		int16_t oldpixel, newpixel; //uint8_t ?
+		float w1 = (float)(1.0 / 8.0);
+
+		for (y = 0; y < image->__img_y; y++)
+		{
+			for (x = 0; x < image->__img_x; x++)
+			{
+				oldpixel = _img_get(image, x, y);
+				newpixel = (oldpixel < 128) ? 0 : 255;
+				_img_set(image, x, y, (uint8_t)newpixel);
+				quant_error = (int16_t)(oldpixel - newpixel);
+				_img_set(image, x + 1, y,     (uint8_t)(_img_get(image, x + 1, y)     + w1 * quant_error));
+                _img_set(image, x + 2, y,     (uint8_t)(_img_get(image, x + 2, y)     + w1 * quant_error));
+				_img_set(image, x - 1, y + 1, (uint8_t)(_img_get(image, x - 1, y + 1) + w1 * quant_error));
+				_img_set(image, x,     y + 1, (uint8_t)(_img_get(image, x,     y + 1) + w1 * quant_error));
+				_img_set(image, x + 1, y + 1, (uint8_t)(_img_get(image, x + 1, y + 1) + w1 * quant_error));
+				_img_set(image, x,     y + 2, (uint8_t)(_img_get(image, x,     y + 2) + w1 * quant_error));
+			}
+		}
+		return 0;
+	}
+	return 1;
+}
+
+/* https://imagej.net/Dithering */
+int canvas::bayer(img* image, uint8_t matrix)
+{
+	if (image->__img != nullptr)
+	{
+		uint32_t y = 0, x = 0;
+		uint8_t newpixel;
+		uint8_t* d = (uint8_t*)matrix_array[matrix];
+		matrix = 2 << matrix;
+
+		for (y = 0; y < image->__img_y; y++)
+		{
+			for (x = 0; x < image->__img_x; x++)
+			{
+				newpixel = (_img_get(image, x, y) >= d[(y % matrix * matrix + x % matrix)]) ? 255 : 0;
+				_img_set(image, x, y, newpixel);
+			}
+		}
+		return 0;
+	}
+	return 1;
+}
+
+int canvas::cluster(img* image)
+{
+	if (image->__img != nullptr)
+	{
+		uint32_t y = 0, x = 0;
+		uint8_t newpixel;
+
+		for (y = 0; y < image->__img_y; y++)
+		{
+			for (x = 0; x < image->__img_x; x++)
+			{
+				newpixel = (_img_get(image, x, y) >= c_4x4[(y % 4 + x % 4)]) ? 255 : 0;
+				_img_set(image, x, y, (uint8_t)newpixel);
+			}
+		}
+		return 0;
+	}
+
 	return 1;
 }
