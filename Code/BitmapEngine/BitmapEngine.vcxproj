@@ -89,7 +89,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)libfreetype2\include\freetype2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)parser;$(ProjectDir)BitmapLibs;$(ProjectDir)libfreetype2\include\freetype2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -106,7 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)libfreetype2\include\freetype2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)parser;$(ProjectDir)BitmapLibs;$(ProjectDir)libfreetype2\include\freetype2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,14 +146,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="canvas.cpp" />
-    <ClCompile Include="font.cpp" />
     <ClCompile Include="bitmapengine.cpp" />
+    <ClCompile Include="BitmapLibs\canvas.cpp" />
+    <ClCompile Include="BitmapLibs\font.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="canvas.hpp" />
-    <ClInclude Include="font.hpp" />
-    <ClInclude Include="parser.hpp" />
+    <ClInclude Include="BitmapLibs\canvas.hpp" />
+    <ClInclude Include="BitmapLibs\font.hpp" />
+    <ClInclude Include="parser\parser.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

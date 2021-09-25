@@ -18,21 +18,21 @@
     <ClCompile Include="bitmapengine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="font.cpp">
+    <ClCompile Include="BitmapLibs\canvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="canvas.cpp">
+    <ClCompile Include="BitmapLibs\font.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="font.hpp">
+    <ClInclude Include="BitmapLibs\canvas.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="canvas.hpp">
+    <ClInclude Include="BitmapLibs\font.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="parser.hpp">
+    <ClInclude Include="parser\parser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

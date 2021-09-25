@@ -1,14 +1,48 @@
 /*
-	TEST
-	MJM
-	2021
+    ***************************************************************************************
+	MJM -2021-
+	
+	This is a Sample application, designed to demonstrate the 
+	graphical capability of the bitmap engine.
+	
+	The chosen label format is a USPS shipping format.
+	
+	---------------------------------------------------------------------------------------
 
-	very little error handling..... needs fixed
+	This example takes a csv file as an argument.
+		[ bitmapengine.exe mycsv.csv ]
+
+	=======================================================================================	
+	
+	File: bitmapengine.cpp
+	
+		Notes: Very little error handling.
+		
+	=======================================================================================
+
+	Copyright <2021> <Matthew McCardle>
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
+	following conditions:
+
+	The above copyright notice and this permission notice shall be included
+	in all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+	PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+	COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+	IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	***************************************************************************************
+
 */
 
 #define _CRT_SECURE_NO_DEPRECATE
-
-//#include <iostream>
 
 #include <cstdio>
 #include <cstdint>
@@ -18,8 +52,7 @@
 #include "canvas.hpp"
 #include "font.hpp"
 
-/* CVS Parser, grabbed from https://github.com/AriaFallah/csv-parser */
-#include "parser.hpp"
+#include "parser.hpp"			/* https://github.com/AriaFallah/csv-parser */
 
 using namespace aria::csv;
 
@@ -126,7 +159,6 @@ int static_test(CsvParser* CSVptr)
 		add_dynamic_data(&fmt, temp);
 		delete temp;
 
-		//printf("parsed: %d\n", cnt++);
 	}
 
 	return 0;
@@ -179,8 +211,6 @@ int build_format(canvas* master)
 	arial_4pt.writeCanvas(master, "4 POINT FONT, 4 point font", 90, 1840);
 	arial_6pt.writeCanvas(master, "6 POINT FONT, 6 point font", 90, 1860);
 	arial_8pt.writeCanvas(master, "8 POINT FONT, 8 point font", 90, 1888);
-
-
 
 	return 0;
 }
@@ -236,7 +266,6 @@ int add_dynamic_data(static_format_struct* data, canvas* ptr)
 	ptr->addSprite(graphic, 1090, 240, 0);
 	delete graphic;
 	/**************************************************************************/
-
 
 	ptr->save(data->save_as, DPI);
 	return 0;
