@@ -1,7 +1,3 @@
-// ! ref !
-//https://github.com/adafruit/Adafruit-GFX-Library/blob/master/Adafruit_GFX.cpp
-//https://github.com/adafruit/Adafruit-GFX-Library/blob/master/fontconvert/fontconvert.c
-//
 //MJM 2021
 
 #pragma once
@@ -61,7 +57,6 @@ typedef struct {
 	uint32_t __img_y;
 } img;
 
-
 enum class DITHER 
 { 
 	Threshold, 
@@ -75,8 +70,6 @@ enum class DITHER
 	Bayer_16x16,
 	Cluster
 };
-
-
 /*************** Dithering Tables ********************************************/
 static const float c_4x4[16] = 
 { 
@@ -130,20 +123,33 @@ static const uint8_t b_16x16[256] =
 static const uint8_t* matrix_array[4] = { b_2x2, b_4x4, b_8x8, b_16x16 };
 /*****************************************************************************/
 
+enum class DEGREE
+{
+	ROT_0,
+	ROT_90,
+	ROT_180,
+	ROT_270,
+	ROT_360
+};
+
 class canvas
 {
 public:
 	canvas();
 
 	int create(int32_t x, int32_t y, bool invert);
-	int getSize(int32_t* x, int32_t* y);
+
 	int32_t get_y(void);
 	int32_t get_x(void);
-	int fill(bool val);
-	int addSprite(canvas* src, int32_t x, int32_t y, bool alpha);
-	int save(const char* fileName, int DPI);
-	int invert(bool invert);
 	bool getInvert(void);
+	int getSize(int32_t* x, int32_t* y);
+
+	int fill(bool val);
+	int invert(bool invert);
+	int rotate(DEGREE rot);
+
+	int addSprite(canvas* src, int32_t x, int32_t y, bool alpha);
+
 	bool getPixle(uint32_t x, uint32_t y);
 	int setPixle(uint32_t x, uint32_t y, bool val);
 
@@ -152,7 +158,8 @@ public:
 	int drawBox(int32_t x0, int32_t y0, int32_t length, int32_t width, int32_t thick, bool val);
 	int drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val);
 
-	int import_24bit(const char* fileName, DITHER type = DITHER::Threshold);
+	int import_24bit(const char* fileName, DITHER type = DITHER::Threshold);	
+	int save(const char* fileName, int DPI);
 
 	~canvas();
 

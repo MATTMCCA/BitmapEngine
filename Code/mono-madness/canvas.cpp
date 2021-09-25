@@ -1,8 +1,3 @@
-// ! ref !
-//https://github.com/adafruit/Adafruit-GFX-Library/blob/master/Adafruit_GFX.cpp
-//https://github.com/adafruit/Adafruit-GFX-Library/blob/master/fontconvert/fontconvert.c
-// 
-//
 //MJM 2021
 
 #include "canvas.h"
@@ -142,29 +137,31 @@ int canvas::save(const char* fileName, int DPI)
 
 		if (fd != NULL)
 		{
-			//TODO: add error handling, or not...
-			/////////////////////////////////////////////////////////////////////////
-			fwrite(&bmpHead.Signature, sizeof(uint16_t), 1, fd);
-			fwrite(&bmpHead.FileSize, sizeof(uint32_t), 1, fd);
-			fwrite(&bmpHead.reserved, sizeof(uint32_t), 1, fd);
-			fwrite(&bmpHead.DataOffset, sizeof(uint32_t), 1, fd);
-			/////////////////////////////////////////////////////////////////////////
-			fwrite(&bmpInfoHead.Size, sizeof(uint32_t), 1, fd);
-			fwrite(&bmpInfoHead.Width, sizeof(uint32_t), 1, fd);
-			fwrite(&bmpInfoHead.Height, sizeof(uint32_t), 1, fd);
-			fwrite(&bmpInfoHead.Planes, sizeof(uint16_t), 1, fd);
-			fwrite(&bmpInfoHead.Bits_Per_Pixel, sizeof(uint16_t), 1, fd);
-			fwrite(&bmpInfoHead.Compression, sizeof(uint32_t), 1, fd);
-			fwrite(&bmpInfoHead.ImageSize, sizeof(uint32_t), 1, fd);
-			fwrite(&bmpInfoHead.XpixelsPerM, sizeof(uint32_t), 1, fd);
-			fwrite(&bmpInfoHead.YpixelsPerM, sizeof(uint32_t), 1, fd);
-			fwrite(&bmpInfoHead.Colors_Used, sizeof(uint32_t), 1, fd);
-			fwrite(&bmpInfoHead.Important_Colors, sizeof(uint32_t), 1, fd);
-			/////////////////////////////////////////////////////////////////////////
-			fwrite(&COLOR_TABLE, sizeof(uint32_t), 2, fd);
-			/////////////////////////////////////////////////////////////////////////
-			fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
-			/////////////////////////////////////////////////////////////////////////
+			{
+				//TODO: add error handling, or not...
+				/////////////////////////////////////////////////////////////////////////
+				fwrite(&bmpHead.Signature, sizeof(uint16_t), 1, fd);
+				fwrite(&bmpHead.FileSize, sizeof(uint32_t), 1, fd);
+				fwrite(&bmpHead.reserved, sizeof(uint32_t), 1, fd);
+				fwrite(&bmpHead.DataOffset, sizeof(uint32_t), 1, fd);
+				/////////////////////////////////////////////////////////////////////////
+				fwrite(&bmpInfoHead.Size, sizeof(uint32_t), 1, fd);
+				fwrite(&bmpInfoHead.Width, sizeof(uint32_t), 1, fd);
+				fwrite(&bmpInfoHead.Height, sizeof(uint32_t), 1, fd);
+				fwrite(&bmpInfoHead.Planes, sizeof(uint16_t), 1, fd);
+				fwrite(&bmpInfoHead.Bits_Per_Pixel, sizeof(uint16_t), 1, fd);
+				fwrite(&bmpInfoHead.Compression, sizeof(uint32_t), 1, fd);
+				fwrite(&bmpInfoHead.ImageSize, sizeof(uint32_t), 1, fd);
+				fwrite(&bmpInfoHead.XpixelsPerM, sizeof(uint32_t), 1, fd);
+				fwrite(&bmpInfoHead.YpixelsPerM, sizeof(uint32_t), 1, fd);
+				fwrite(&bmpInfoHead.Colors_Used, sizeof(uint32_t), 1, fd);
+				fwrite(&bmpInfoHead.Important_Colors, sizeof(uint32_t), 1, fd);
+				/////////////////////////////////////////////////////////////////////////
+				fwrite(&COLOR_TABLE, sizeof(uint32_t), 2, fd);
+				/////////////////////////////////////////////////////////////////////////
+				fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
+				/////////////////////////////////////////////////////////////////////////
+			}
 			fclose(fd);
 		}
 
@@ -280,26 +277,27 @@ uint8_t* canvas::img_open(const char* fileName, uint32_t *x0, uint32_t *y0, uint
 
 		if (file_size >= 0x0036)
 		{
-			//no error checking, yet!
-			//fread will fail hard!
-			/////////////////////////////////////////////////////////////////////////
-			fread(&bmpHead.Signature, sizeof(uint16_t), 1, fd);
-			fread(&bmpHead.FileSize, sizeof(uint32_t), 1, fd);
-			fread(&bmpHead.reserved, sizeof(uint32_t), 1, fd);
-			fread(&bmpHead.DataOffset, sizeof(uint32_t), 1, fd);
-			/////////////////////////////////////////////////////////////////////////
-			fread(&bmpInfoHead.Size, sizeof(uint32_t), 1, fd);
-			fread(&bmpInfoHead.Width, sizeof(uint32_t), 1, fd);
-			fread(&bmpInfoHead.Height, sizeof(uint32_t), 1, fd);
-			fread(&bmpInfoHead.Planes, sizeof(uint16_t), 1, fd);
-			fread(&bmpInfoHead.Bits_Per_Pixel, sizeof(uint16_t), 1, fd);
-			fread(&bmpInfoHead.Compression, sizeof(uint32_t), 1, fd);
-			fread(&bmpInfoHead.ImageSize, sizeof(uint32_t), 1, fd);
-			fread(&bmpInfoHead.XpixelsPerM, sizeof(uint32_t), 1, fd);
-			fread(&bmpInfoHead.YpixelsPerM, sizeof(uint32_t), 1, fd);
-			fread(&bmpInfoHead.Colors_Used, sizeof(uint32_t), 1, fd);
-			fread(&bmpInfoHead.Important_Colors, sizeof(uint32_t), 1, fd);
-
+			{   
+				//no error checking, yet!
+				//fread will fail hard!
+				/////////////////////////////////////////////////////////////////////////
+				fread(&bmpHead.Signature, sizeof(uint16_t), 1, fd);
+				fread(&bmpHead.FileSize, sizeof(uint32_t), 1, fd);
+				fread(&bmpHead.reserved, sizeof(uint32_t), 1, fd);
+				fread(&bmpHead.DataOffset, sizeof(uint32_t), 1, fd);
+				/////////////////////////////////////////////////////////////////////////
+				fread(&bmpInfoHead.Size, sizeof(uint32_t), 1, fd);
+				fread(&bmpInfoHead.Width, sizeof(uint32_t), 1, fd);
+				fread(&bmpInfoHead.Height, sizeof(uint32_t), 1, fd);
+				fread(&bmpInfoHead.Planes, sizeof(uint16_t), 1, fd);
+				fread(&bmpInfoHead.Bits_Per_Pixel, sizeof(uint16_t), 1, fd);
+				fread(&bmpInfoHead.Compression, sizeof(uint32_t), 1, fd);
+				fread(&bmpInfoHead.ImageSize, sizeof(uint32_t), 1, fd);
+				fread(&bmpInfoHead.XpixelsPerM, sizeof(uint32_t), 1, fd);
+				fread(&bmpInfoHead.YpixelsPerM, sizeof(uint32_t), 1, fd);
+				fread(&bmpInfoHead.Colors_Used, sizeof(uint32_t), 1, fd);
+				fread(&bmpInfoHead.Important_Colors, sizeof(uint32_t), 1, fd);
+			}
 			/* bmp check is not very good */
 			if ((bmpInfoHead.Bits_Per_Pixel != 24) || (bmpHead.Signature != 0x4D42) ||
 				(bmpInfoHead.Compression != 0) || (bmpInfoHead.Colors_Used != 0) ||
@@ -340,7 +338,7 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 
 	if (image_24 != nullptr) 
 	{
-		uint32_t i_x = s / y, i_y = y, i_v = i_x / 3, gray_size = i_v * i_y;
+		uint32_t i_x = s / y, i_y = y, gray_size = x * i_y;
 
 		gray = new uint8_t[gray_size];
 		uint8_t* tmp = gray;
@@ -350,11 +348,10 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 			x1 = 0;
 			row = &image_24[i_x * y0];
 
-			for (x0 = 0; x0 < i_v; x0++) 
+			for (x0 = 0; x0 < x; x0++) 
 			{
 				//https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
-				/*                blue?              green?               red?             */
-				lum = (row[x1++] * 0.11) + (row[x1++] * 0.59) + (row[x1++] * 0.30);
+				lum = /*blue*/(row[x1++] * 0.11) + /*green*/(row[x1++] * 0.59) + /*red*/(row[x1++] * 0.30);
 				if (lum < 0) lum = 0;
 				if (lum > 255) lum = 255;
 				*tmp = (uint8_t) lum;
@@ -365,19 +362,18 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 
 		if (gray != nullptr) 
 		{
-			//create image struct
-			img _img = { gray, i_v, i_y }; 
+			img _img = { gray, x, i_y }; //create image struct
 
 			/* dither */
 			dither(&_img, type);
 
 			x1 = i_y - 1; //reused, not x, but y
-			create(i_v, i_y, 0);			
+			create(x, i_y, 0);			
 			for (y0 = 0; y0 < i_y; y0++) 
 			{
-				for (x0 = 0; x0 < i_v; x0++) 
+				for (x0 = 0; x0 < x; x0++) 
 				{
-					tmp = gray + ( ((((x1) - y0) * i_v)) + x0 );
+					tmp = gray + ( ((((x1) - y0) * x)) + x0 );
 					s = *tmp;
 
 					if (s == 0) setPixle(x0, y0, 1);
@@ -388,6 +384,52 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 	}
 
 	return 0;
+}
+
+int canvas::rotate(DEGREE rot)
+{
+	if (ptr != nullptr)
+	{
+		uint32_t y = 0, x = 0;
+		uint32_t y1 = 0, x1 = 0;
+
+		uint32_t _y_new = _y, _x_new = _x;
+		size_t _asize = (_x_new * _y_new) * sizeof(bool);
+
+		if (rot == DEGREE::ROT_0 || rot == DEGREE::ROT_360)
+			return 0;
+
+		if (rot == DEGREE::ROT_90 || rot == DEGREE::ROT_270) {
+			_y_new = _x;
+			_x_new = _y;
+		}
+
+		bool* tmp;
+		bool* new_ptr = new bool[_asize] {0};
+
+		for (y = 0; y < _y; y++)
+		{
+			for (x = 0; x < _x; x++)
+			{
+				if (rot == DEGREE::ROT_90)		{ x1 = (_y - 1) - y; y1 = x;	        }
+				if (rot == DEGREE::ROT_180)     { x1 = (_x - 1) - x; y1 = (_y - 1) - y; }
+				if (rot == DEGREE::ROT_270)     { x1 = y;            y1 = (_x - 1) - x; }
+
+				tmp = new_ptr + (y1 * _x_new) + x1;
+				*tmp = ptr[(y * _x) + x];
+			}
+		}
+
+		delete[] ptr;
+		ptr = new_ptr;
+
+		_y = _y_new;
+		_x = _x_new;
+
+		return 0;
+	}
+
+	return 1;
 }
 
 int canvas::dither(img* image, DITHER type)
@@ -418,7 +460,6 @@ int canvas::dither(img* image, DITHER type)
 
 	return 1;
 }
-
 
 uint8_t canvas::_img_get(img* image, uint32_t x0, uint32_t y0)
 {
@@ -622,6 +663,7 @@ int canvas::bayer(img* image, uint8_t matrix)
 	return 1;
 }
 
+/* https://imagej.net/Dithering */
 int canvas::cluster(img* image)
 {
 	if (image->__img != nullptr)

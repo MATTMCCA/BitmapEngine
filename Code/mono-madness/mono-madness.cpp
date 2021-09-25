@@ -36,15 +36,14 @@ void image_test(const char* input_bmp, const char* out_dir);
 
 int main(int argc, char* argv[]) 
 {
-	/**/
+	/*
 	printf("==============================\n");
 	printf("image dither test\n");
 	image_test("A:\\Users\\Matt\\Pictures\\TRASH\\Lena.bmp", "A:\\Users\\Matt\\Pictures\\TRASH\\BMP_TEST\\");
 	printf("[end] image dither\n");
 	printf("==============================\n");
-	/**/
+	*/
 	
-
 	/******************************************************************************/
 
 	printf("Test Begin\n");
@@ -69,13 +68,11 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-
 void build_demo_outline(canvas* mstr)
 {
 	mstr->drawBox(0 + 10, 0 + 10, 2400 - 20, 1200 - 20, 10, 1);	//draw box
 	mstr->drawHorizontalLine(0 + 10, 0 + 200, 1200 - 20, 10, 1);	//draw line
 }
-
 
 void add_some_text(canvas* mstr)
 {
@@ -149,7 +146,6 @@ void add_time(canvas* mstr)
 	mstr->addSprite(&time_date, 40, 2300, 0);
 }
 
-
 void add_image(canvas* mstr)
 {
 	/* create canvas */
@@ -158,9 +154,18 @@ void add_image(canvas* mstr)
 	g24_test.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\Lena.bmp", DITHER::Stucki);
 	/* overlay onto master canvas */
 
+	uint32_t x = g24_test.get_x();
+	uint32_t y = g24_test.get_y();
+
+	g24_test.rotate(DEGREE::ROT_90);
+	//g24_test.rotate(DEGREE::ROT_180);
+	//g24_test.rotate(DEGREE::ROT_270);
+
+	x = g24_test.get_x();
+	y = g24_test.get_y();
+
 	mstr->addSprite(&g24_test, 0, 0, 0);
 }
-
 
 void image_test(const char* input_bmp, const char* out_dir)
 {

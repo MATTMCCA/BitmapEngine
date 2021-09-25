@@ -17,7 +17,7 @@
 
 #include "canvas.h"
 
-typedef struct {               // Data stored PER GLYPH
+typedef struct {                // Data stored PER GLYPH
 	uint32_t  bitmapOffset;     // Pointer into GFXfont->bitmap
 	uint32_t  width, height;    // Bitmap dimensions in pixels
 	uint32_t  xAdvance;         // Distance to advance cursor (x axis)
@@ -25,11 +25,11 @@ typedef struct {               // Data stored PER GLYPH
 } GFXglyph;
 
 
-typedef struct {           // Data stored for FONT AS A WHOLE:
+typedef struct {             // Data stored for FONT AS A WHOLE:
 	uint8_t*   bitmap;       // Glyph bitmaps, concatenated
-	GFXglyph*  glyph;       // Glyph array
-	uint32_t   first, last; // ASCII extents
-	uint32_t   yAdvance;    // Newline distance (y axis)
+	GFXglyph*  glyph;        // Glyph array
+	uint32_t   first, last;  // ASCII extents
+	uint32_t   yAdvance;     // Newline distance (y axis)
 } GFXfont;
 
 
@@ -42,9 +42,17 @@ public:
 
 	int create(const char* fontName, int point, int dpi);
 	int changeCharOffset(int32_t x, int32_t y);
+	int writeCanvas(canvas* ptr, const char* str, int32_t x0 = 0, int32_t y0 = 0);
+	
 	GFXfont* getGFXfont(void);
 
-	int writeCanvas(canvas* ptr, const char* str, int32_t x0 = 0, int32_t y0 = 0);
+	~font();
+
+private:
+
+	int drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0);
+	int write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y, int32_t x_offset = 0);
+	int print(canvas* ptr, const char* str, int32_t x0, int32_t y0, int32_t x_offset = 0);
 
 	int charBounds(unsigned char c, int32_t* x, int32_t* y,
 		int32_t* minx, int32_t* miny, int32_t* maxx,
@@ -53,15 +61,6 @@ public:
 	int getTextBounds(const char* str, int32_t x, int32_t y,
 		int32_t* x1, int32_t* y1, uint32_t* w,
 		uint32_t* h);
-
-	int drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0);
-	int write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y, int32_t x_offset = 0);
-
-	int print(canvas* ptr, const char* str, int32_t x0, int32_t y0, int32_t x_offset = 0);
-
-	~font();
-
-private:
 
 	void enbit(uint8_t value, std::vector<uint8_t> *bmp);
 
