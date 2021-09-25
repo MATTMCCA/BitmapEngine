@@ -155,7 +155,7 @@ void add_image(canvas* mstr)
 	/* create canvas */
 	canvas g24_test;
 	/* add 24-bit color image to canvas with stucki dithering */
-	g24_test.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\tst.bmp", DITHER::Stucki);
+	g24_test.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\Lena.bmp", DITHER::Stucki);
 	/* overlay onto master canvas */
 	mstr->addSprite(&g24_test, 0, 0, 0);
 }
