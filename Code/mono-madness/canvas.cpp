@@ -66,7 +66,7 @@ int canvas::addSprite(canvas* src, int32_t x, int32_t y, bool alpha)
 					if (src->getPixle(__x, __y) ^ src->getInvert())
 						setPixle(x + __x, y + __y, 1);
 				} else {
-					setPixle(x + __x, y + __y, src->getPixle(__x, __y));//^ src->getInvert());
+					setPixle(x + __x, y + __y, src->getPixle(__x, __y) ^ src->getInvert());
 				}
 	
 		return 0;
