@@ -241,10 +241,10 @@ int canvas::drawVerticalLine(int32_t x0, int32_t y0, int32_t length, int32_t thi
 
 int canvas::drawBox(int32_t x0, int32_t y0, int32_t length, int32_t width, int32_t thick, bool val)
 {
-	if (drawHorizontalLine(x0, y0, width, thick, val))	return 1;
-	if (drawHorizontalLine(x0, y0 + length - thick, width, thick, val))	return 1;
-	if (drawVerticalLine(x0, y0 + thick, length - thick, thick, val))	return 1;
-	if (drawVerticalLine(x0 + width - thick, y0 + thick, length - thick, thick, val))	return 1;
+	if (drawHorizontalLine(x0,                 y0,                  width,          thick, val))	return 1;
+	if (drawHorizontalLine(x0,                 y0 + length - thick, width,          thick, val))	return 1;
+	if (drawVerticalLine  (x0,                 y0 + thick,          length - thick, thick, val))	return 1;
+	if (drawVerticalLine  (x0 + width - thick, y0 + thick,          length - thick, thick, val))	return 1;
 
 	return 0;
 }
