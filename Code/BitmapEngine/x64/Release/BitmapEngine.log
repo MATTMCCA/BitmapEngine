@@ -1,8 +1,0 @@
-﻿  font.cpp
-  bitmapengine.cpp
-  Generating code
-  14 of 375 functions ( 3.7%) were compiled, the rest were copied from previous compilation.
-    10 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  BitmapEngine.vcxproj -> A:\Users\Matt\Documents\Personal\BitmapEngine\Code\BitmapEngine\x64\Release\BitmapEngine.exe
