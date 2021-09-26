@@ -46,8 +46,8 @@ int canvas::create(int32_t x, int32_t y, bool invert)
 	_x = x;
 	_y = y;
 	_inv = invert;
-
-	size_t _asize = (_x * _y) * sizeof(bool);
+	uint32_t q = (_x * _y);
+	size_t _asize = q * sizeof(bool);
 	ptr = new bool[_asize] {0};
 
 	return 0;
@@ -66,7 +66,8 @@ int canvas::fill(bool val)
 		return 1;
 
 	delete[] ptr;
-	size_t _asize = (_x * _y) * sizeof(bool);
+	uint32_t q = (_x * _y);
+	size_t _asize = q * sizeof(bool);
 	ptr = new bool[_asize] {1};
 
 	return 0;
@@ -141,7 +142,8 @@ int canvas::save(const char* fileName, int DPI)
 	bmpInfoHead.Important_Colors = 0x00;
 
 	uint8_t* BMPDATA = nullptr;
-	size_t BMPDATASIZE = image_x * image_y;
+	uint32_t q = image_x * image_y;
+	size_t BMPDATASIZE = q * sizeof(uint8_t);
 	BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
 
 	if (BMPDATA != nullptr) {
@@ -361,7 +363,7 @@ uint8_t* canvas::img_open(const char* fileName, uint32_t *x0, uint32_t *y0, uint
 int canvas::import_24bit(const char* fileName, DITHER type)
 {
 	double lum;
-	uint32_t y0 = 0, x0 = 0, x1 = 0;
+	uint32_t y0 = 0, x0 = 0, x1 = 0, q = 0;
 	uint32_t x = 0, y = 0, s = 0;
 	uint8_t* gray = nullptr;
 
@@ -405,7 +407,8 @@ int canvas::import_24bit(const char* fileName, DITHER type)
 			{
 				for (x0 = 0; x0 < x; x0++) 
 				{
-					tmp = gray + ( ((((x1) - y0) * x)) + x0 );
+					q = ((((x1)-y0) * x)) + x0;
+					tmp = gray + q;
 					s = *tmp;
 
 					if (s == 0) setPixle(x0, y0, 1);
@@ -425,8 +428,10 @@ int canvas::rotate(DEGREE rot)
 		uint32_t y = 0, x = 0;
 		uint32_t y1 = 0, x1 = 0;
 
+
 		uint32_t _y_new = _y, _x_new = _x;
-		size_t _asize = (_x_new * _y_new) * sizeof(bool);
+		uint32_t q = _x_new * _y_new;
+		size_t _asize = q * sizeof(bool);
 
 		if (rot == DEGREE::ROT_0 || rot == DEGREE::ROT_360)
 			return 0;
@@ -447,7 +452,8 @@ int canvas::rotate(DEGREE rot)
 				if (rot == DEGREE::ROT_180)     { x1 = (_x - 1) - x; y1 = (_y - 1) - y; }
 				if (rot == DEGREE::ROT_270)     { x1 = y;            y1 = (_x - 1) - x; }
 
-				tmp = new_ptr + (y1 * _x_new) + x1;
+				q = (y1 * _x_new);
+				tmp = new_ptr + q + x1;
 				*tmp = ptr[(y * _x) + x];
 			}
 		}

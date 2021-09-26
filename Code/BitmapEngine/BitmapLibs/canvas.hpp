@@ -196,11 +196,11 @@ public:
 	~canvas();
 
 	canvas& operator= (const canvas& c)	{
+		uint32_t q = (c._x * c._y * sizeof(bool));
 		create(c._x, c._y, c._inv);
-		addSprite((canvas*)&c, 0, 0, 0);
+		memcpy(ptr, c.ptr, q);
 		return *this;
 	}
-
 
 private:
 
