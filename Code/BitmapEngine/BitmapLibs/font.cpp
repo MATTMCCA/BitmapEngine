@@ -9,8 +9,30 @@
 	=======================================================================================	
 	
 	File: font.cpp
+
+		Notes: uses Freetype
 		
 	=======================================================================================
+
+	Copyright <2021> <Matthew McCardle>
+	Permission is hereby granted, free of charge, to any person obtaining a copy of
+	this software and associated documentation files (the "Software"), to deal in the
+	Software without restriction, including without limitation the rights to use, copy,
+	modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+	and to permit persons to whom the Software is furnished to do so, subject to the
+	following conditions:
+
+	The above copyright notice and this permission notice shall be included
+	in all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+	INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+	PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+	COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+	IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	***************************************************************************************
 
 	TrueType to Adafruit_GFX font converter.  Derived from Peter Jakobs'
 	Adafruit_ftGFX fork & makefont tool, and Paul Kourany's Adafruit_mfGFX.
@@ -62,8 +84,8 @@ font::font()
 int font::create(const char* fontName, int point, int dpi)
 {
 	int					i, j, err, byte;
-	int					first = ' ';
-	int					last = '~';
+	int			    	first = ' ';
+	int 				last = '~';
 	int32_t			    bitmapOffset = 0;
 	unsigned int		x, y;
 
@@ -76,8 +98,9 @@ int font::create(const char* fontName, int point, int dpi)
 	
 	std::vector<uint8_t> BITMAP;
 
+	int _jk = (last - first + 1);
 	myFont = new GFXfont;
-	myFont->glyph = new GFXglyph[last - first + 1];
+	myFont->glyph = new GFXglyph[_jk];
 
 	// Init FreeType lib, load font
 	if ((err = FT_Init_FreeType(&library)))
@@ -156,7 +179,7 @@ int font::create(const char* fontName, int point, int dpi)
 		FT_Done_Glyph(glyph);
 	}
 
-	uint32_t h = BITMAP.size();
+	uint32_t h = (uint32_t)BITMAP.size();
 	myFont->bitmap = new uint8_t[h] {0x00};
 
 	for (uint32_t i = 0; i < h; i++)
