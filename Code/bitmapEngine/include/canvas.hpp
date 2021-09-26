@@ -197,9 +197,12 @@ public:
 	~canvas();
 
 	canvas& operator= (const canvas& c)	{
-		uint32_t q = (c._x * c._y * sizeof(bool));
-		create(c._x, c._y, c._inv);
-		memcpy(ptr, c.ptr, q);
+		if (c.ptr != nullptr)
+		{
+			uint32_t q = (c._x * c._y * sizeof(bool));
+			create(c._x, c._y, c._inv);
+			memcpy(ptr, c.ptr, q);
+		}
 		return *this;
 	}
 

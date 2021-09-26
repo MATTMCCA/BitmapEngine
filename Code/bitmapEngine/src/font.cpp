@@ -226,7 +226,7 @@ int font::writeCanvas(canvas* ptr, const char* str, int32_t x0, int32_t y0)
 
 	getTextBounds(str, 0, 0, &x, &y, &w, &h);
 
-	ptr->create(w, h, 0); //return 1
+	ptr->create(w, h, 0);
 
 	if (x != 0) {
 		if (x > 0) {
@@ -359,7 +359,7 @@ int font::getTextBounds(const char* str, int32_t x, int32_t y, int32_t* x1, int3
 
 int font::drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0)
 {
-	if (myFont != nullptr)
+	if ((myFont != nullptr) && (ptr != nullptr))
 	{
 		c -= (uint8_t)myFont->first;
 		GFXglyph* glyph = &myFont->glyph[c];
@@ -388,9 +388,9 @@ int font::drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0)
 				bits <<= 1;
 			}
 		}
+		return 0;
 	}
-
-	return 0;
+	return 1;
 }
 
 int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y, int32_t x_offset)

@@ -166,14 +166,13 @@ int static_test(CsvParser* CSVptr)
 
 		add_dynamic_data(&fmt, temp);
 		delete temp;
-
 	}
-
 	return 0;
 }
 
 int build_format(canvas* master)
 {
+	
 	font arial_bold_70;
 	font arial_bold_20;
 	font arial_bold_10;
@@ -183,9 +182,10 @@ int build_format(canvas* master)
 	arial_bold_20.create(ARIAL_FONT_BOLD, 20, DPI);
 	arial_bold_10.create(ARIAL_FONT_BOLD, 10, DPI);
 	arial_bold_12.create(ARIAL_FONT_BOLD, 12, DPI);
-
+	
 	/* solid's outline */
 	master->create(1275, 2025, 0);
+	
 	master->drawBox(60, 100, 1830, 1170, 10, 1);			//box 1
 	master->drawBox(60, 100, 300, 300, 10, 1);			//box 2
 	master->drawBox(350, 100, 300, 880, 10, 1);			//box 3
@@ -193,8 +193,7 @@ int build_format(canvas* master)
 	master->drawHorizontalLine(60, 1300, 1170, 20, 1);		//line 2
 	master->drawHorizontalLine(60, 1800, 1170, 20, 1);		//line 3
 	master->drawBox(850, 800, 70, 160, 5, 1);				//box 4
-
-
+	
 	/* static text */
 	arial_bold_10.writeCanvas(master, "TM", 1060, 430);
 	arial_bold_10.writeCanvas(master, "SHIP\nTO:", 90, 950);
@@ -203,7 +202,7 @@ int build_format(canvas* master)
 	arial_bold_12.writeCanvas(master, "0023", 1040, 564);
 	arial_bold_20.writeCanvas(master, "PRIORITY MAIL 2-DAY", 160, 430);
 	arial_bold_70.writeCanvas(master, "P", 130, 140);
-
+	
 	/* Font Test */
 	font arial_2pt;
 	font arial_4pt;
@@ -219,7 +218,7 @@ int build_format(canvas* master)
 	arial_4pt.writeCanvas(master, "4 POINT FONT, 4 point font", 90, 1840);
 	arial_6pt.writeCanvas(master, "6 POINT FONT, 6 point font", 90, 1860);
 	arial_8pt.writeCanvas(master, "8 POINT FONT, 8 point font", 90, 1888);
-
+	
 	return 0;
 }
 
@@ -237,43 +236,43 @@ int add_dynamic_data(static_format_struct* data, canvas* ptr)
 	arial_bold_12.create(ARIAL_FONT_BOLD, 12, DPI);
 	arial_bold_16.create(ARIAL_FONT_BOLD, 16, DPI);
 
-	/**************************************************************************/
+	//**************************************************************************
 	arial_bold_6.writeCanvas(ptr, data->text_field_001, 390, 120);
 	arial_bold_6.writeCanvas(ptr, data->text_field_002, 390, 120 + 25);
 	arial_bold_6.writeCanvas(ptr, data->text_field_003, 390, 120 + 50);
 	arial_bold_6.writeCanvas(ptr, data->text_field_004, 390, 120 + 75);
-	/**************************************************************************/
+	//**************************************************************************
 	get_date(char_buffer, 100);
 	arial_bold_6.writeCanvas(ptr, char_buffer, 1066, 350);	//date
-	/**************************************************************************/
+	//**************************************************************************
 	get_tracking(char_buffer, 100);
 	arial_bold_12.writeCanvas(ptr, char_buffer, 350, 1730); //tracking
-	/**************************************************************************/
+	//**************************************************************************
 	arial_bold_8.writeCanvas(ptr, data->text_field_005, 90, 550);
 	arial_bold_8.writeCanvas(ptr, data->text_field_006, 90, 550 + 40);
 	arial_bold_8.writeCanvas(ptr, data->text_field_007, 90, 550 + 80);
-	/**************************************************************************/
+	//**************************************************************************
 	arial_bold_16.writeCanvas(ptr, data->text_field_008, 250, 950);
 	arial_bold_16.writeCanvas(ptr, data->text_field_009, 250, 950 + 70);
 	arial_bold_16.writeCanvas(ptr, data->text_field_010, 250, 950 + 140);
 
-	/************************** Add grphic ************************************/
+	//************************** Add grphic ************************************
 	canvas* graphic;
 	graphic = new canvas;
 	graphic->import_24bit(data->graphic_001, DITHER::Threshold);
 	ptr->addSprite(graphic, 390, 230, 0);
 	delete graphic;
-	/**************************************************************************/
+	//**************************************************************************
 	graphic = new canvas;
 	graphic->import_24bit(data->graphic_002, DITHER::Jarvis);
 	ptr->addSprite(graphic, 85, 1400, 0);
 	delete graphic;
-	/**************************************************************************/
+	//**************************************************************************
 	graphic = new canvas;
 	graphic->import_24bit(data->graphic_003, DITHER::Threshold);
 	ptr->addSprite(graphic, 1090, 240, 0);
 	delete graphic;
-	/**************************************************************************/
+	//**************************************************************************
 
 	ptr->save(data->save_as, DPI);
 	return 0;

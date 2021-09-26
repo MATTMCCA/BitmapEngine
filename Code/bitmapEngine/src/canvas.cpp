@@ -40,18 +40,16 @@ canvas::canvas()
 
 bool canvas::create(int32_t x, int32_t y, bool invert)
 {
-	if (ptr != nullptr)
-		delete[] ptr;
-
-	_x = x;
-	_y = y;
-	_inv = invert;
-	uint32_t q = (_x * _y);
-	size_t _asize = q * sizeof(bool);
-	ptr = new bool[_asize] {0};
-	if (ptr == nullptr)
-		return 1;
-
+	if (ptr == nullptr)	{
+		_x = x;
+		_y = y;
+		_inv = invert;
+		uint32_t q = (_x * _y);
+		size_t _asize = q * sizeof(bool);
+		ptr = new bool[_asize] {0};
+		if (ptr == nullptr)
+			return 1;
+	}
 	return 0;
 }
 
@@ -60,7 +58,7 @@ bool canvas::create(bool* raw, int32_t x, int32_t y, bool invert)
 	if (!create(x, y, invert))
 	{
 		if (ptr != nullptr)	{
-			uint32_t q = (x * y);
+			uint32_t q = (_x * _y);
 			memcpy(ptr, raw, q * sizeof(bool));
 			if (ptr == nullptr)
 				return 1;
@@ -73,7 +71,7 @@ bool canvas::create(bool* raw, int32_t x, int32_t y, bool invert)
 
 bool canvas::getSize(int32_t* x, int32_t* y)
 {
-	if (ptr == nullptr) {
+	if (ptr != nullptr) {
 		*x = _x;
 		*y = _y;
 		return 0;

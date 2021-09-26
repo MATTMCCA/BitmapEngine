@@ -1,2 +1,2 @@
-"%CD%\x64\BitmapEngine.exe" test.csv
+"%CD%\x64\usps_demo.exe" test.csv
 pause
