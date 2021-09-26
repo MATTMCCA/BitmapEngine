@@ -56,7 +56,7 @@ void print_pass_fail(const char* testname, bool err);
 
 bool canvas_noninv(const char* dir, int cnt);
 bool canvas_inv(const char* dir, int cnt);
-bool convas_fill(const char* dir, int cnt);
+bool canvas_fill(const char* dir, int cnt);
 bool canvas_setPixle(const char* dir, int cnt);
 bool canvas_setPixle_rand(const char* dir, int cnt);
 bool canvas_Hline(const char* dir, int cnt);
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 
 	canvas_noninv(output_dir, tc++);
 	canvas_inv(output_dir, tc++);
-	convas_fill(output_dir, tc++);
+	canvas_fill(output_dir, tc++);
 	canvas_setPixle(output_dir, tc++);
 	canvas_setPixle_rand(output_dir, tc++);
 	canvas_Hline(output_dir, tc++);
@@ -175,7 +175,7 @@ bool canvas_inv(const char* dir, int cnt)
 	return err;
 }
 
-bool convas_fill(const char* dir, int cnt)
+bool canvas_fill(const char* dir, int cnt)
 {
 	bool err = 0;
 	canvas c;
