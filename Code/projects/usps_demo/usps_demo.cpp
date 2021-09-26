@@ -14,7 +14,7 @@
 
 	=======================================================================================
 
-	File: bitmapengine.cpp
+	File: usps_demo.cpp
 
 		Notes: Very little error handling, its a demo?
 

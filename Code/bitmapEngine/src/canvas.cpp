@@ -82,10 +82,9 @@ bool canvas::getSize(int32_t* x, int32_t* y)
 bool canvas::fill(bool val)
 {
 	if (ptr != nullptr)	{
-		delete[] ptr;
 		uint32_t q = (_x * _y);
 		size_t _asize = q * sizeof(bool);
-		ptr = new bool[_asize] {1};
+		memset(ptr, val, _asize);
 		if (ptr == nullptr)
 			return 1;
 		return 0;
@@ -238,6 +237,8 @@ bool canvas::invert(bool invert)
 /* calling function should guard nullptr */
 bool canvas::getPixle(uint32_t x, uint32_t y)
 {
+	if (ptr == nullptr)	return 1;
+
 	if ((y < _y) && (x < _x)) 
 		return ptr[(y * _x) + x];
 	return 0;
@@ -252,6 +253,8 @@ bool canvas::getInvert(void)
 //umm passing signed into this might be bad....
 bool canvas::setPixle(uint32_t x, uint32_t y, bool val)
 {
+	if (ptr == nullptr)	return 1;
+
 	if ((y < _y) && (x < _x))
 		ptr[(y * _x) + x] = val;
 	return 0;
