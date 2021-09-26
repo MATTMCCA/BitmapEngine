@@ -46,10 +46,7 @@
 
 using namespace std::chrono;
 
-//const char ARIAL_FONT[] = "C:\\Windows\\Fonts\\arial.ttf";
-//const char ARIAL_FONT_BOLD[] = "C:\\Windows\\Fonts\\arialbd.ttf";
-//const char TEST_FILE[] = "A:\\Users\\Matt\\Pictures\\TRASH\\static_test\\test.csv";
-
+const char ARIAL_FONT[] = "C:\\Windows\\Fonts\\arial.ttf";
 const char TEST_DIR[] = "A:\\Users\\Matt\\Pictures\\TRASH\\libtest\\";
 const char TEST_IMG[] = "A:\\Users\\Matt\\Pictures\\TRASH\\Lena.bmp";
 const int DPI = 300;
@@ -67,6 +64,23 @@ bool canvas_Vline(const char* dir, int cnt);
 bool canvas_box(const char* dir, int cnt);
 bool canvas_box_fill(const char* dir, int cnt);
 bool canvas_box_fill_inv(const char* dir, int cnt);
+bool canvas_import_bitmap_Threshold(const char* dir, const char* bmp, int cnt);
+bool canvas_import_bitmap_FloydSteinberg(const char* dir, const char* bmp, int cnt);
+bool canvas_import_bitmap_Stucki(const char* dir, const char* bmp, int cnt);
+bool canvas_import_bitmap_Jarvis(const char* dir, const char* bmp, int cnt);
+bool canvas_import_bitmap_Atkinson(const char* dir, const char* bmp, int cnt);
+bool canvas_import_bitmap_Bayer_2x2(const char* dir, const char* bmp, int cnt);
+bool canvas_import_bitmap_Bayer_4x4(const char* dir, const char* bmp, int cnt);
+bool canvas_import_bitmap_Bayer_8x8(const char* dir, const char* bmp, int cnt);
+bool canvas_import_bitmap_Bayer_16x16(const char* dir, const char* bmp, int cnt);
+bool canvas_import_bitmap_Cluster_16x16(const char* dir, const char* bmp, int cnt);
+bool canvas_rotate_90(const char* dir, const char* bmp, int cnt);
+bool canvas_rotate_180(const char* dir, const char* bmp, int cnt);
+bool canvas_rotate_270(const char* dir, const char* bmp, int cnt);
+bool canvas_rotate_270_inv(const char* dir, const char* bmp, int cnt);
+bool font_noninv(const char* dir, const char* fnt, int cnt);
+bool font_inv(const char* dir, const char* fnt, int cnt);
+
 
 int main(int argc, char* argv[])
 {
@@ -94,6 +108,23 @@ int main(int argc, char* argv[])
 	canvas_box(output_dir, tc++);
 	canvas_box_fill(output_dir, tc++);
 	canvas_box_fill_inv(output_dir, tc++);
+	canvas_import_bitmap_Threshold(output_dir, tst_img, tc++);
+	canvas_import_bitmap_FloydSteinberg(output_dir, tst_img, tc++);
+	canvas_import_bitmap_Stucki(output_dir, tst_img, tc++);
+	canvas_import_bitmap_Jarvis(output_dir, tst_img, tc++);
+	canvas_import_bitmap_Atkinson(output_dir, tst_img, tc++);
+	canvas_import_bitmap_Bayer_2x2(output_dir, tst_img, tc++);
+	canvas_import_bitmap_Bayer_4x4(output_dir, tst_img, tc++);
+	canvas_import_bitmap_Bayer_8x8(output_dir, tst_img, tc++);
+	canvas_import_bitmap_Bayer_16x16(output_dir, tst_img, tc++);
+	canvas_import_bitmap_Cluster_16x16(output_dir, tst_img, tc++);
+	canvas_rotate_90(output_dir, tst_img, tc++);
+	canvas_rotate_180(output_dir, tst_img, tc++);
+	canvas_rotate_270(output_dir, tst_img, tc++);
+	canvas_rotate_270_inv(output_dir, tst_img, tc++);
+	font_noninv(output_dir, ARIAL_FONT, tc++);
+	font_inv(output_dir, ARIAL_FONT, tc++);
+	
 
 	auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<milliseconds>(stop - start);
@@ -252,5 +283,191 @@ bool canvas_box_fill_inv(const char* dir, int cnt)
 	err |= c.invert(1);
 	err |= save_bmp(&c, dir, cnt);
 	print_pass_fail("Canvas (box_fill_invert)", err);
+	return err;
+}
+
+bool canvas_import_bitmap_Threshold(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Threshold);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_import_Threshold)", err);
+	return err;
+}
+
+bool canvas_import_bitmap_FloydSteinberg(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::FloydSteinberg);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_import_FloydSteinberg)", err);
+	return err;
+}
+
+bool canvas_import_bitmap_Stucki(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Stucki);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_import_Stucki)", err);
+	return err;
+}
+
+bool canvas_import_bitmap_Jarvis(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Jarvis);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_import_Jarvis)", err);
+	return err;
+}
+
+bool canvas_import_bitmap_Atkinson(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Atkinson);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_import_Atkinson)", err);
+	return err;
+}
+
+bool canvas_import_bitmap_Bayer_2x2(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Bayer_2x2);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_import_Bayer_2x2)", err);
+	return err;
+}
+
+bool canvas_import_bitmap_Bayer_4x4(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Bayer_4x4);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_import_Bayer_4x4)", err);
+	return err;
+}
+
+bool canvas_import_bitmap_Bayer_8x8(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Bayer_8x8);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_import_Bayer_8x8)", err);
+	return err;
+}
+
+bool canvas_import_bitmap_Bayer_16x16(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Bayer_16x16);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_import_Bayer_16x16)", err);
+	return err;
+}
+
+bool canvas_import_bitmap_Cluster_16x16(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Cluster);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_import_Cluster)", err);
+	return err;
+}
+
+bool canvas_rotate_90(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Jarvis);
+	c.rotate(DEGREE::ROT_90);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_rot_90)", err);
+	return err;
+}
+
+bool canvas_rotate_180(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Jarvis);
+	c.rotate(DEGREE::ROT_180);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_rot_180)", err);
+	return err;
+}
+
+bool canvas_rotate_270(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Jarvis);
+	c.rotate(DEGREE::ROT_270);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_rot_270)", err);
+	return err;
+}
+
+bool canvas_rotate_270_inv(const char* dir, const char* bmp, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.import_24bit(bmp, DITHER::Jarvis);
+	c.rotate(DEGREE::ROT_270);
+	c.invert(1);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("Canvas (bitmap_rot_270_inv)", err);
+	return err;
+}
+
+bool font_noninv(const char* dir, const char* fnt, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	font f;
+	err |= f.create(fnt, 20, DPI);
+	err |= f.writeCanvas(&c, "TESTSTRING", 0, 0);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("font (non_inverting)", err);
+	return err;
+}
+
+bool font_inv(const char* dir, const char* fnt, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	font f;
+	err |= f.create(fnt, 20, DPI);
+	err |= f.writeCanvas(&c, "TESTSTRING", 0, 0);
+	c.invert(1);
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("font (inverting)", err);
 	return err;
 }

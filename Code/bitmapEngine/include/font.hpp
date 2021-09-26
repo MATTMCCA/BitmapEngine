@@ -113,9 +113,9 @@ public:
 
 	font();
 
-	int create(const char* fontName, int point, int dpi);
-	int changeCharOffset(int32_t x, int32_t y);
-	int writeCanvas(canvas* ptr, const char* str, int32_t x0 = 0, int32_t y0 = 0);
+	bool create(const char* fontName, int point, int dpi);
+	bool changeCharOffset(int32_t x, int32_t y);
+	bool writeCanvas(canvas* ptr, const char* str, int32_t x0 = 0, int32_t y0 = 0);
 	
 	GFXfont* getGFXfont(void);
 
@@ -123,15 +123,15 @@ public:
 
 private:
 
-	int drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0);
-	int write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y, int32_t x_offset = 0);
-	int print(canvas* ptr, const char* str, int32_t x0, int32_t y0, int32_t x_offset = 0);
+	bool drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0);
+	bool write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y, int32_t x_offset = 0);
+	bool print(canvas* ptr, const char* str, int32_t x0, int32_t y0, int32_t x_offset = 0);
 
-	int charBounds(unsigned char c, int32_t* x, int32_t* y,
+	bool charBounds(unsigned char c, int32_t* x, int32_t* y,
 		int32_t* minx, int32_t* miny, int32_t* maxx,
 		int32_t* maxy);
 
-	int getTextBounds(const char* str, int32_t x, int32_t y,
+	bool getTextBounds(const char* str, int32_t x, int32_t y,
 		int32_t* x1, int32_t* y1, uint32_t* w,
 		uint32_t* h);
 

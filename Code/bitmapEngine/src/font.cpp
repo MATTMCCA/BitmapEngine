@@ -81,7 +81,7 @@ font::font()
 {
 }
 
-int font::create(const char* fontName, int point, int dpi)
+bool font::create(const char* fontName, int point, int dpi)
 {
 	int					i, j, err, byte;
 	int			    	first = ' ';
@@ -105,8 +105,12 @@ int font::create(const char* fontName, int point, int dpi)
 	// Init FreeType lib, load font
 	if ((err = FT_Init_FreeType(&library)))
 	{
-		fprintf(stderr, "FreeType init error: %d\n", err);
-		return err;
+		if(myFont->glyph != nullptr)
+			delete[] myFont->glyph;
+		if (myFont != nullptr)
+			delete myFont;
+
+		return 1;
 	}
 
 	FT_UInt interpreter_version = TT_INTERPRETER_VERSION_35;
@@ -114,9 +118,14 @@ int font::create(const char* fontName, int point, int dpi)
 
 	if ((err = FT_New_Face(library, fontName, 0, &face)))
 	{
-		fprintf(stderr, "Font load error: %d\n", err);
 		FT_Done_FreeType(library);
-		return err;
+
+		if (myFont->glyph != nullptr)
+			delete[] myFont->glyph;
+		if (myFont != nullptr)
+			delete myFont;
+
+		return 1;
 	}
 
 	// << 6 because '26dot6' fixed-point format
@@ -129,20 +138,37 @@ int font::create(const char* fontName, int point, int dpi)
 		// (no wasted pixels) via bitmap struct.
 		if ((err = FT_Load_Char(face, i, FT_LOAD_TARGET_MONO)))
 		{
-			fprintf(stderr, "Error %d loading char '%c'\n", err, i);
-			return err;
+			FT_Done_FreeType(library);
+
+			if (myFont->glyph != nullptr)
+				delete[] myFont->glyph;
+			if (myFont != nullptr)
+				delete myFont;
+			return 1;
 		}
 
 		if ((err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_MONO)))
 		{
-			fprintf(stderr, "Error %d rendering char '%c'\n", err, i);
-			return err;
+			FT_Done_Face(face);
+			FT_Done_FreeType(library);
+
+			if (myFont->glyph != nullptr)
+				delete[] myFont->glyph;
+			if (myFont != nullptr)
+				delete myFont;
+			return 1;
 		}
 
 		if ((err = FT_Get_Glyph(face->glyph, &glyph)))
 		{
-			fprintf(stderr, "Error %d getting glyph '%c'\n", err, i);
-			return err;
+			FT_Done_Face(face);
+			FT_Done_FreeType(library);
+	
+			if (myFont->glyph != nullptr)
+				delete[] myFont->glyph;
+			if (myFont != nullptr)
+				delete myFont;
+			return 1;
 		}
 
 		bitmap = &face->glyph->bitmap;
@@ -195,13 +221,17 @@ int font::create(const char* fontName, int point, int dpi)
 		myFont->yAdvance = (uint32_t)(face->size->metrics.height >> 6);
 	}
 
+	FT_Done_Face(face);
 	FT_Done_FreeType(library);
 
 	return 0;
 }
 
-int font::changeCharOffset(int32_t x, int32_t y)
+bool font::changeCharOffset(int32_t x, int32_t y)
 {
+	if ((myFont == nullptr) || (myFont->glyph == nullptr) || (myFont->bitmap == nullptr))
+		return 1;
+
 	int	i, j;
 	int	first = ' ';
 	int	last = '~';
@@ -219,34 +249,29 @@ GFXfont* font::getGFXfont(void)
 	return myFont;
 }
 
-int font::writeCanvas(canvas* ptr, const char* str, int32_t x0, int32_t y0)
+bool font::writeCanvas(canvas* ptr, const char* str, int32_t x0, int32_t y0)
 {
 	int32_t x, y;
 	uint32_t w, h;
 
-	getTextBounds(str, 0, 0, &x, &y, &w, &h);
+	if (getTextBounds(str, 0, 0, &x, &y, &w, &h))
+		return 1;	
 
-	ptr->create(w, h, 0);
+	if (ptr->create(w, h, 0))
+		return 1;
 
 	if (x != 0) {
-		if (x > 0) {
-			x = 0 - x;
-		}
-		else {
-			x *= -1;
-		}
+		if (x > 0)    { x = 0 - x; }
+		else          { x *= -1;   }
 	}
 
 	if (y != 0) {
-		if (y > 0) {
-			y = 0 - y;
-		}
-		else {
-			y *= -1;
-		}
+		if (y > 0) { y = 0 - y; }
+		else       { y *= -1;   }
 	}
 
-	print(ptr, str, x + x0, y + y0, x0);
+	if (print(ptr, str, x + x0, y + y0, x0))
+		return 1;
 
 	return 0;
 }
@@ -267,9 +292,11 @@ int font::writeCanvas(canvas* ptr, const char* str, int32_t x0, int32_t y0)
 	@param  maxx  Pointer to maximum X coord, passed in AND returned.
 	@param  maxy  Pointer to maximum Y coord, passed in AND returned.
 */
-
-int font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int32_t* miny, int32_t* maxx, int32_t* maxy)
+bool font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int32_t* miny, int32_t* maxx, int32_t* maxy)
 {
+	if ((myFont == nullptr) || (myFont->glyph == nullptr) || (myFont->bitmap == nullptr))
+		return 1;
+
 	if (c == '\n') // Newline?
 	{ 
 		*x = 0;									// Reset x to zero, advance y by one line
@@ -289,13 +316,6 @@ int font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int
 
 			int32_t xo = glyph->xOffset;
 			int32_t yo = glyph->yOffset;
-			
-			/* fix at some point */
-			//if (/*wrap*/ true && ((*x + (((int16_t)xo + gw) )) > _width)) 
-			//{
-			//	*x = 0; // Reset x to zero, advance y by one line
-			//	*y += (uint8_t)myFont->yAdvance;
-			//}
 
 			int32_t tsx = 1, tsy = 1;
 			int32_t x1 = *x + xo * tsx;
@@ -328,8 +348,7 @@ int font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int
 	@param  w    The boundary width, returned by function
 	@param  h    The boundary height, returned by function
 */
-
-int font::getTextBounds(const char* str, int32_t x, int32_t y, int32_t* x1, int32_t* y1, uint32_t* w, uint32_t* h)
+bool font::getTextBounds(const char* str, int32_t x, int32_t y, int32_t* x1, int32_t* y1, uint32_t* w, uint32_t* h)
 {
 	uint8_t c; // Current character
 	int32_t minx = 0x7FFFFFFF, miny = 0x7FFFFFFF, maxx = -1, maxy = -1; // Bound rect
@@ -342,7 +361,8 @@ int font::getTextBounds(const char* str, int32_t x, int32_t y, int32_t* x1, int3
 	while ((c = *str++)) {
 		// charBounds() modifies x/y to advance for each character,
 		// and min/max x/y are updated to incrementally build bounding rect.
-		charBounds(c, &x, &y, &minx, &miny, &maxx, &maxy);
+		if (charBounds(c, &x, &y, &minx, &miny, &maxx, &maxy))
+			return 1;
 	}
 
 	if (maxx >= minx) {     // If legit string bounds were found...
@@ -357,44 +377,48 @@ int font::getTextBounds(const char* str, int32_t x, int32_t y, int32_t* x1, int3
 	return 0;
 }
 
-int font::drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0)
+bool font::drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0)
 {
-	if ((myFont != nullptr) && (ptr != nullptr))
-	{
-		c -= (uint8_t)myFont->first;
-		GFXglyph* glyph = &myFont->glyph[c];
-		uint8_t* bitmap = myFont->bitmap;
+	if ((myFont == nullptr) || (myFont->glyph == nullptr) || (myFont->bitmap == nullptr))
+		return 1;
 
-		uint32_t bo = glyph->bitmapOffset;
-		uint32_t w = glyph->width;
-		uint32_t h = glyph->height;
-		int32_t xo = glyph->xOffset;
-		int32_t yo = glyph->yOffset;
+	c -= (uint8_t)myFont->first;
+	GFXglyph* glyph = &myFont->glyph[c];
+	uint8_t* bitmap = myFont->bitmap;
 
-		uint32_t xx, yy;
-		uint8_t bits = 0, bit = 0;
-		int32_t xo16 = 0, yo16 = 0;
+	uint32_t bo = glyph->bitmapOffset;
+	uint32_t w = glyph->width;
+	uint32_t h = glyph->height;
+	int32_t xo = glyph->xOffset;
+	int32_t yo = glyph->yOffset;
 
-		for (yy = 0; yy < h; yy++) {
-			for (xx = 0; xx < w; xx++) {
-				if (!(bit++ & 7)) {
-					bits = bitmap[bo++];
-				}
+	uint32_t xx, yy;
+	uint8_t bits = 0, bit = 0;
+	int32_t xo16 = 0, yo16 = 0;
 
-				if (bits & 0x80) {
-					ptr->setPixle((x0 + xo + xx), (y0 + yo + yy), 1);
-				}
-
-				bits <<= 1;
+	for (yy = 0; yy < h; yy++) {
+		for (xx = 0; xx < w; xx++) {
+			if (!(bit++ & 7)) {
+				bits = bitmap[bo++];
 			}
+
+			if (bits & 0x80) {
+				if (ptr->setPixle((x0 + xo + xx), (y0 + yo + yy), 1))
+					return 1;
+			}
+
+			bits <<= 1;
 		}
-		return 0;
 	}
-	return 1;
+
+	return 0;
 }
 
-int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y, int32_t x_offset)
+bool font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y, int32_t x_offset)
 {
+	if ((myFont == nullptr) || (myFont->glyph == nullptr) || (myFont->bitmap == nullptr))
+		return 1;
+
 	if (c == '\n')
 	{
 		*cursor_x = x_offset + 0;
@@ -405,43 +429,29 @@ int font::write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor
 		uint8_t first = myFont->first;
 		if ((c >= first) && (c <= (uint8_t)myFont->last))
 		{
-			if (myFont->glyph != NULL)
-			{
-				GFXglyph* glyph = &myFont->glyph[c - first];
+			GFXglyph* glyph = &myFont->glyph[c - first];
 
-				uint32_t w = glyph->width;
-				uint32_t h = glyph->height;
+			uint32_t w = glyph->width;
+			uint32_t h = glyph->height;
 
-				if ((w > 0) && (h > 0))
-				{
-					int32_t xo = glyph->xOffset;
-
-					/* fix at some point */
-					//if (true && ((*cursor_x + (xo + w)) > (uint32_t)ptr->get_x()))
-					//{
-					//	*cursor_x = 0;
-					//	*cursor_y += myFont->yAdvance;
-					//}
-					
-					drawChar(ptr, c, *cursor_x, *cursor_y);
-				}
-				*cursor_x += (uint32_t)glyph->xAdvance;
+			if ((w > 0) && (h > 0))	{
+				int32_t xo = glyph->xOffset;					
+				if (drawChar(ptr, c, *cursor_x, *cursor_y))
+					return 1;
 			}
+			*cursor_x += (uint32_t)glyph->xAdvance;
 		}
 	}
 	return 0;
 }
 
-int font::print(canvas* myCanvas, const char* str, int32_t x0, int32_t y0, int32_t x_offset)
+bool font::print(canvas* myCanvas, const char* str, int32_t x0, int32_t y0, int32_t x_offset)
 {
 	size_t index = 0;
 	size_t n = strlen(str);
-	while (n--)
-	{
-		if (!write(myCanvas, str[index], &x0, &y0, x_offset))
-			index++;
-		else
-			break;
+	while (n--)	{
+		if (!write(myCanvas, str[index], &x0, &y0, x_offset))	index++;
+		else                                                    break;
 	}
 
 	return 0;
@@ -449,14 +459,14 @@ int font::print(canvas* myCanvas, const char* str, int32_t x0, int32_t y0, int32
 
 font::~font()
 {
+	if (myFont->bitmap != nullptr)
+		delete[] myFont->bitmap;
+
+	if (myFont->glyph != nullptr)
+		delete[] myFont->glyph;
+
 	if (myFont != nullptr)
-	{
-		if(myFont->bitmap != NULL)
-			delete[] myFont->bitmap;
-		if (myFont->glyph != NULL)
-			delete[] myFont->glyph;
 		delete myFont;
-	}
 }
 
 void font::enbit(uint8_t value, std::vector<uint8_t>* bmp)
