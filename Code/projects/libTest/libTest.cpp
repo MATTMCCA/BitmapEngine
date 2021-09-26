@@ -80,6 +80,10 @@ bool canvas_rotate_270(const char* dir, const char* bmp, int cnt);
 bool canvas_rotate_270_inv(const char* dir, const char* bmp, int cnt);
 bool font_noninv(const char* dir, const char* fnt, int cnt);
 bool font_inv(const char* dir, const char* fnt, int cnt);
+bool font_size(const char* dir, const char* fnt, int cnt);
+bool font_rot(const char* dir, const char* fnt, int cnt);
+bool sprite_overlay_no_alpha(const char* dir, const char* fnt, const char* bmp, int cnt);
+bool sprite_overlay_alpha(const char* dir, const char* fnt, const char* bmp, int cnt);
 
 
 int main(int argc, char* argv[])
@@ -124,6 +128,10 @@ int main(int argc, char* argv[])
 	canvas_rotate_270_inv(output_dir, tst_img, tc++);
 	font_noninv(output_dir, ARIAL_FONT, tc++);
 	font_inv(output_dir, ARIAL_FONT, tc++);
+	font_size(output_dir, ARIAL_FONT, tc++);
+	font_rot(output_dir, ARIAL_FONT, tc++);
+	sprite_overlay_no_alpha(output_dir, ARIAL_FONT, tst_img, tc++);
+	sprite_overlay_alpha(output_dir, ARIAL_FONT, tst_img, tc++);
 	
 
 	auto stop = high_resolution_clock::now();
@@ -469,5 +477,88 @@ bool font_inv(const char* dir, const char* fnt, int cnt)
 
 	err |= save_bmp(&c, dir, cnt);
 	print_pass_fail("font (inverting)", err);
+	return err;
+}
+
+bool font_size(const char* dir, const char* fnt, int cnt)
+{
+	bool err = 0;
+	canvas c;
+	err |= c.create(350, 350, 0);
+
+	std::vector<font> font_list;
+	font_list.resize(15);
+	for (int i = 0; i < 15; i ++) {
+		err |= font_list[i].create(fnt, (i + 1) * 2, DPI);
+		err |= font_list[i].writeCanvas(&c, "String", 5, 20 + (i*i));
+	}
+
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("font (size)", err);
+	return err;
+}
+
+bool font_rot(const char* dir, const char* fnt, int cnt)
+{
+	bool err = 0;
+	font f_10pt;
+
+	canvas c;
+	canvas rot_0;
+	canvas rot_90;
+	canvas rot_180;
+	canvas rot_270;
+
+	err |= c.create(500, 500, 0);
+	err |= f_10pt.create(fnt, 10, DPI);
+	err |= f_10pt.writeCanvas(&rot_0, "TEST_STRING!", 0, 0);
+
+	rot_90 = rot_180 = rot_270 = rot_0;
+
+	err |= rot_90.rotate(DEGREE::ROT_90);
+	err |= rot_180.rotate(DEGREE::ROT_180);
+	err |= rot_270.rotate(DEGREE::ROT_270);
+
+	err |= c.addSprite(&rot_0, (c.get_x() - rot_180.get_x()) / 2, 0, 0);
+	err |= c.addSprite(&rot_90, c.get_x() - rot_90.get_x(), (c.get_y() - rot_90.get_y()) / 2, 0);
+	err |= c.addSprite(&rot_180, (c.get_x() - rot_180.get_x()) / 2, c.get_y() - rot_180.get_y(), 0);
+	err |= c.addSprite(&rot_270, 0, (c.get_y() - rot_270.get_y()) / 2, 0);
+	
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("font (rotate)", err);
+	return err;
+}
+
+bool sprite_overlay_no_alpha(const char* dir, const char* fnt, const char* bmp, int cnt)
+{
+	bool err = 0;
+	font f_10pt;
+	canvas c;
+	canvas f_c;
+
+	err |= c.import_24bit(bmp, DITHER::Jarvis);
+	err |= f_10pt.create(fnt, 10, DPI);
+	err |= f_10pt.writeCanvas(&f_c, "TEST_STRING!", 0, 0);
+
+	err |= c.addSprite(&f_c, 0, 0, 0);
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("font (overlay_no_alpha)", err);
+	return err;
+}
+
+bool sprite_overlay_alpha(const char* dir, const char* fnt, const char* bmp, int cnt)
+{
+	bool err = 0;
+	font f_10pt;
+	canvas c;
+	canvas f_c;
+
+	err |= c.import_24bit(bmp, DITHER::Jarvis);
+	err |= f_10pt.create(fnt, 10, DPI);
+	err |= f_10pt.writeCanvas(&f_c, "TEST_STRING!", 0, 0);
+
+	err |= c.addSprite(&f_c, 0, 0, 1); //change alpha to 1
+	err |= save_bmp(&c, dir, cnt);
+	print_pass_fail("font (overlay_no_alpha)", err);
 	return err;
 }

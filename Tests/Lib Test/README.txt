@@ -1,0 +1,3 @@
+Running the x86 | x64 batch will generate tests in the img directory.
+
+batch may not work...

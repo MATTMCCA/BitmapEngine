@@ -137,6 +137,24 @@ private:
 
 	void enbit(uint8_t value, std::vector<uint8_t> *bmp);
 
+	void GFX_free(void)
+	{
+		if (myFont->bitmap != nullptr) {
+			delete[] myFont->bitmap;
+			myFont->bitmap = nullptr;
+		}
+
+		if (myFont->glyph != nullptr) {
+			delete[] myFont->glyph;
+			myFont->glyph = nullptr;
+		}
+
+		if (myFont != nullptr) {
+			delete myFont;
+			myFont = nullptr;
+		}
+	}
+
 protected:
 
 	GFXfont* myFont = nullptr;

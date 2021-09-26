@@ -81,6 +81,7 @@ font::font()
 {
 }
 
+/* not 100% sure if freetype is free-ed on fail */
 bool font::create(const char* fontName, int point, int dpi)
 {
 	int					i, j, err, byte;
@@ -105,11 +106,7 @@ bool font::create(const char* fontName, int point, int dpi)
 	// Init FreeType lib, load font
 	if ((err = FT_Init_FreeType(&library)))
 	{
-		if(myFont->glyph != nullptr)
-			delete[] myFont->glyph;
-		if (myFont != nullptr)
-			delete myFont;
-
+		GFX_free();
 		return 1;
 	}
 
@@ -119,12 +116,7 @@ bool font::create(const char* fontName, int point, int dpi)
 	if ((err = FT_New_Face(library, fontName, 0, &face)))
 	{
 		FT_Done_FreeType(library);
-
-		if (myFont->glyph != nullptr)
-			delete[] myFont->glyph;
-		if (myFont != nullptr)
-			delete myFont;
-
+		GFX_free();
 		return 1;
 	}
 
@@ -139,35 +131,21 @@ bool font::create(const char* fontName, int point, int dpi)
 		if ((err = FT_Load_Char(face, i, FT_LOAD_TARGET_MONO)))
 		{
 			FT_Done_FreeType(library);
-
-			if (myFont->glyph != nullptr)
-				delete[] myFont->glyph;
-			if (myFont != nullptr)
-				delete myFont;
+			GFX_free();
 			return 1;
 		}
 
 		if ((err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_MONO)))
 		{
-			FT_Done_Face(face);
 			FT_Done_FreeType(library);
-
-			if (myFont->glyph != nullptr)
-				delete[] myFont->glyph;
-			if (myFont != nullptr)
-				delete myFont;
+			GFX_free();
 			return 1;
 		}
 
 		if ((err = FT_Get_Glyph(face->glyph, &glyph)))
 		{
-			FT_Done_Face(face);
 			FT_Done_FreeType(library);
-	
-			if (myFont->glyph != nullptr)
-				delete[] myFont->glyph;
-			if (myFont != nullptr)
-				delete myFont;
+			GFX_free();
 			return 1;
 		}
 
@@ -221,7 +199,6 @@ bool font::create(const char* fontName, int point, int dpi)
 		myFont->yAdvance = (uint32_t)(face->size->metrics.height >> 6);
 	}
 
-	FT_Done_Face(face);
 	FT_Done_FreeType(library);
 
 	return 0;
@@ -459,14 +436,7 @@ bool font::print(canvas* myCanvas, const char* str, int32_t x0, int32_t y0, int3
 
 font::~font()
 {
-	if (myFont->bitmap != nullptr)
-		delete[] myFont->bitmap;
-
-	if (myFont->glyph != nullptr)
-		delete[] myFont->glyph;
-
-	if (myFont != nullptr)
-		delete myFont;
+	GFX_free();
 }
 
 void font::enbit(uint8_t value, std::vector<uint8_t>* bmp)
