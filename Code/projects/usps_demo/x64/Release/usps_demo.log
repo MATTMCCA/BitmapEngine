@@ -1,0 +1,11 @@
+﻿  copy dll
+  ..\..\libfreetype2\bin\x64\freetype.dll
+  1 File(s) copied
+  canvas.cpp
+  font.cpp
+  usps_demo.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 375 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  usps_demo.vcxproj -> A:\Users\Matt\Documents\Personal\BitmapEngine\Code\projects\usps_demo\x64\Release\usps_demo.exe

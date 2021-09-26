@@ -1,0 +1,8 @@
+﻿  copy dll
+  ..\..\libfreetype2\bin\x64\freetype.dll
+  1 File(s) copied
+  canvas.cpp
+  font.cpp
+  usps_demo.cpp
+  Generating Code...
+  usps_demo.vcxproj -> A:\Users\Matt\Documents\Personal\BitmapEngine\Code\projects\usps_demo\x64\Debug\usps_demo.exe
