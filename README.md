@@ -1,7 +1,5 @@
-# mono-madness
+# BitmapEngine
 
-I was in need of a simple way to generate monochrome bitmaps.
+I was in need of a simple way to generate monochrome bitmaps. For testing various things.
 
-Project files are provided as is, I hope to add additional functionality in the future. 
-
-# This is very rough code, it was mainly just a test.
+This [lib / sample] application serves as a starting point for other works.
