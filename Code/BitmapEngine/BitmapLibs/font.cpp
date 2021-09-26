@@ -10,7 +10,7 @@
 	
 	File: font.cpp
 
-		Notes: uses Freetype
+		Notes: Uses Freetype, https://github.com/ShiftMediaProject/freetype2
 		
 	=======================================================================================
 

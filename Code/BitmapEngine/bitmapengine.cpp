@@ -16,7 +16,7 @@
 	
 	File: bitmapengine.cpp
 	
-		Notes: Very little error handling.
+		Notes: Very little error handling, its a demo?
 		
 	=======================================================================================
 
@@ -39,10 +39,11 @@
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 	***************************************************************************************
-
 */
 
 #define _CRT_SECURE_NO_DEPRECATE
+
+#include <chrono>
 
 #include <cstdio>
 #include <cstdint>
@@ -54,6 +55,7 @@
 
 #include "parser.hpp"			/* https://github.com/AriaFallah/csv-parser */
 
+using namespace std::chrono;
 using namespace aria::csv;
 
 const char ARIAL_FONT[] =		"C:\\Windows\\Fonts\\arial.ttf";
@@ -89,6 +91,8 @@ void get_tracking(char* buf, size_t len);
 
 int main(int argc, char* argv[]) 
 {
+	auto start = high_resolution_clock::now();
+
 	char* inputFile = (char*) TEST_FILE;
 
 	if (argc > 1) {
@@ -100,6 +104,10 @@ int main(int argc, char* argv[])
 	CsvParser parser(f);
 
 	static_test(&parser);
+
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<milliseconds>(stop - start);
+	printf("Took: %I64d milliseconds\n", duration.count());
 
 	return 0;
 }
