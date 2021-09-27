@@ -136,8 +136,6 @@ int main(int argc, char* argv[])
     mirrorH(output_dir, tst_img, tc++);
     mirrorV(output_dir, tst_img, tc++);
 
-    
-
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
     printf("Took: %I64d milliseconds\n", duration.count());
