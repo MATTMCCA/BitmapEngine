@@ -447,7 +447,7 @@ bool canvas::mirror(MIRROR m)
             }
             return 1;
         }
-        else if (m == MIRROR::Vertical)
+        else if (m == MIRROR::Vertical) //TODO: fix, make "more better"
         {
             uint32_t q = _x * _y;
             tmp = new bool[q * sizeof(bool)];

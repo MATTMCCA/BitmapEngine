@@ -82,10 +82,13 @@ bool font_noninv(const char* dir, const char* fnt, int cnt);
 bool font_inv(const char* dir, const char* fnt, int cnt);
 bool font_size(const char* dir, const char* fnt, int cnt);
 bool font_rot(const char* dir, const char* fnt, int cnt);
+bool font_offset(const char* dir, const char* fnt, int cnt);
+bool font_huge(const char* dir, const char* fnt, int cnt);
+bool font_small(const char* dir, const char* fnt, int cnt);
 bool sprite_overlay_no_alpha(const char* dir, const char* fnt, const char* bmp, int cnt);
 bool sprite_overlay_alpha(const char* dir, const char* fnt, const char* bmp, int cnt);
-bool mirrorH(const char* dir, const char* bmp, int cnt);
-bool mirrorV(const char* dir, const char* bmp, int cnt);
+bool canvas_mirrorH(const char* dir, const char* bmp, int cnt);
+bool canvas_mirrorV(const char* dir, const char* bmp, int cnt);
 
 int main(int argc, char* argv[])
 {
@@ -127,14 +130,18 @@ int main(int argc, char* argv[])
     canvas_rotate_180(output_dir, tst_img, tc++);
     canvas_rotate_270(output_dir, tst_img, tc++);
     canvas_rotate_270_inv(output_dir, tst_img, tc++);
+    canvas_mirrorH(output_dir, tst_img, tc++);
+    canvas_mirrorV(output_dir, tst_img, tc++);
     font_noninv(output_dir, ARIAL_FONT, tc++);
     font_inv(output_dir, ARIAL_FONT, tc++);
     font_size(output_dir, ARIAL_FONT, tc++);
     font_rot(output_dir, ARIAL_FONT, tc++);
+    font_offset(output_dir, ARIAL_FONT, tc++);
+    font_huge(output_dir, ARIAL_FONT, tc++);
+    font_small(output_dir, ARIAL_FONT, tc++);
     sprite_overlay_no_alpha(output_dir, ARIAL_FONT, tst_img, tc++);
     sprite_overlay_alpha(output_dir, ARIAL_FONT, tst_img, tc++);
-    mirrorH(output_dir, tst_img, tc++);
-    mirrorV(output_dir, tst_img, tc++);
+
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
@@ -146,15 +153,16 @@ int main(int argc, char* argv[])
 bool save_bmp(canvas* ptr, const char* dir, int cnt)
 {
     std::string output = std::string(dir) + std::to_string(cnt) + std::string(".bmp");
+    printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".bmp")).c_str());
     return ptr->save(output.c_str(), DPI);
 }
 
 void print_pass_fail(const char* testname, bool err)
 {
     if (err)
-        printf("FAILED:\t%s\n", testname);
+        printf("FAILED: %s\n", testname);
     else
-        printf("PASSED:\t%s\n", testname);
+        printf("PASSED: %s\n", testname);
 }
 
 bool canvas_noninv(const char* dir, int cnt)
@@ -531,6 +539,49 @@ bool font_rot(const char* dir, const char* fnt, int cnt)
     return err;
 }
 
+bool font_offset(const char* dir, const char* fnt, int cnt)
+{
+    bool err = 0;
+    font f_10pt;
+
+    canvas c;
+    err |= c.create(450, 200, 0);
+    err |= f_10pt.create(fnt, 10, DPI);
+    err |= f_10pt.writeCanvas(&c, "TEST_STRING!", 5, 10);
+    err |= f_10pt.changeCharOffset(5, 0);
+    err |= f_10pt.writeCanvas(&c, "TEST_STRING!", 5, 60);
+    err |= f_10pt.changeCharOffset(-10, 0);
+    err |= f_10pt.writeCanvas(&c, "TEST_STRING!", 5, 110);
+
+    err |= save_bmp(&c, dir, cnt);
+    print_pass_fail("font (offsete)", err);
+    return err;
+}
+
+bool font_huge(const char* dir, const char* fnt, int cnt)
+{
+    bool err = 0;
+    font f_10pt;
+    canvas c;
+    err |= f_10pt.create(fnt, 500, DPI);
+    err |= f_10pt.writeCanvas(&c, "HUGE!", 0, 0);
+    err |= save_bmp(&c, dir, cnt);
+    print_pass_fail("font (huge)", err);
+    return err;
+}
+
+bool font_small(const char* dir, const char* fnt, int cnt)
+{
+    bool err = 0;
+    font f_10pt;
+    canvas c;
+    err |= f_10pt.create(fnt, 4, DPI);
+    err |= f_10pt.writeCanvas(&c, "small...", 0, 0);
+    err |= save_bmp(&c, dir, cnt);
+    print_pass_fail("font (small)", err);
+    return err;
+}
+
 bool sprite_overlay_no_alpha(const char* dir, const char* fnt, const char* bmp, int cnt)
 {
     bool err = 0;
@@ -565,7 +616,7 @@ bool sprite_overlay_alpha(const char* dir, const char* fnt, const char* bmp, int
     return err;
 }
 
-bool mirrorH(const char* dir, const char* bmp, int cnt)
+bool canvas_mirrorH(const char* dir, const char* bmp, int cnt)
 {
     bool err = 0;
     canvas c;
@@ -577,7 +628,7 @@ bool mirrorH(const char* dir, const char* bmp, int cnt)
     return err;
 }
 
-bool mirrorV(const char* dir, const char* bmp, int cnt)
+bool canvas_mirrorV(const char* dir, const char* bmp, int cnt)
 {
     bool err = 0;
     canvas c;
