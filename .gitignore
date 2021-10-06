@@ -10,3 +10,8 @@ Code/projects/ReceiptStack/.vs/
 Code/projects/ReceiptStack/Debug/
 Code/projects/ReceiptStack/Release/
 Code/projects/ReceiptStack/x64/
+Code/zint/Release/libzint.tlog/
+Code/projects/zint_test/.vs/
+Code/projects/zint_test/Debug/
+Code/projects/zint_test/Release/
+Code/projects/zint_test/x64/

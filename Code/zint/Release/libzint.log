@@ -1,0 +1,55 @@
+﻿  2of5.c
+  auspost.c
+  aztec.c
+  bmp.c
+  codablock.c
+  code.c
+  code1.c
+  code128.c
+  code16k.c
+  code49.c
+  common.c
+  composite.c
+  dllversion.c
+  dmatrix.c
+  dotcode.c
+  eci.c
+  emf.c
+  gb18030.c
+  gb2312.c
+  general_field.c
+  Generating Code...
+  Compiling...
+  gif.c
+  gridmtx.c
+  gs1.c
+  hanxin.c
+  imail.c
+  large.c
+  library.c
+  mailmark.c
+  maxicode.c
+  medical.c
+  output.c
+  pcx.c
+  pdf417.c
+  plessey.c
+  png.c
+  postal.c
+  ps.c
+  qr.c
+  raster.c
+  reedsol.c
+  Generating Code...
+  Compiling...
+  rss.c
+  sjis.c
+  svg.c
+  telepen.c
+  tif.c
+  ultra.c
+  upcean.c
+  vector.c
+  Generating Code...
+     Creating library C:\libs\zint\win32\Release\zint.lib and object C:\libs\zint\win32\Release\zint.exp
+  libzint.vcxproj -> C:\libs\zint\win32\Release\zint.dll
