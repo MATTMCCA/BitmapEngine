@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 
     my_symbol = ZBarcode_Create();
 
-    my_symbol->symbology = BARCODE_QRCODE;
+    my_symbol->symbology        = BARCODE_QRCODE;
     my_symbol->scale            = 2.0;
     my_symbol->output_options   |= OUT_BUFFER_INTERMEDIATE;
 
