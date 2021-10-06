@@ -51,7 +51,7 @@
     Install git (https://git-scm.com/downloads)
     Install cmake (https://cmake.org/download/)
 
-    Open a "Developer Command Prompt for VS 2017" (should be available under the
+    Open a "Developer Command Prompt for VS 2019" (should be available under the
     "Visual Studio 2017" tab in the Start menu).
 
     Make sure git and cmake are in your PATH, e.g. (your paths may differ)
@@ -91,7 +91,7 @@
 
       cd ..
 
-    If you now open "%cd%\zint\win32\zint.sln" with Visual Studio 2017, you
+    If you now open "%cd%\zint\win32\zint.sln" with Visual Studio 2019, you
     should be able to build the Release configuration for Win32.
 
     "zint.dll" and "zint.exe" will be in "zint\win32\Release".
