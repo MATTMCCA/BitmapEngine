@@ -43,6 +43,10 @@
 #include <cstring>
 #include <cmath>
 
+extern "C" {
+#include "jbig85.h"
+}
+
 // a=target variable, b=bit number to act upon 0-n 
 //https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
 #define BIT_SET(a,b)                ((a) |= (1ULL<<(b)))
@@ -84,7 +88,7 @@ typedef struct {
 static const uint32_t COLOR_TABLE[2] = { 0x00000000, 0x00FFFFFF };
 
 typedef struct {
-    uint8_t* __img;
+    float* __img;
     uint32_t __img_x;
     uint32_t __img_y;
 } img;
@@ -170,6 +174,8 @@ enum class DEGREE
     ROT_360
 };
 
+static void data_out(unsigned char* start, size_t len, void* file);
+
 class canvas
 {
 public:
@@ -199,7 +205,9 @@ public:
     bool drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val);
 
     bool import_24bit(const char* fileName, DITHER type = DITHER::Threshold);
-    bool save(const char* fileName, int DPI);
+    bool saveBMP(const char* fileName, int DPI);
+    bool savePBM(const char* fileName); //portable bitmap raw
+    bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
 
     ~canvas();
 
@@ -219,8 +227,8 @@ private:
 
     /* DITHER!!!! */
     bool dither(img* image, DITHER type);
-    uint8_t _img_get(img *image, uint32_t x0, uint32_t y0);
-    bool _img_set(img* image, uint32_t x0, uint32_t y0, uint8_t value);
+    float _img_get(img* image, uint32_t x0, uint32_t y0);
+    bool _img_set(img* image, uint32_t x0, uint32_t y0, float value);
 
     bool threshold(img *image, uint8_t value);
     bool floydSteinberg(img *image);
@@ -236,4 +244,3 @@ protected:
     uint32_t _x = 0, _y = 0;
 
 };
-

@@ -120,7 +120,155 @@ bool canvas::addSprite(canvas* src, int32_t x, int32_t y, bool alpha)
     return 1;
 }
 
-bool canvas::save(const char* fileName, int DPI)
+/*
+ * Callback procedure which is used by JBIG encoder to deliver the
+ * encoded data. It simply sends the bytes to the output file.
+ */
+static void data_out(unsigned char* start, size_t len, void* file)
+{
+    fwrite(start, len, sizeof(uint8_t), (FILE*)file);
+    return;
+}
+
+bool canvas::saveJBG(const char* fileName)
+{
+    if (ptr != nullptr) {
+        uint32_t image_y = _y;
+        uint32_t image_x = (uint32_t)(_x / 8.0);
+
+        if ((image_x * 8) < (uint32_t)_x)
+            image_x++;   //math fix
+
+        if (image_x == 0)
+            image_x = 1; //non 0 byte width
+
+        uint8_t* BMPDATA = nullptr;
+        uint32_t q = image_x * image_y;
+        size_t BMPDATASIZE = q * sizeof(uint8_t);
+        BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
+
+        if (BMPDATA != nullptr)
+        {
+            memset(BMPDATA, 0x00, BMPDATASIZE);
+
+            bool* in_line;
+            uint8_t* out_line;
+            uint32_t __y = 0, __x = 0;
+
+            image_y--;
+            for (__y = 0; __y < _y; __y++) {
+                in_line = &ptr[(__y * _x)];
+                out_line = &BMPDATA[(__y * image_x)];
+
+                for (__x = 0; __x < _x; __x++) {
+                    if (in_line[__x] ^ _inv)
+                        BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
+                }
+            }
+
+            struct jbg85_enc_state s;
+
+            size_t bpl = image_x;
+            uint32_t width = _x, height = _y, y;      
+
+            FILE* fd;
+            fd = fopen(fileName, "wb");
+            if (fd != NULL) 
+            {                
+                jbg85_enc_init(&s, _x, _y, data_out, fd);
+                jbg85_enc_options(&s, JBG_TPBON, 0, -1);
+
+                unsigned char *next_line = nullptr, *prev_line = nullptr, *prevprev_line = nullptr;
+
+                for (y = 0; y < _y; y++) {
+
+                    /* Use a 3-line ring buffer, because the encoder requires that the two
+                     * previously supplied lines are still in memory when the next line is
+                     * processed. */
+                    next_line = &BMPDATA[y * image_x];
+
+                    /* JBIG compress another line and write out result via callback */
+                    jbg85_enc_lineout(&s, next_line, prev_line, prevprev_line);
+                    prevprev_line = prev_line;
+                    prev_line = next_line;
+
+                    /* adjust final image height via NEWLEN */
+                    if (y == _y)
+                        jbg85_enc_newlen(&s, _y);
+                }
+                fclose(fd);
+            }
+
+            delete[] BMPDATA; //release when done
+            return 0;
+        }
+        return 1;
+    }
+    return 1;
+}
+
+bool canvas::savePBM(const char* fileName)
+{
+    if (ptr != nullptr) {
+        uint32_t image_y = _y;
+        uint32_t image_x = (uint32_t)(_x / 8.0);
+
+        if ((image_x * 8) < (uint32_t)_x)
+            image_x++;   //math fix
+
+        if (image_x == 0)
+            image_x = 1; //non 0 byte width
+
+        /* Create Head */
+        char PBM_HEAD[1024];
+        snprintf(PBM_HEAD, 1024, "P4\n# Created by BitmapEngine\n%d %d\n", _x, _y);
+
+        uint8_t* BMPDATA = nullptr;
+        uint32_t q = image_x * image_y;
+        size_t BMPDATASIZE = q * sizeof(uint8_t);
+        BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
+
+        if (BMPDATA != nullptr) 
+        {
+            memset(BMPDATA, 0x00, BMPDATASIZE);
+
+            bool* in_line;
+            uint8_t* out_line;
+            uint32_t __y = 0, __x = 0;
+
+            image_y--;
+            for (__y = 0; __y < _y; __y++) {
+                in_line = &ptr[(__y * _x)];
+                out_line = &BMPDATA[(__y * image_x)];
+
+                for (__x = 0; __x < _x; __x++) {
+                    if (in_line[__x] ^ _inv)
+                        BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
+                }
+            }
+
+            FILE* fd;
+            fd = fopen(fileName, "wb");
+
+            if (fd != NULL) {
+                //TODO: add error handling, or not...
+                /////////////////////////////////////////////////////////////////////////
+                fputs(PBM_HEAD, fd);
+                /////////////////////////////////////////////////////////////////////////
+                fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
+                /////////////////////////////////////////////////////////////////////////
+                fclose(fd);
+            }
+
+            delete[] BMPDATA; //release when done
+            return 0;
+        }
+        return 1;
+    }
+    return 1;
+}
+
+bool canvas::saveBMP(const char* fileName, int DPI)
 {
     if (ptr != nullptr) {
         uint32_t image_y = _y;
@@ -371,7 +519,7 @@ bool canvas::import_24bit(const char* fileName, DITHER type)
     double lum;
     uint32_t y0 = 0, x0 = 0, x1 = 0, q = 0;
     uint32_t x = 0, y = 0, s = 0;
-    uint8_t* gray = nullptr;
+    float* gray = nullptr;
 
     uint8_t* row = nullptr;
     uint8_t* image_24 = img_open(fileName, &x, &y, &s);
@@ -379,8 +527,8 @@ bool canvas::import_24bit(const char* fileName, DITHER type)
     if (image_24 != nullptr) {
         uint32_t i_x = s / y, i_y = y, gray_size = x * i_y;
 
-        gray = new uint8_t[gray_size];
-        uint8_t* tmp = gray;
+        gray = new float[gray_size];
+        float* tmp = gray;
     
         if (gray != nullptr) {
             for (y0 = 0; y0 < i_y; y0++) {
@@ -401,14 +549,18 @@ bool canvas::import_24bit(const char* fileName, DITHER type)
             img _img = { gray, x, i_y }; //create image struct
 
             bool err = 0;
-            if ((err |= dither(&_img, type)) != 1) {
+            if ((err |= dither(&_img, type)) != 1) 
+            {
                 x1 = i_y - 1; //reused, not x, but y
-                if ((err |= create(x, i_y, 0)) != 1) {
-                    for (y0 = 0; y0 < i_y; y0++) {
-                        for (x0 = 0; x0 < x; x0++) {
+                if ((err |= create(x, i_y, 0)) != 1) 
+                {
+                    for (y0 = 0; y0 < i_y; y0++) 
+                    {
+                        for (x0 = 0; x0 < x; x0++) 
+                        {
                             q = ((((x1)-y0) * x)) + x0;
                             tmp = gray + q;
-                            s = *tmp;
+                            s = (uint32_t) *tmp;
 
                             if (s == 0)
                                 setPixle(x0, y0, 1);
@@ -514,46 +666,45 @@ bool canvas::rotate(DEGREE rot)
 
 bool canvas::dither(img* image, DITHER type)
 {
+    bool err = 0;
     switch (type)
     {
     case DITHER::FloydSteinberg:
-        return floydSteinberg(image);
+        err |= floydSteinberg(image);
     case DITHER::Stucki:
-        return stucki(image);
+        err |=  stucki(image);
     case DITHER::Jarvis:
-        return jarvis(image);
+        err |= jarvis(image);
     case DITHER::Atkinson:
-        return atkinson(image);
+        err |= atkinson(image);
     case DITHER::Bayer_2x2:
-        return bayer(image, 0);
+        err |= bayer(image, 0);
     case DITHER::Bayer_4x4:
-        return bayer(image, 1);
+        err |= bayer(image, 1);
     case DITHER::Bayer_8x8:
-        return bayer(image, 2);
+        err |= bayer(image, 2);
     case DITHER::Bayer_16x16:
-        return bayer(image, 3);
+        err |= bayer(image, 3);
     case DITHER::Cluster:
-        return cluster(image);
+        err |= cluster(image);
     default:
-        return threshold(image, 256 / 2);
+        err |= threshold(image, 256 / 2);
     };
 
-    return 1;
+    return err;
 }
 
-//null guard by calling function
-uint8_t canvas::_img_get(img* image, uint32_t x0, uint32_t y0)
+float canvas::_img_get(img* image, uint32_t x0, uint32_t y0)
 {
-    if (x0 < image->__img_x && y0 < image->__img_y) 
+    if (x0 < image->__img_x && y0 < image->__img_y)
         return image->__img[(image->__img_x * y0) + x0];
-    
+
     return 0;
 }
 
-//null guard by calling function
-bool canvas::_img_set(img* image, uint32_t x0, uint32_t y0, uint8_t value)
+bool canvas::_img_set(img* image, uint32_t x0, uint32_t y0, float value)
 {
-    if (x0 < image->__img_x && y0 < image->__img_y) 
+    if (x0 < image->__img_x && y0 < image->__img_y)
         image->__img[(image->__img_x * y0) + x0] = value;
 
     return 0;
@@ -580,20 +731,21 @@ bool canvas::floydSteinberg(img* image)
 {   
     if (image->__img != nullptr) {
         uint32_t y = 0, x = 0;
-        int16_t oldpixel, newpixel;
+        float oldpixel, newpixel;
         float quant_error;
         float w1 = 7.0 / 16.0, w2 = 3.0 / 16.0, w3 = 5.0 / 16.0, w4 = 1.0 / 16.0;
 
         for (y = 0; y < image->__img_y; y++) {
             for (x = 0; x < image->__img_x; x++) {
                 oldpixel = _img_get(image, x, y);
-                newpixel = (oldpixel < 128) ? 0 : 255;
-                _img_set(image, x, y, (uint8_t)newpixel);
-                quant_error = (float)(oldpixel - newpixel);
-                _img_set(image, x + 1, y,     (uint8_t) (_img_get(image, x + 1, y)      + w1 * quant_error));
-                _img_set(image, x - 1, y + 1, (uint8_t) (_img_get(image, x - 1, y + 1)  + w2 * quant_error));
-                _img_set(image, x, y + 1,     (uint8_t) (_img_get(image, x, y + 1)      + w3 * quant_error));
-                _img_set(image, x + 1, y + 1, (uint8_t) (_img_get(image, x + 1, y + 1)  + w4 * quant_error));
+                newpixel = (oldpixel < 128) ? 0.0f : 255.0f;
+                _img_set(image, x, y, newpixel);
+                quant_error = (oldpixel - newpixel);
+
+                _img_set(image, x + 1, y,      (_img_get(image, x + 1, y)      + w1 * quant_error));
+                _img_set(image, x - 1, y + 1,  (_img_get(image, x - 1, y + 1)  + w2 * quant_error));
+                _img_set(image, x,     y + 1,  (_img_get(image, x,     y + 1)  + w3 * quant_error));
+                _img_set(image, x + 1, y + 1,  (_img_get(image, x + 1, y + 1)  + w4 * quant_error));
             }
         }
         return 0;
@@ -607,7 +759,7 @@ bool canvas::stucki(img* image)
     if (image->__img != nullptr) {
         uint32_t y = 0, x = 0;
         float quant_error;
-        int16_t oldpixel, newpixel; //uint8_t ?
+        float oldpixel, newpixel; //uint8_t ?
         float w8 = (float)(8.0 / 42.0),
               w7 = (float)(7.0 / 42.0),
               w5 = (float)(5.0 / 42.0),
@@ -618,21 +770,21 @@ bool canvas::stucki(img* image)
         for (y = 0; y < image->__img_y; y++) {
             for (x = 0; x < image->__img_x; x++) {
                 oldpixel = _img_get(image, x, y);
-                newpixel = (oldpixel < 128) ? 0 : 255;
-                _img_set(image, x, y, (uint8_t)newpixel);
-                quant_error = (int16_t)(oldpixel - newpixel);
-                _img_set(image, x + 1, y,     (uint8_t)(_img_get(image, x + 1, y)     + w7 * quant_error));
-                _img_set(image, x + 2, y,     (uint8_t)(_img_get(image, x + 2, y)     + w5 * quant_error));
-                _img_set(image, x - 2, y + 1, (uint8_t)(_img_get(image, x - 2, y + 1) + w2 * quant_error));
-                _img_set(image, x - 1, y + 1, (uint8_t)(_img_get(image, x - 1, y + 1) + w4 * quant_error));
-                _img_set(image, x,     y + 1, (uint8_t)(_img_get(image, x,     y + 1) + w8 * quant_error));
-                _img_set(image, x + 1, y + 1, (uint8_t)(_img_get(image, x + 1, y + 1) + w4 * quant_error));
-                _img_set(image, x + 2, y + 1, (uint8_t)(_img_get(image, x + 2, y + 1) + w2 * quant_error));
-                _img_set(image, x - 2, y + 2, (uint8_t)(_img_get(image, x - 2, y + 2) + w1 * quant_error));
-                _img_set(image, x - 1, y + 2, (uint8_t)(_img_get(image, x - 1, y + 2) + w2 * quant_error));
-                _img_set(image, x,     y + 2, (uint8_t)(_img_get(image, x,     y + 2) + w4 * quant_error));
-                _img_set(image, x + 1, y + 2, (uint8_t)(_img_get(image, x + 1, y + 2) + w2 * quant_error));
-                _img_set(image, x + 2, y + 2, (uint8_t)(_img_get(image, x + 2, y + 2) + w1 * quant_error));
+                newpixel = (oldpixel < 128) ? 0.0f : 255.0f;
+                _img_set(image, x, y, newpixel);
+                quant_error = (oldpixel - newpixel);
+                _img_set(image, x + 1, y,     (_img_get(image, x + 1, y)     + w7 * quant_error));
+                _img_set(image, x + 2, y,     (_img_get(image, x + 2, y)     + w5 * quant_error));
+                _img_set(image, x - 2, y + 1, (_img_get(image, x - 2, y + 1) + w2 * quant_error));
+                _img_set(image, x - 1, y + 1, (_img_get(image, x - 1, y + 1) + w4 * quant_error));
+                _img_set(image, x,     y + 1, (_img_get(image, x,     y + 1) + w8 * quant_error));
+                _img_set(image, x + 1, y + 1, (_img_get(image, x + 1, y + 1) + w4 * quant_error));
+                _img_set(image, x + 2, y + 1, (_img_get(image, x + 2, y + 1) + w2 * quant_error));
+                _img_set(image, x - 2, y + 2, (_img_get(image, x - 2, y + 2) + w1 * quant_error));
+                _img_set(image, x - 1, y + 2, (_img_get(image, x - 1, y + 2) + w2 * quant_error));
+                _img_set(image, x,     y + 2, (_img_get(image, x,     y + 2) + w4 * quant_error));
+                _img_set(image, x + 1, y + 2, (_img_get(image, x + 1, y + 2) + w2 * quant_error));
+                _img_set(image, x + 2, y + 2, (_img_get(image, x + 2, y + 2) + w1 * quant_error));
             }
         }
         return 0;
@@ -646,7 +798,7 @@ bool canvas::jarvis(img* image)
     if (image->__img != nullptr) {
         uint32_t y = 0, x = 0;
         float quant_error;
-        int16_t oldpixel, newpixel; //uint8_t ?
+        float oldpixel, newpixel; //uint8_t ?
         float w7 = (float)(7.0 / 48.0),
               w5 = (float)(5.0 / 48.0),
               w3 = (float)(3.0 / 48.0),
@@ -655,21 +807,21 @@ bool canvas::jarvis(img* image)
         for (y = 0; y < image->__img_y; y++) {
             for (x = 0; x < image->__img_x; x++) {
                 oldpixel = _img_get(image, x, y);
-                newpixel = (oldpixel < 128) ? 0 : 255;
-                _img_set(image, x, y, (uint8_t)newpixel);
-                quant_error = (int16_t)(oldpixel - newpixel);
-                _img_set(image, x + 1, y,     (uint8_t)(_img_get(image, x + 1, y)     + w7 * quant_error));
-                _img_set(image, x + 2, y,     (uint8_t)(_img_get(image, x + 2, y)     + w5 * quant_error));
-                _img_set(image, x - 2, y + 1, (uint8_t)(_img_get(image, x - 2, y + 1) + w3 * quant_error));
-                _img_set(image, x - 1, y + 1, (uint8_t)(_img_get(image, x - 1, y + 1) + w5 * quant_error));
-                _img_set(image, x,     y + 1, (uint8_t)(_img_get(image, x,     y + 1) + w7 * quant_error));
-                _img_set(image, x + 1, y + 1, (uint8_t)(_img_get(image, x + 1, y + 1) + w5 * quant_error));
-                _img_set(image, x + 2, y + 1, (uint8_t)(_img_get(image, x + 2, y + 1) + w3 * quant_error));
-                _img_set(image, x - 2, y + 2, (uint8_t)(_img_get(image, x - 2, y + 2) + w1 * quant_error));
-                _img_set(image, x - 1, y + 2, (uint8_t)(_img_get(image, x - 1, y + 2) + w3 * quant_error));
-                _img_set(image, x,     y + 2, (uint8_t)(_img_get(image, x,     y + 2) + w5 * quant_error));
-                _img_set(image, x + 1, y + 2, (uint8_t)(_img_get(image, x + 1, y + 2) + w3 * quant_error));
-                _img_set(image, x + 2, y + 2, (uint8_t)(_img_get(image, x + 2, y + 2) + w1 * quant_error));
+                newpixel = (oldpixel < 128) ? 0.0f : 255.0f;
+                _img_set(image, x, y, newpixel);
+                quant_error = (oldpixel - newpixel);
+                _img_set(image, x + 1, y,     (_img_get(image, x + 1, y)     + w7 * quant_error));
+                _img_set(image, x + 2, y,     (_img_get(image, x + 2, y)     + w5 * quant_error));
+                _img_set(image, x - 2, y + 1, (_img_get(image, x - 2, y + 1) + w3 * quant_error));
+                _img_set(image, x - 1, y + 1, (_img_get(image, x - 1, y + 1) + w5 * quant_error));
+                _img_set(image, x,     y + 1, (_img_get(image, x,     y + 1) + w7 * quant_error));
+                _img_set(image, x + 1, y + 1, (_img_get(image, x + 1, y + 1) + w5 * quant_error));
+                _img_set(image, x + 2, y + 1, (_img_get(image, x + 2, y + 1) + w3 * quant_error));
+                _img_set(image, x - 2, y + 2, (_img_get(image, x - 2, y + 2) + w1 * quant_error));
+                _img_set(image, x - 1, y + 2, (_img_get(image, x - 1, y + 2) + w3 * quant_error));
+                _img_set(image, x,     y + 2, (_img_get(image, x,     y + 2) + w5 * quant_error));
+                _img_set(image, x + 1, y + 2, (_img_get(image, x + 1, y + 2) + w3 * quant_error));
+                _img_set(image, x + 2, y + 2, (_img_get(image, x + 2, y + 2) + w1 * quant_error));
             }
         }
         return 0;
@@ -683,21 +835,21 @@ bool canvas::atkinson(img* image)
     if (image->__img != nullptr) {
         uint32_t y = 0, x = 0;
         float quant_error;
-        int16_t oldpixel, newpixel; //uint8_t ?
+        float oldpixel, newpixel; //uint8_t ?
         float w1 = (float)(1.0 / 8.0);
 
         for (y = 0; y < image->__img_y; y++) {
             for (x = 0; x < image->__img_x; x++) {
                 oldpixel = _img_get(image, x, y);
-                newpixel = (oldpixel < 128) ? 0 : 255;
-                _img_set(image, x, y, (uint8_t)newpixel);
-                quant_error = (int16_t)(oldpixel - newpixel);
-                _img_set(image, x + 1, y,     (uint8_t)(_img_get(image, x + 1, y)     + w1 * quant_error));
-                _img_set(image, x + 2, y,     (uint8_t)(_img_get(image, x + 2, y)     + w1 * quant_error));
-                _img_set(image, x - 1, y + 1, (uint8_t)(_img_get(image, x - 1, y + 1) + w1 * quant_error));
-                _img_set(image, x,     y + 1, (uint8_t)(_img_get(image, x,     y + 1) + w1 * quant_error));
-                _img_set(image, x + 1, y + 1, (uint8_t)(_img_get(image, x + 1, y + 1) + w1 * quant_error));
-                _img_set(image, x,     y + 2, (uint8_t)(_img_get(image, x,     y + 2) + w1 * quant_error));
+                newpixel = (oldpixel < 128) ? 0.0f : 255.0f;
+                _img_set(image, x, y, newpixel);
+                quant_error = (oldpixel - newpixel);
+                _img_set(image, x + 1, y,     (_img_get(image, x + 1, y)     + w1 * quant_error));
+                _img_set(image, x + 2, y,     (_img_get(image, x + 2, y)     + w1 * quant_error));
+                _img_set(image, x - 1, y + 1, (_img_get(image, x - 1, y + 1) + w1 * quant_error));
+                _img_set(image, x,     y + 1, (_img_get(image, x,     y + 1) + w1 * quant_error));
+                _img_set(image, x + 1, y + 1, (_img_get(image, x + 1, y + 1) + w1 * quant_error));
+                _img_set(image, x,     y + 2, (_img_get(image, x,     y + 2) + w1 * quant_error));
             }
         }
         return 0;

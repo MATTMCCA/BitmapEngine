@@ -24,12 +24,24 @@
     <ClCompile Include="..\..\bitmapEngine\src\font.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig85.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig_ar.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\bitmapEngine\include\canvas.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\bitmapEngine\include\font.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig_ar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig85.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

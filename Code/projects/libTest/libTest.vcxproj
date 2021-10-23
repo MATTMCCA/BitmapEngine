@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,7 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,7 +148,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -165,11 +165,15 @@
   <ItemGroup>
     <ClCompile Include="..\..\bitmapEngine\src\canvas.cpp" />
     <ClCompile Include="..\..\bitmapEngine\src\font.cpp" />
+    <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig85.c" />
+    <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig_ar.c" />
     <ClCompile Include="libTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\bitmapEngine\include\canvas.hpp" />
     <ClInclude Include="..\..\bitmapEngine\include\font.hpp" />
+    <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig85.h" />
+    <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig_ar.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

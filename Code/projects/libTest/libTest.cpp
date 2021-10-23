@@ -52,7 +52,11 @@ const char TEST_IMG[] = "A:\\Users\\Matt\\Pictures\\TRASH\\Lena.bmp";
 const int DPI = 300;
 
 bool save_bmp(canvas* ptr, const char* dir, int cnt);
+bool save_pbm(canvas* ptr, const char* dir, int cnt);
+bool save_jbg(canvas* ptr, const char* dir, int cnt);
+
 void print_pass_fail(const char* testname, bool err);
+
 
 bool canvas_noninv(const char* dir, int cnt);
 bool canvas_inv(const char* dir, int cnt);
@@ -89,6 +93,12 @@ bool sprite_overlay_no_alpha(const char* dir, const char* fnt, const char* bmp, 
 bool sprite_overlay_alpha(const char* dir, const char* fnt, const char* bmp, int cnt);
 bool canvas_mirrorH(const char* dir, const char* bmp, int cnt);
 bool canvas_mirrorV(const char* dir, const char* bmp, int cnt);
+
+bool PBM_TEST(const char* dir, const char* bmp, int cnt);           //portable bitmap
+
+/* https://filext.com/file-extension/JBG */
+/* http://manpages.ubuntu.com/manpages/bionic/man1/jbgtopbm.1.html */
+bool JBIG_TEST(const char* dir, const char* bmp, int cnt);          //JBIG compressed bitmap
 
 int main(int argc, char* argv[])
 {
@@ -137,11 +147,12 @@ int main(int argc, char* argv[])
     font_size(output_dir, ARIAL_FONT, tc++);
     font_rot(output_dir, ARIAL_FONT, tc++);
     font_offset(output_dir, ARIAL_FONT, tc++);
-    font_huge(output_dir, ARIAL_FONT, tc++);
-    font_small(output_dir, ARIAL_FONT, tc++);
+    //font_huge(output_dir, ARIAL_FONT, tc++);
+    //font_small(output_dir, ARIAL_FONT, tc++);
     sprite_overlay_no_alpha(output_dir, ARIAL_FONT, tst_img, tc++);
     sprite_overlay_alpha(output_dir, ARIAL_FONT, tst_img, tc++);
-
+    PBM_TEST(output_dir, tst_img, tc++);
+    JBIG_TEST(output_dir, tst_img, tc++);
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
@@ -154,7 +165,21 @@ bool save_bmp(canvas* ptr, const char* dir, int cnt)
 {
     std::string output = std::string(dir) + std::to_string(cnt) + std::string(".bmp");
     printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".bmp")).c_str());
-    return ptr->save(output.c_str(), DPI);
+    return ptr->saveBMP(output.c_str(), DPI);
+}
+
+bool save_pbm(canvas* ptr, const char* dir, int cnt)
+{
+    std::string output = std::string(dir) + std::to_string(cnt) + std::string(".pbm");
+    printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".pbm")).c_str());
+    return ptr->savePBM(output.c_str());
+}
+
+bool save_jbg(canvas* ptr, const char* dir, int cnt)
+{
+    std::string output = std::string(dir) + std::to_string(cnt) + std::string(".jbg");
+    printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".jbg")).c_str());
+    return ptr->saveJBG(output.c_str());
 }
 
 void print_pass_fail(const char* testname, bool err)
@@ -637,5 +662,28 @@ bool canvas_mirrorV(const char* dir, const char* bmp, int cnt)
 
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("Canvas (MIRROR::Vertical)", err);
+    return err;
+}
+
+bool PBM_TEST(const char* dir, const char* bmp, int cnt)
+{
+    bool err = 0;
+    canvas c;
+    err |= c.import_24bit(bmp, DITHER::Stucki);
+    //err |= c.invert(1);
+
+    err |= save_pbm(&c, dir, cnt);
+    print_pass_fail("PBM_TEST", err);
+    return err;
+}
+
+bool JBIG_TEST(const char* dir, const char* bmp, int cnt)
+{
+    bool err = 0;
+    canvas c;
+    err |= c.import_24bit(bmp, DITHER::Stucki);
+
+    err |= save_jbg(&c, dir, cnt);
+    print_pass_fail("PBM_TEST", err);
     return err;
 }
