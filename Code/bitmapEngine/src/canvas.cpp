@@ -219,10 +219,6 @@ bool canvas::savePBM(const char* fileName)
         if (image_x == 0)
             image_x = 1; //non 0 byte width
 
-        /* Create Head */
-        char PBM_HEAD[1024];
-        snprintf(PBM_HEAD, 1024, "P4\n# Created by BitmapEngine\n%d %d\n", _x, _y);
-
         uint8_t* BMPDATA = nullptr;
         uint32_t q = image_x * image_y;
         size_t BMPDATASIZE = q * sizeof(uint8_t);
@@ -253,7 +249,7 @@ bool canvas::savePBM(const char* fileName)
             if (fd != NULL) {
                 //TODO: add error handling, or not...
                 /////////////////////////////////////////////////////////////////////////
-                fputs(PBM_HEAD, fd);
+                fprintf(fd, "P4\n# Created by BitmapEngine\n%d %d\n", _x, _y);
                 /////////////////////////////////////////////////////////////////////////
                 fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
                 /////////////////////////////////////////////////////////////////////////

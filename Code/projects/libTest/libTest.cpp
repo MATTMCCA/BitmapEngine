@@ -669,7 +669,7 @@ bool PBM_TEST(const char* dir, const char* bmp, int cnt)
 {
     bool err = 0;
     canvas c;
-    err |= c.import_24bit(bmp, DITHER::Stucki);
+    err |= c.import_24bit(bmp, DITHER::Threshold);
     //err |= c.invert(1);
 
     err |= save_pbm(&c, dir, cnt);
@@ -681,7 +681,7 @@ bool JBIG_TEST(const char* dir, const char* bmp, int cnt)
 {
     bool err = 0;
     canvas c;
-    err |= c.import_24bit(bmp, DITHER::Stucki);
+    err |= c.import_24bit(bmp, DITHER::Threshold);
 
     err |= save_jbg(&c, dir, cnt);
     print_pass_fail("PBM_TEST", err);
