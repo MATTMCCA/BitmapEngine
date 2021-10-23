@@ -49,7 +49,12 @@ using namespace std::chrono;
 const char ARIAL_FONT[] = "C:\\Windows\\Fonts\\arial.ttf";
 const char TEST_DIR[] = "A:\\Users\\Matt\\Pictures\\TRASH\\libtest\\";
 const char TEST_IMG[] = "A:\\Users\\Matt\\Pictures\\TRASH\\Lena.bmp";
+//const char TEST_IMG[] = "A:\\Users\\Matt\\Pictures\\TRASH\\hi.bmp";
+
 const int DPI = 300;
+
+std::string JBIG_TESTIMG;
+std::string PBM_TESTIMG;
 
 bool save_bmp(canvas* ptr, const char* dir, int cnt);
 bool save_pbm(canvas* ptr, const char* dir, int cnt);
@@ -93,12 +98,12 @@ bool sprite_overlay_no_alpha(const char* dir, const char* fnt, const char* bmp, 
 bool sprite_overlay_alpha(const char* dir, const char* fnt, const char* bmp, int cnt);
 bool canvas_mirrorH(const char* dir, const char* bmp, int cnt);
 bool canvas_mirrorV(const char* dir, const char* bmp, int cnt);
-
-bool PBM_TEST(const char* dir, const char* bmp, int cnt);           //portable bitmap
-
+bool image_save_PBM(const char* dir, const char* bmp, int cnt);
 /* https://filext.com/file-extension/JBG */
 /* http://manpages.ubuntu.com/manpages/bionic/man1/jbgtopbm.1.html */
-bool JBIG_TEST(const char* dir, const char* bmp, int cnt);          //JBIG compressed bitmap
+bool image_save_JBIG(const char* dir, const char* bmp, int cnt);          //JBIG compressed bitmap
+bool import_jbg_file(char* dir, const char* bmp, int cnt);
+bool import_pbm_file(char* dir, const char* bmp, int cnt);
 
 int main(int argc, char* argv[])
 {
@@ -151,8 +156,12 @@ int main(int argc, char* argv[])
     //font_small(output_dir, ARIAL_FONT, tc++);
     sprite_overlay_no_alpha(output_dir, ARIAL_FONT, tst_img, tc++);
     sprite_overlay_alpha(output_dir, ARIAL_FONT, tst_img, tc++);
-    PBM_TEST(output_dir, tst_img, tc++);
-    JBIG_TEST(output_dir, tst_img, tc++);
+    image_save_PBM(output_dir, tst_img, tc++);
+
+
+    image_save_JBIG(output_dir, tst_img, tc++);
+    import_jbg_file(output_dir, JBIG_TESTIMG.c_str(), tc++);
+    import_pbm_file(output_dir, PBM_TESTIMG.c_str(), tc++);
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
@@ -665,7 +674,7 @@ bool canvas_mirrorV(const char* dir, const char* bmp, int cnt)
     return err;
 }
 
-bool PBM_TEST(const char* dir, const char* bmp, int cnt)
+bool image_save_PBM(const char* dir, const char* bmp, int cnt)
 {
     bool err = 0;
     canvas c;
@@ -674,16 +683,44 @@ bool PBM_TEST(const char* dir, const char* bmp, int cnt)
 
     err |= save_pbm(&c, dir, cnt);
     print_pass_fail("PBM_TEST", err);
+
+    if (err == 0)
+        PBM_TESTIMG = std::string(dir) + std::to_string(cnt) + std::string(".pbm");
     return err;
 }
 
-bool JBIG_TEST(const char* dir, const char* bmp, int cnt)
+bool image_save_JBIG(const char* dir, const char* bmp, int cnt)
 {
     bool err = 0;
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Threshold);
 
     err |= save_jbg(&c, dir, cnt);
-    print_pass_fail("PBM_TEST", err);
+    print_pass_fail("JBG_TEST", err);
+
+    if (err == 0)
+        JBIG_TESTIMG = std::string(dir) + std::to_string(cnt) + std::string(".jbg");
+    return err;
+}
+
+bool import_jbg_file(char* dir, const char* bmp, int cnt)
+{
+    bool err = 0;
+    canvas c;
+    err |= c.import_jbg(bmp);
+
+    err |= save_bmp(&c, dir, cnt);
+    print_pass_fail("jbg_import_export", err);
+    return err;
+}
+
+bool import_pbm_file(char* dir, const char* bmp, int cnt)
+{
+    bool err = 0;
+    canvas c;
+    err |= c.import_pbm(bmp);
+
+    err |= save_bmp(&c, dir, cnt);
+    print_pass_fail("pbm_import_export", err);
     return err;
 }

@@ -7,7 +7,7 @@
     
     File: canvas.cpp
     
-        Notes: Very little error handling.
+        Notes: Very little error handling. Like for real, this needs looked at sometime.
         
     =======================================================================================
 
@@ -445,6 +445,108 @@ bool canvas::drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, 
     return 1;
 }
 
+/*
+ * Call-back routine for merged image output
+ */
+static int line_out(const struct jbg85_dec_state* s, unsigned char* start, size_t len, unsigned long y, void* file)
+{
+    /* this is awfull and needs work, infact most of this is awfull lol*/
+    if (file != nullptr) {
+        jbg_buffer* buf = (jbg_buffer*)file;
+
+        if (y == 0) {
+            if (buf->__img != nullptr) {
+                free(buf->__img);
+                buf->__img = nullptr;
+                buf->__img_len = 0;
+            }
+
+            if (buf->__img == nullptr) {
+                buf->__img = (uint8_t*) malloc(len);
+                if (buf->__img != nullptr) {
+                    memcpy(buf->__img, start, len);
+                    buf->__img_len += len;
+                }
+            }
+            return 0;
+        }
+
+        if (buf->__img != nullptr) {
+            uint8_t* org = buf->__img;
+            buf->__img = (uint8_t*)realloc(org, buf->__img_len + len);
+            if (buf->__img != nullptr) {
+                memcpy(((uint8_t*)buf->__img) + buf->__img_len, start, len);
+                buf->__img_len += len;
+            } else {
+                free(org);
+                org = nullptr;
+            }
+        }
+    }
+
+    return 0;
+}
+
+uint8_t* canvas::jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size)
+{
+    jbg_buffer buf{ nullptr };
+    struct jbg85_dec_state s;
+
+    int result;
+    unsigned char* inbuf, * outbuf;
+    size_t bytes_read = 0, len, cnt;
+    size_t inbuflen = 1024, outbuflen;
+    unsigned long xmax = COMP_XMAX;
+
+    inbuf = (unsigned char*)malloc(inbuflen);
+    outbuflen = ((xmax >> 3) + !!(xmax & 7)) * 3;
+    outbuf = (unsigned char*)malloc(outbuflen);
+
+    if (!inbuf || !outbuf) {
+        return nullptr;
+    }
+
+    FILE* fd;
+    fd = fopen(fileName, "rb");
+
+    if (fd != NULL) 
+    {
+        /* send input file to decoder */
+        jbg85_dec_init(&s, outbuf, outbuflen, line_out, (void*)&buf);
+        result = JBG_EAGAIN;
+        while ((len = fread(inbuf, 1, inbuflen, fd)))
+        {
+            result = jbg85_dec_in(&s, inbuf, len, &cnt);
+            bytes_read += cnt;
+            //printf("%s\n", jbg85_strerror(result));
+            if (result != JBG_EAGAIN)
+                break;
+        }
+
+        if (result != JBG_EOK) {
+            if (buf.__img != nullptr) {
+                free(buf.__img);
+                buf.__img = nullptr;
+                buf.__img_len = 0;
+            }
+        }
+        
+        free(inbuf);
+        free(outbuf);
+        fclose(fd);
+    }
+
+    /* got the image */
+    if (buf.__img != nullptr) {
+        *y0 = jbg85_dec_getheight(&s);
+        *x0 = jbg85_dec_getwidth(&s);
+        *_size = buf.__img_len;
+        return buf.__img;
+    }
+
+    return nullptr;
+}
+
 //TODO: add file io error handling
 uint8_t* canvas::img_open(const char* fileName, uint32_t *x0, uint32_t *y0, uint32_t *_size)
 {
@@ -509,6 +611,107 @@ uint8_t* canvas::img_open(const char* fileName, uint32_t *x0, uint32_t *y0, uint
     return nullptr;
 }
 
+uint8_t* canvas::pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size)
+{
+    uint32_t dim[2] = { 0x00 };
+    uint32_t image_size = 0;
+    uint8_t* image = nullptr;
+
+    FILE* fd;
+    fd = fopen(fileName, "rb");
+
+    if (fd != NULL) {
+        fseek(fd, 0, SEEK_END);
+        size_t file_size = ftell(fd);
+        fseek(fd, 0, SEEK_SET);
+       
+        int i = 0;
+        char* pch;
+        bool err = 0;
+        char trash[500];
+        
+
+        if (fgets(trash, 5, fd) != NULL) {
+            if (strcmp(trash, "P4\n"))
+            {
+                fclose(fd);
+                return nullptr;
+            }
+        } else {
+            fclose(fd);
+            return nullptr;
+        }
+ 
+        do {
+            if (fgets(trash, 500, fd) == NULL) {
+                fclose(fd);
+                return nullptr;
+            }
+        }
+        while (trash[0] == '#');
+
+        pch = strtok(trash, " \n");
+        while (pch != NULL) {
+            dim[i++] = atoi(pch);
+            pch = strtok(NULL, " \n");
+        }
+
+        image_size = (uint32_t)(file_size - ftell(fd));
+        image = new uint8_t[image_size];
+
+        if (image != nullptr) {
+            fread(image, sizeof(uint8_t), image_size, fd);
+        }
+
+        fclose(fd);
+    }
+
+    /* got the image */
+    if (image != nullptr) {
+        *y0 = dim[1];
+        *x0 = dim[0];
+        * _size = image_size;
+        return image;
+    }
+
+    return nullptr;
+}
+
+bool canvas::import_jbg(const char* fileName)
+{
+    uint32_t x = 0, y = 0, s = 0;
+    uint8_t* image_jbg = jbg_open(fileName, &x, &y, &s);
+
+    if (image_jbg != nullptr) {
+
+        uint32_t x1 = s / y;
+        uint32_t q, _y, _x = 0;
+        uint8_t* tmp;
+
+        if (create(x, y, 0) != 1) {
+            for (_y = 0; _y < y; _y++) {
+                q = x1 * _y;
+                tmp = image_jbg + q;
+
+                uint8_t bit = 0;
+                for (_x = 0; _x < x; _x++) {
+                    if (BIT_CHECK(tmp[_x / 8], 7-bit))
+                        setPixle(_x, _y, 1);
+                    bit = (bit + 1) % 8;
+                }
+            }
+        } else {
+            free(image_jbg);
+            return 1;
+        }
+
+        free(image_jbg);
+    }
+
+    return 0;
+}
+
+
 //TODO: add file io error handling
 bool canvas::import_24bit(const char* fileName, DITHER type)
 {
@@ -545,15 +748,11 @@ bool canvas::import_24bit(const char* fileName, DITHER type)
             img _img = { gray, x, i_y }; //create image struct
 
             bool err = 0;
-            if ((err |= dither(&_img, type)) != 1) 
-            {
+            if ((err |= dither(&_img, type)) != 1) {
                 x1 = i_y - 1; //reused, not x, but y
-                if ((err |= create(x, i_y, 0)) != 1) 
-                {
-                    for (y0 = 0; y0 < i_y; y0++) 
-                    {
-                        for (x0 = 0; x0 < x; x0++) 
-                        {
+                if ((err |= create(x, i_y, 0)) != 1) {
+                    for (y0 = 0; y0 < i_y; y0++) {
+                        for (x0 = 0; x0 < x; x0++) {
                             q = ((((x1)-y0) * x)) + x0;
                             tmp = gray + q;
                             s = (uint32_t) *tmp;
@@ -572,6 +771,41 @@ bool canvas::import_24bit(const char* fileName, DITHER type)
     }
 
     return 1;
+}
+
+bool canvas::import_pbm(const char* fileName)
+{
+    uint32_t x = 0, y = 0, s = 0;
+    uint8_t* image_pbm = pbm_open(fileName, &x, &y, &s);
+
+    if (image_pbm != nullptr) {
+
+        uint32_t x1 = s / y;
+        uint32_t q, _y, _x = 0;
+        uint8_t* tmp;
+
+        if (create(x, y, 0) != 1) {
+            for (_y = 0; _y < y; _y++) {
+                q = x1 * _y;
+                tmp = image_pbm + q;
+
+                uint8_t bit = 0;
+                for (_x = 0; _x < x; _x++) {
+                    if (BIT_CHECK(tmp[_x / 8], 7 - bit))
+                        setPixle(_x, _y, 1);
+                    bit = (bit + 1) % 8;
+                }
+            }
+        }
+        else {
+            delete[] image_pbm;
+            return 1;
+        }
+
+        delete[] image_pbm;
+    }
+
+    return 0;
 }
 
 bool canvas::mirror(MIRROR m)

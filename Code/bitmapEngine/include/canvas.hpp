@@ -47,6 +47,8 @@ extern "C" {
 #include "jbig85.h"
 }
 
+#define COMP_XMAX 1024*8
+
 // a=target variable, b=bit number to act upon 0-n 
 //https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
 #define BIT_SET(a,b)                ((a) |= (1ULL<<(b)))
@@ -88,10 +90,15 @@ typedef struct {
 static const uint32_t COLOR_TABLE[2] = { 0x00000000, 0x00FFFFFF };
 
 typedef struct {
-    float* __img;
+    float*   __img;
     uint32_t __img_x;
     uint32_t __img_y;
 } img;
+
+typedef struct {
+    uint8_t* __img;
+    uint32_t __img_len;
+} jbg_buffer;
 
 enum class DITHER 
 { 
@@ -175,6 +182,7 @@ enum class DEGREE
 };
 
 static void data_out(unsigned char* start, size_t len, void* file);
+static int line_out(const struct jbg85_dec_state* s, unsigned char* start, size_t len, unsigned long y, void* file);
 
 class canvas
 {
@@ -205,6 +213,9 @@ public:
     bool drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val);
 
     bool import_24bit(const char* fileName, DITHER type = DITHER::Threshold);
+    bool import_jbg(const char* fileName);
+    bool import_pbm(const char* fileName);
+
     bool saveBMP(const char* fileName, int DPI);
     bool savePBM(const char* fileName); //portable bitmap raw
     bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
@@ -224,6 +235,8 @@ public:
 private:
 
     uint8_t* img_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
+    uint8_t* jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
+    uint8_t* pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
 
     /* DITHER!!!! */
     bool dither(img* image, DITHER type);
