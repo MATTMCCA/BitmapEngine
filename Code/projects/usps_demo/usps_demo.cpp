@@ -186,13 +186,13 @@ int build_format(canvas* master)
     /* solid's outline */
     master->create(1275, 2025, 0);
     
-    master->drawBox(60, 100, 1830, 1170, 10, 1);            //box 1
-    master->drawBox(60, 100, 300, 300, 10, 1);          //box 2
-    master->drawBox(350, 100, 300, 880, 10, 1);         //box 3
+    master->drawBox(60, 100, 1830, 1170, 10, 1);            //box  1
+    master->drawBox(60, 100, 300, 300, 10, 1);              //box  2
+    master->drawBox(350, 100, 300, 880, 10, 1);             //box  3
     master->drawHorizontalLine(60, 520, 1170, 10, 1);       //line 1
     master->drawHorizontalLine(60, 1300, 1170, 20, 1);      //line 2
     master->drawHorizontalLine(60, 1800, 1170, 20, 1);      //line 3
-    master->drawBox(850, 800, 70, 160, 5, 1);               //box 4
+    master->drawBox(850, 800, 70, 160, 5, 1);               //box  4
     
     /* static text */
     arial_bold_10.writeCanvas(master, "TM", 1060, 430);
@@ -274,6 +274,11 @@ int add_dynamic_data(static_format_struct* data, canvas* ptr)
     delete graphic;
     //**************************************************************************
 
-    ptr->save(data->save_as, DPI);
+    /* mono bitmap 1-bit */
+    ptr->saveBMP(data->save_as, DPI);
+    /* JBIG compression */
+    ptr->saveJBG(std::string(std::string(data->save_as) + std::string(".jbg")).c_str()); //dirty fix
+    /* Portable Bitmap */
+    ptr->savePBM(std::string(std::string(data->save_as) + std::string(".pbm")).c_str()); //dirty fix
     return 0;
 }

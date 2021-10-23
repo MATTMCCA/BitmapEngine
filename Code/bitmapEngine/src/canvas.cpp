@@ -632,8 +632,7 @@ uint8_t* canvas::pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
         
 
         if (fgets(trash, 5, fd) != NULL) {
-            if (strcmp(trash, "P4\n"))
-            {
+            if (strcmp(trash, "P4\n")) {
                 fclose(fd);
                 return nullptr;
             }
