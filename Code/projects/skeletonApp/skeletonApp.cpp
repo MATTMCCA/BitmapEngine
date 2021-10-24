@@ -213,12 +213,13 @@ int getImage(canvas* can, const char* fileName)
 /////////////////////// HELPERS ///////////////////////////////////////
 int add_barcode_to_canvas(canvas* can, zint_symbol* my_symbol)
 {
+    bool err;
     int row, col, i = 0;
-    can->create(my_symbol->bitmap_width, my_symbol->bitmap_height, 0);
+    err = can->create(my_symbol->bitmap_width, my_symbol->bitmap_height, 0);
     for (row = 0; row < my_symbol->bitmap_height; row++)
         for (col = 0; col < my_symbol->bitmap_width; col++, i++)
             if (my_symbol->bitmap[i] == '1')
                 can->setPixle(col, row, 1);
-    return 0;
+    return err;
 }
 ////////////////////////////////////////////////////////////////////////
