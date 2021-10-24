@@ -281,7 +281,7 @@ bool font::charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, in
             int32_t tsx = 1, tsy = 1;
             int32_t x1 = *x + xo * tsx;
             int32_t y1 = *y + yo * tsy;
-            int32_t x2 = x1 + gw * tsx - 1;
+            int32_t x2 = x1 + gw * tsx + 1;// -1;
             int32_t y2 = y1 + gh * tsy - 1;
             if (x1 < *minx)
             *minx = x1;

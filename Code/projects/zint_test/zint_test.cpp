@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
 
     if (zint_error == 0) {
         add_barcode_to_canvas(&master, my_symbol);
-        master.save("QR_TEST.bmp", DPI); //will output to prog debug dir
+        master.saveBMP("QR_TEST.bmp", DPI); //will output to prog debug dir
     }
     else {
         printf("hmmm..... error?\n");

@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{5ba7af7d-5b48-47d8-957c-d28103a06813}</ProjectGuid>
-    <RootNamespace>zinttest</RootNamespace>
+    <ProjectGuid>{d5f92ceb-1f6d-4659-b3e3-cc8c04a2321e}</ProjectGuid>
+    <RootNamespace>skeletonApp</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../jbigkit-2.1/libjbig;../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../zint/inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../zint/inc;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -109,7 +109,7 @@ xcopy /y /d "..\..\zint\Release\*.dll" "$(OutDir)"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../jbigkit-2.1/libjbig;../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../zint/inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../zint/inc;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,7 +157,7 @@ xcopy /y /d "..\..\zint\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\..\bitmapEngine\src\font.cpp" />
     <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig85.c" />
     <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig_ar.c" />
-    <ClCompile Include="zint_test.cpp" />
+    <ClCompile Include="skeletonApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\bitmapEngine\include\canvas.hpp" />
