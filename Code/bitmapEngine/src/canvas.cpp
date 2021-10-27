@@ -155,7 +155,6 @@ bool canvas::saveJBG(const char* fileName)
             uint8_t* out_line;
             uint32_t __y = 0, __x = 0;
 
-            image_y--;
             for (__y = 0; __y < _y; __y++) {
                 in_line = &ptr[(__y * _x)];
                 out_line = &BMPDATA[(__y * image_x)];
@@ -232,7 +231,6 @@ bool canvas::savePBM(const char* fileName)
             uint8_t* out_line;
             uint32_t __y = 0, __x = 0;
 
-            image_y--;
             for (__y = 0; __y < _y; __y++) {
                 in_line = &ptr[(__y * _x)];
                 out_line = &BMPDATA[(__y * image_x)];
@@ -253,6 +251,67 @@ bool canvas::savePBM(const char* fileName)
                 /////////////////////////////////////////////////////////////////////////
                 fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
                 /////////////////////////////////////////////////////////////////////////
+                fclose(fd);
+            }
+
+            delete[] BMPDATA; //release when done
+            return 0;
+        }
+        return 1;
+    }
+    return 1;
+}
+
+/* This function was quick and dirty, could be optomized */
+bool canvas::saveByteArray(const char* fileName)
+{
+    if (ptr != nullptr) {
+        uint32_t image_y = _y;
+        uint32_t image_x = (uint32_t)(_x / 8.0);
+
+        if ((image_x * 8) < (uint32_t)_x)
+            image_x++;   //math fix
+
+        if (image_x == 0)
+            image_x = 1; //non 0 byte width
+
+        uint8_t* BMPDATA = nullptr;
+        uint32_t q = image_x * image_y;
+        size_t BMPDATASIZE = q * sizeof(uint8_t);
+        BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
+
+        /* like why buffer the whole image?, just buffer a line*/
+        if (BMPDATA != nullptr)
+        {
+            memset(BMPDATA, 0x00, BMPDATASIZE);
+
+            bool* in_line;
+            uint8_t* out_line;
+            uint32_t __y = 0, __x = 0;
+
+            for (__y = 0; __y < _y; __y++) {
+                in_line = &ptr[(__y * _x)];
+                out_line = &BMPDATA[(__y * image_x)];
+
+                for (__x = 0; __x < _x; __x++) {
+                    if (in_line[__x] ^ _inv)
+                        BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
+                }
+                /* write line out here */
+            }
+
+            FILE* fd;
+            fd = fopen(fileName, "wb");
+
+            if (fd != NULL) {
+                uint32_t k = 1;
+                fprintf(fd, "//Size: %d bytes [%d x %d], [%d_pix x %d_pix]\n", BMPDATASIZE, image_x, image_y, _x, _y);
+                for (uint32_t i = 0; i < BMPDATASIZE; i++, k++) {
+                    fprintf(fd, "0x%.2x, ", BMPDATA[i]);
+                    if ((k % image_x) == 0) {
+                        fprintf(fd, "\n");
+                    }
+                }
                 fclose(fd);
             }
 

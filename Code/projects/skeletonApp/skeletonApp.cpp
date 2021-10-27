@@ -50,6 +50,8 @@ const int DPI = 300; //used for bitmap
 
 /************************ Helpers ******************************/
 int add_barcode_to_canvas(canvas* can, zint_symbol* my_symbol);
+
+void test(void);
 /***************************************************************/
 
 
@@ -64,6 +66,11 @@ int getImage(canvas* can, const char* fileName);
 
 int main(int argc, char* argv[])
 {
+
+    //test();
+    //return 0;
+
+
     canvas* temp;
     canvas master;
 
@@ -223,3 +230,11 @@ int add_barcode_to_canvas(canvas* can, zint_symbol* my_symbol)
     return err;
 }
 ////////////////////////////////////////////////////////////////////////
+
+
+void test(void)
+{
+    canvas hhh;
+    hhh.import_pbm("moo.pbm");
+    hhh.saveBMP("moo_conv.bmp", DPI);
+}
