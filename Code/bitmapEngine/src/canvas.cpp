@@ -278,40 +278,39 @@ bool canvas::saveByteArray(const char* fileName)
         uint8_t* BMPDATA = nullptr;
         uint32_t q = image_x * image_y;
         size_t BMPDATASIZE = q * sizeof(uint8_t);
-        BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
+        BMPDATA = new uint8_t[image_x]{ 0x00 };
 
-        /* like why buffer the whole image?, just buffer a line*/
         if (BMPDATA != nullptr)
         {
-            memset(BMPDATA, 0x00, BMPDATASIZE);
-
             bool* in_line;
-            uint8_t* out_line;
+            uint8_t* out_line = &BMPDATA[0];
             uint32_t __y = 0, __x = 0;
-
-            for (__y = 0; __y < _y; __y++) {
-                in_line = &ptr[(__y * _x)];
-                out_line = &BMPDATA[(__y * image_x)];
-
-                for (__x = 0; __x < _x; __x++) {
-                    if (in_line[__x] ^ _inv)
-                        BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
-                }
-                /* write line out here */
-            }
 
             FILE* fd;
             fd = fopen(fileName, "wb");
 
-            if (fd != NULL) {
+            if (fd != NULL)
+            {
                 uint32_t k = 1;
-                fprintf(fd, "//Size: %d bytes [%d x %d], [%d_pix x %d_pix]\n", BMPDATASIZE, image_x, image_y, _x, _y);
-                for (uint32_t i = 0; i < BMPDATASIZE; i++, k++) {
-                    fprintf(fd, "0x%.2x, ", BMPDATA[i]);
-                    if ((k % image_x) == 0) {
-                        fprintf(fd, "\n");
+                fprintf(fd, "//Size: %zd bytes [%d x %d], [%d_pix x %d_pix]\n", BMPDATASIZE, image_x, image_y, _x, _y);
+
+                for (__y = 0; __y < _y; __y++) {
+                    in_line = &ptr[(__y * _x)];
+                    memset(out_line, 0x00, image_x);
+
+                    for (__x = 0; __x < _x; __x++) {
+                        if (in_line[__x] ^ _inv)
+                            BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
+                    }
+
+                    for (__x = 0; __x < image_x; __x++, k++) {
+                        fprintf(fd, "0x%.2x, ", out_line[__x]);
+                        if ((k % image_x) == 0) {
+                            fprintf(fd, "\n");
+                        }
                     }
                 }
+
                 fclose(fd);
             }
 
