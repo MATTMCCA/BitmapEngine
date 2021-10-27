@@ -262,8 +262,8 @@ bool canvas::savePBM(const char* fileName)
     return 1;
 }
 
-/* This function was quick and dirty, could be optomized */
-bool canvas::saveByteArray(const char* fileName)
+/* mainly for debugging */
+bool canvas::saveXBM(const char* fileName, const char* structName)
 {
     if (ptr != nullptr) {
         uint32_t image_y = _y;
@@ -280,8 +280,7 @@ bool canvas::saveByteArray(const char* fileName)
         size_t BMPDATASIZE = q * sizeof(uint8_t);
         BMPDATA = new uint8_t[image_x]{ 0x00 };
 
-        if (BMPDATA != nullptr)
-        {
+        if (BMPDATA != nullptr) {
             bool* in_line;
             uint8_t* out_line = &BMPDATA[0];
             uint32_t __y = 0, __x = 0;
@@ -289,10 +288,25 @@ bool canvas::saveByteArray(const char* fileName)
             FILE* fd;
             fd = fopen(fileName, "wb");
 
-            if (fd != NULL)
-            {
+            if (fd != NULL) {
                 uint32_t k = 1;
-                fprintf(fd, "//Size: %zd bytes [%d x %d], [%d_pix x %d_pix]\n", BMPDATASIZE, image_x, image_y, _x, _y);
+
+                fprintf(fd, "#define IMG_width %d\n", _x);
+                fprintf(fd, "#define IMG_height %d\n", _y);
+                fprintf(fd, "static unsigned char IMG_bits[] = {\n\t");
+
+                /* jank lookup table */
+                uint8_t xbm_table[256];
+                for (int i = 0; i < 256; i++) {
+                    int k = i;
+                    xbm_table[i] = 0;
+                    for (int b = 0; b < 8; b++) {
+                        xbm_table[i] <<= 1;
+                        xbm_table[i] |= k & 1;
+                        k >>= 1;
+                    }
+                    xbm_table[i] &= 0xFF;
+                }
 
                 for (__y = 0; __y < _y; __y++) {
                     in_line = &ptr[(__y * _x)];
@@ -303,10 +317,10 @@ bool canvas::saveByteArray(const char* fileName)
                             BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
                     }
 
-                    for (__x = 0; __x < image_x; __x++, k++) {
-                        fprintf(fd, "0x%.2x, ", out_line[__x]);
+                    for (__x = 0; __x < image_x; __x++, k++) {                        
+                        fprintf(fd, "0x%.2x%s", xbm_table[out_line[__x]], k != BMPDATASIZE ? ", " : "\n};");
                         if ((k % image_x) == 0) {
-                            fprintf(fd, "\n");
+                            fprintf(fd, "\n\t");
                         }
                     }
                 }

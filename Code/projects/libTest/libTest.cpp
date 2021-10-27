@@ -105,7 +105,7 @@ bool image_save_PBM(const char* dir, const char* bmp, int cnt);
 bool image_save_JBIG(const char* dir, const char* bmp, int cnt);          //JBIG compressed bitmap
 bool import_jbg_file(char* dir, const char* bmp, int cnt);
 bool import_pbm_file(char* dir, const char* bmp, int cnt);
-bool image_save_ba(const char* dir, const char* bmp, int cnt);
+bool image_save_xbm(const char* dir, const char* bmp, int cnt);
 
 int main(int argc, char* argv[])
 {
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
     import_jbg_file(output_dir, JBIG_TESTIMG.c_str(), tc++);
     import_pbm_file(output_dir, PBM_TESTIMG.c_str(), tc++);
 
-    image_save_ba(output_dir, tst_img, tc++);
+    image_save_xbm(output_dir, tst_img, tc++);
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
@@ -193,11 +193,11 @@ bool save_jbg(canvas* ptr, const char* dir, int cnt)
     return ptr->saveJBG(output.c_str());
 }
 
-bool save_ba(canvas* ptr, const char* dir, int cnt)
+bool save_xbm(canvas* ptr, const char* dir, int cnt)
 {
-    std::string output = std::string(dir) + std::to_string(cnt) + std::string(".txt");
-    printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".txt")).c_str());
-    return ptr->saveByteArray(output.c_str());
+    std::string output = std::string(dir) + std::to_string(cnt) + std::string(".xbm");
+    printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".xbm")).c_str());
+    return ptr->saveXBM(output.c_str(), "myImage");
 }
 
 void print_pass_fail(const char* testname, bool err)
@@ -734,14 +734,14 @@ bool import_pbm_file(char* dir, const char* bmp, int cnt)
     return err;
 }
 
-bool image_save_ba(const char* dir, const char* bmp, int cnt)
+bool image_save_xbm(const char* dir, const char* bmp, int cnt)
 {
     bool err = 0;
     canvas c;
 
     err |= c.import_24bit(bmp, DITHER::Threshold);
-    err |= save_ba(&c, dir, cnt);
-    print_pass_fail("BA_TEST", err);
 
+    err |= save_xbm(&c, dir, cnt);
+    print_pass_fail("XBM_TEST", err);
     return err;
 }

@@ -219,7 +219,7 @@ public:
     bool saveBMP(const char* fileName, int DPI);
     bool savePBM(const char* fileName); //portable bitmap raw
     bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
-    bool saveByteArray(const char* fileName);
+    bool saveXBM(const char* fileName, const char* structName);
 
     ~canvas();
 
