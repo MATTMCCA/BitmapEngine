@@ -561,14 +561,16 @@ static int line_out(const struct jbg85_dec_state* s, unsigned char* start, size_
 
 uint8_t* canvas::jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size)
 {
-    jbg_buffer buf{ nullptr };
-    struct jbg85_dec_state s;
+    *x0 = *y0 = *_size = 0;
 
     int result;
     unsigned char* inbuf, * outbuf;
     size_t bytes_read = 0, len, cnt;
     size_t inbuflen = 1024, outbuflen;
     unsigned long xmax = COMP_XMAX;
+
+    jbg_buffer buf{ nullptr };
+    struct jbg85_dec_state s;
 
     inbuf = (unsigned char*)malloc(inbuflen);
     outbuflen = ((xmax >> 3) + !!(xmax & 7)) * 3;
@@ -581,26 +583,26 @@ uint8_t* canvas::jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
     FILE* fd;
     fd = fopen(fileName, "rb");
 
-    if (fd != NULL) 
-    {
+    if (fd != NULL) {
         /* send input file to decoder */
         jbg85_dec_init(&s, outbuf, outbuflen, line_out, (void*)&buf);
         result = JBG_EAGAIN;
-        while ((len = fread(inbuf, 1, inbuflen, fd)))
-        {
+        while ((len = fread(inbuf, 1, inbuflen, fd))) {
             result = jbg85_dec_in(&s, inbuf, len, &cnt);
             bytes_read += cnt;
-            //printf("%s\n", jbg85_strerror(result));
-            if (result != JBG_EAGAIN)
+            if ((result != JBG_EAGAIN) || (ferror(fd)))
                 break;
         }
 
-        if (result != JBG_EOK) {
-            if (buf.__img != nullptr) {
+        if ((result != JBG_EOK) || (ferror(fd))) {
+            if (buf.__img != nullptr) 
                 free(buf.__img);
-                buf.__img = nullptr;
-                buf.__img_len = 0;
-            }
+            buf.__img = nullptr;
+            buf.__img_len = 0;
+        } else {
+            *y0 = jbg85_dec_getheight(&s);
+            *x0 = jbg85_dec_getwidth(&s);
+            *_size = buf.__img_len;
         }
         
         free(inbuf);
@@ -608,20 +610,12 @@ uint8_t* canvas::jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
         fclose(fd);
     }
 
-    /* got the image */
-    if (buf.__img != nullptr) {
-        *y0 = jbg85_dec_getheight(&s);
-        *x0 = jbg85_dec_getwidth(&s);
-        *_size = buf.__img_len;
-        return buf.__img;
-    }
-
-    return nullptr;
+    return buf.__img;
 }
 
-//TODO: add file io error handling
-uint8_t* canvas::img_open(const char* fileName, uint32_t *x0, uint32_t *y0, uint32_t *_size)
+uint8_t* canvas::bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size)
 {
+    *x0 = *y0 = *_size = 0;
     uint32_t image_size = 0;
     uint8_t* image = nullptr;
 
@@ -636,58 +630,79 @@ uint8_t* canvas::img_open(const char* fileName, uint32_t *x0, uint32_t *y0, uint
         size_t file_size = ftell(fd);
         fseek(fd, 0, SEEK_SET);
 
-        if (file_size >= 0x0036) {
-            //no error checking, yet!
-            //fread will fail hard!
-            /////////////////////////////////////////////////////////////////////////
-            fread(&bmpHead.Signature, sizeof(uint16_t), 1, fd);
-            fread(&bmpHead.FileSize, sizeof(uint32_t), 1, fd);
-            fread(&bmpHead.reserved, sizeof(uint32_t), 1, fd);
-            fread(&bmpHead.DataOffset, sizeof(uint32_t), 1, fd);
-            /////////////////////////////////////////////////////////////////////////
-            fread(&bmpInfoHead.Size, sizeof(uint32_t), 1, fd);
-            fread(&bmpInfoHead.Width, sizeof(uint32_t), 1, fd);
-            fread(&bmpInfoHead.Height, sizeof(uint32_t), 1, fd);
-            fread(&bmpInfoHead.Planes, sizeof(uint16_t), 1, fd);
-            fread(&bmpInfoHead.Bits_Per_Pixel, sizeof(uint16_t), 1, fd);
-            fread(&bmpInfoHead.Compression, sizeof(uint32_t), 1, fd);
-            fread(&bmpInfoHead.ImageSize, sizeof(uint32_t), 1, fd);
-            fread(&bmpInfoHead.XpixelsPerM, sizeof(uint32_t), 1, fd);
-            fread(&bmpInfoHead.YpixelsPerM, sizeof(uint32_t), 1, fd);
-            fread(&bmpInfoHead.Colors_Used, sizeof(uint32_t), 1, fd);
-            fread(&bmpInfoHead.Important_Colors, sizeof(uint32_t), 1, fd);
-            /* bmp check is not very good */
-            if ((bmpInfoHead.Bits_Per_Pixel != 24) || (bmpHead.Signature != 0x4D42) ||
-                (bmpInfoHead.Compression != 0) || (bmpInfoHead.Colors_Used != 0) ||
-                (bmpHead.FileSize - 0x36 != bmpInfoHead.ImageSize)) {
-                fclose(fd);
-                return nullptr;
-            }
+        /////////////////////////////////////////////////////////////////
+        fread(&bmpHead.Signature,               sizeof(uint16_t), 1, fd);
+        fread(&bmpHead.FileSize,                sizeof(uint32_t), 1, fd);
+        fread(&bmpHead.reserved,                sizeof(uint32_t), 1, fd);
+        fread(&bmpHead.DataOffset,              sizeof(uint32_t), 1, fd);
+        /////////////////////////////////////////////////////////////////
+        fread(&bmpInfoHead.Size,                sizeof(uint32_t), 1, fd);
+        fread(&bmpInfoHead.Width,               sizeof(uint32_t), 1, fd);
+        fread(&bmpInfoHead.Height,              sizeof(uint32_t), 1, fd);
+        fread(&bmpInfoHead.Planes,              sizeof(uint16_t), 1, fd);
+        fread(&bmpInfoHead.Bits_Per_Pixel,      sizeof(uint16_t), 1, fd);
+        fread(&bmpInfoHead.Compression,         sizeof(uint32_t), 1, fd);
+        fread(&bmpInfoHead.ImageSize,           sizeof(uint32_t), 1, fd);
+        fread(&bmpInfoHead.XpixelsPerM,         sizeof(uint32_t), 1, fd);
+        fread(&bmpInfoHead.YpixelsPerM,         sizeof(uint32_t), 1, fd);
+        fread(&bmpInfoHead.Colors_Used,         sizeof(uint32_t), 1, fd);
+        fread(&bmpInfoHead.Important_Colors,    sizeof(uint32_t), 1, fd);
+        /////////////////////////////////////////////////////////////////
 
-            /* reads image */
-            image_size = bmpInfoHead.ImageSize;
-            image = new uint8_t[image_size];
-            fread(image, sizeof(uint8_t), image_size, fd);
+        if (ferror(fd) == 0) {
+            if ((bmpInfoHead.Bits_Per_Pixel == 24) && (bmpHead.Signature == 0x4D42) &&
+                (bmpInfoHead.Compression == 0) && (bmpInfoHead.Colors_Used == 0)) {
+                image_size = bmpInfoHead.ImageSize;
+                image = new uint8_t[image_size];
+                if (image != nullptr) {
+                    fread(image, sizeof(uint8_t), image_size, fd);
+                    if (ferror(fd)) {
+                        delete[] image;
+                        image = nullptr;
+                    } else {
+                        *y0 = bmpInfoHead.Height;
+                        *x0 = bmpInfoHead.Width;
+                        *_size = bmpInfoHead.ImageSize;
+                    }
+                }
+            }
         }
         fclose(fd);
     }
 
-    /* got the image */
+    /* convert to grayscale */
     if (image != nullptr) {
-        *y0 = bmpInfoHead.Height;
-        *x0 = bmpInfoHead.Width;
-        *_size = bmpInfoHead.ImageSize;
-        return image;
+        double lum = 0;
+        uint8_t* row = nullptr, * tmp = nullptr;
+        uint32_t __y = 0, __x = 0, x1 = 0, _fb = 0, _x = *_size / *y0;
+
+        for (__y = 0; __y < *y0; __y++) {
+            x1 = 0;
+            row = &image[_x * __y];
+            for (__x = 0; __x < *x0; __x++) {
+                tmp = &image[_fb++];
+                //https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
+                lum = /*blue*/(row[x1++] * 0.11) + /*green*/(row[x1++] * 0.59) + /*red*/(row[x1++] * 0.30);
+                if (lum < 0) lum = 0;
+                if (lum > 255) lum = 255;
+                *tmp = (uint8_t)lum;
+            }
+        }
+        *_size = _fb;
     }
 
-    return nullptr;
+    return image;
 }
 
 uint8_t* canvas::pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size)
 {
-    uint32_t dim[2] = { 0x00 };
-    uint32_t image_size = 0;
+    *x0 = *y0 = *_size = 0;
+
+    bool err = 0;
+    char trash[500];
     uint8_t* image = nullptr;
+    uint32_t image_size = 0;
+    uint32_t dim[2] = { 0x00 };
 
     FILE* fd;
     fd = fopen(fileName, "rb");
@@ -696,73 +711,64 @@ uint8_t* canvas::pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
         fseek(fd, 0, SEEK_END);
         size_t file_size = ftell(fd);
         fseek(fd, 0, SEEK_SET);
-       
-        int i = 0;
-        char* pch;
-        bool err = 0;
-        char trash[500];
-        
 
+        /////////////////////////////////////////////////////////////////
         if (fgets(trash, 5, fd) != NULL) {
-            if (strcmp(trash, "P4\n")) {
-                fclose(fd);
-                return nullptr;
+            if (!strcmp(trash, "P4\n")) {
+                do {
+                    if (fgets(trash, 500, fd) == NULL) {
+                        err = 1;
+                        break;
+                    }
+                } while (trash[0] == '#');
+                int i = 0; char* pch;
+                pch = strtok(trash, " \n");
+                while (pch != NULL) {
+                    dim[i++] = atoi(pch);
+                    pch = strtok(NULL, " \n");
+                }
             }
-        } else {
-            fclose(fd);
-            return nullptr;
         }
- 
-        do {
-            if (fgets(trash, 500, fd) == NULL) {
-                fclose(fd);
-                return nullptr;
+        /////////////////////////////////////////////////////////////////
+
+        if (!err) {
+            image_size = (uint32_t)(file_size - ftell(fd));
+            image = new uint8_t[image_size];
+            if (image != nullptr) {
+                fread(image, sizeof(uint8_t), image_size, fd);
+                if (ferror(fd) == 0) {
+                    if (ferror(fd)) {
+                        delete[] image;
+                        image = nullptr;
+                    } else {
+                        *y0 = dim[1];
+                        *x0 = dim[0];
+                        *_size = image_size;
+                    }
+                }
             }
         }
-        while (trash[0] == '#');
-
-        pch = strtok(trash, " \n");
-        while (pch != NULL) {
-            dim[i++] = atoi(pch);
-            pch = strtok(NULL, " \n");
-        }
-
-        image_size = (uint32_t)(file_size - ftell(fd));
-        image = new uint8_t[image_size];
-
-        if (image != nullptr) {
-            fread(image, sizeof(uint8_t), image_size, fd);
-        }
-
         fclose(fd);
     }
 
-    /* got the image */
-    if (image != nullptr) {
-        *y0 = dim[1];
-        *x0 = dim[0];
-        * _size = image_size;
-        return image;
-    }
-
-    return nullptr;
+    return image;
 }
 
 bool canvas::import_jbg(const char* fileName)
 {
+    bool err = 0;
     uint32_t x = 0, y = 0, s = 0;
-    uint8_t* image_jbg = jbg_open(fileName, &x, &y, &s);
+    uint8_t* image = jbg_open(fileName, &x, &y, &s);
 
-    if (image_jbg != nullptr) {
-
+    if (image != nullptr) {
+        uint8_t* tmp;
         uint32_t x1 = s / y;
         uint32_t q, _y, _x = 0;
-        uint8_t* tmp;
 
-        if (create(x, y, 0) != 1) {
+        if ((err |= create(x, y, 0)) != 1) {
             for (_y = 0; _y < y; _y++) {
                 q = x1 * _y;
-                tmp = image_jbg + q;
+                tmp = image + q;
 
                 uint8_t bit = 0;
                 for (_x = 0; _x < x; _x++) {
@@ -771,91 +777,63 @@ bool canvas::import_jbg(const char* fileName)
                     bit = (bit + 1) % 8;
                 }
             }
-        } else {
-            free(image_jbg);
-            return 1;
-        }
-
-        free(image_jbg);
+        } 
+        free(image);
     }
 
-    return 0;
+    return err;
 }
 
-
-//TODO: add file io error handling
 bool canvas::import_24bit(const char* fileName, DITHER type)
 {
-    double lum;
-    uint32_t y0 = 0, x0 = 0, x1 = 0, q = 0;
-    uint32_t x = 0, y = 0, s = 0;
-    float* gray = nullptr;
+    float* tmp;
+    bool err = 0;
+    uint32_t x = 0, y = 0, s = 0, q = 0;
+    uint32_t _x = 0, _y = 0, _yi;
+    uint8_t* image = bmp_open(fileName, &x, &y, &s);
 
-    uint8_t* row = nullptr;
-    uint8_t* image_24 = img_open(fileName, &x, &y, &s);
-
-    if (image_24 != nullptr) {
-        uint32_t i_x = s / y, i_y = y, gray_size = x * i_y;
-
-        gray = new float[gray_size];
-        float* tmp = gray;
-    
-        if (gray != nullptr) {
-            for (y0 = 0; y0 < i_y; y0++) {
-                x1 = 0;
-                row = &image_24[i_x * y0];
-
-                for (x0 = 0; x0 < x; x0++) {
-                    //https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
-                    lum = /*blue*/(row[x1++] * 0.11) + /*green*/(row[x1++] * 0.59) + /*red*/(row[x1++] * 0.30);
-                    if (lum < 0) lum = 0;
-                    if (lum > 255) lum = 255;
-                    *tmp = (uint8_t)lum;
-                    tmp++;
-                }
-            }
-            delete[] image_24;
-        
-            img _img = { gray, x, i_y }; //create image struct
-
-            bool err = 0;
+    if (image != nullptr) {
+        float* _d = new float[s];
+        if (_d != nullptr) {
+            for (uint32_t i = 0; i < s; i++)
+                _d[i] = (float)image[i];
+            delete[] image;
+            img _img = { _d, x, y };
             if ((err |= dither(&_img, type)) != 1) {
-                x1 = i_y - 1; //reused, not x, but y
-                if ((err |= create(x, i_y, 0)) != 1) {
-                    for (y0 = 0; y0 < i_y; y0++) {
-                        for (x0 = 0; x0 < x; x0++) {
-                            q = ((((x1)-y0) * x)) + x0;
-                            tmp = gray + q;
-                            s = (uint32_t) *tmp;
-
-                            if (s == 0)
-                                setPixle(x0, y0, 1);
+                _yi = y - 1;
+                if ((err |= create(x, y, 0)) != 1) {
+                    for (_y = 0; _y < y; _y++) {
+                        for (_x = 0; _x < x; _x++) {
+                            q = ((((_yi)-_y) * x)) + _x;
+                            tmp = _img.__img + q;
+                            s = (uint32_t)*tmp;
+                            if (s == 0) 
+                                setPixle(_x, _y, 1);
                         }
                     }
                 }
             }
-            delete[] gray;
-            return err;
+            delete[] _d;
         }
-        delete[] image_24;
-        return 1;
+        else delete[] image;
     }
+    else return 1;
 
-    return 1;
+    return err;
 }
 
 bool canvas::import_pbm(const char* fileName)
 {
+    bool err = 0;
     uint32_t x = 0, y = 0, s = 0;
     uint8_t* image_pbm = pbm_open(fileName, &x, &y, &s);
 
     if (image_pbm != nullptr) {
-
         uint32_t x1 = s / y;
         uint32_t q, _y, _x = 0;
         uint8_t* tmp;
 
-        if (create(x, y, 0) != 1) {
+        if ((err |= create(x, y, 0)) != 1) {
             for (_y = 0; _y < y; _y++) {
                 q = x1 * _y;
                 tmp = image_pbm + q;
@@ -868,15 +846,10 @@ bool canvas::import_pbm(const char* fileName)
                 }
             }
         }
-        else {
-            delete[] image_pbm;
-            return 1;
-        }
-
         delete[] image_pbm;
     }
 
-    return 0;
+    return err;
 }
 
 bool canvas::mirror(MIRROR m)
@@ -971,25 +944,27 @@ bool canvas::dither(img* image, DITHER type)
     switch (type)
     {
     case DITHER::FloydSteinberg:
-        err |= floydSteinberg(image);
+        err |= floydSteinberg(image);       break;
     case DITHER::Stucki:
-        err |=  stucki(image);
+        err |=  stucki(image);              break;
     case DITHER::Jarvis:
-        err |= jarvis(image);
+        err |= jarvis(image);               break;
     case DITHER::Atkinson:
-        err |= atkinson(image);
+        err |= atkinson(image);             break;
     case DITHER::Bayer_2x2:
-        err |= bayer(image, 0);
+        err |= bayer(image, 0);             break;
     case DITHER::Bayer_4x4:
-        err |= bayer(image, 1);
+        err |= bayer(image, 1);             break;
     case DITHER::Bayer_8x8:
-        err |= bayer(image, 2);
+        err |= bayer(image, 2);             break;
     case DITHER::Bayer_16x16:
-        err |= bayer(image, 3);
+        err |= bayer(image, 3);             break;
     case DITHER::Cluster:
-        err |= cluster(image);
+        err |= cluster(image);              break;
+    case DITHER::Threshold:
+        err |= threshold(image, 256 / 2);   break;
     default:
-        err |= threshold(image, 256 / 2);
+        err = 1;
     };
 
     return err;

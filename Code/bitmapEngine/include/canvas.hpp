@@ -221,6 +221,12 @@ public:
     bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
     bool saveXBM(const char* fileName, const char* structName);
 
+    void debug(void)
+    {
+        ;
+    }
+
+
     ~canvas();
 
     canvas& operator= (const canvas& c) {
@@ -235,7 +241,7 @@ public:
 
 private:
 
-    uint8_t* img_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
+    uint8_t* bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
     uint8_t* jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
     uint8_t* pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
 
@@ -251,6 +257,7 @@ private:
     bool atkinson(img* image);
     bool bayer(img* image, uint8_t matrix);
     bool cluster(img* image);
+
 
 protected:
     bool _inv = 0;
