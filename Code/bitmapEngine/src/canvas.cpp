@@ -7,7 +7,7 @@
     
     File: canvas.cpp
     
-        Notes: Very little error handling. Like for real, this needs looked at sometime.
+        Notes: 
         
     =======================================================================================
 
@@ -604,12 +604,10 @@ uint8_t* canvas::bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
         size_t file_size = ftell(fd);
         fseek(fd, 0, SEEK_SET);
 
-        /////////////////////////////////////////////////////////////////
         fread(&bmpHead.Signature,               sizeof(uint16_t), 1, fd);
         fread(&bmpHead.FileSize,                sizeof(uint32_t), 1, fd);
         fread(&bmpHead.reserved,                sizeof(uint32_t), 1, fd);
         fread(&bmpHead.DataOffset,              sizeof(uint32_t), 1, fd);
-        /////////////////////////////////////////////////////////////////
         fread(&bmpInfoHead.Size,                sizeof(uint32_t), 1, fd);
         fread(&bmpInfoHead.Width,               sizeof(uint32_t), 1, fd);
         fread(&bmpInfoHead.Height,              sizeof(uint32_t), 1, fd);
@@ -621,7 +619,6 @@ uint8_t* canvas::bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
         fread(&bmpInfoHead.YpixelsPerM,         sizeof(uint32_t), 1, fd);
         fread(&bmpInfoHead.Colors_Used,         sizeof(uint32_t), 1, fd);
         fread(&bmpInfoHead.Important_Colors,    sizeof(uint32_t), 1, fd);
-        /////////////////////////////////////////////////////////////////
 
         if (ferror(fd) == 0) {
             if ((bmpInfoHead.Bits_Per_Pixel == 24) && (bmpHead.Signature == 0x4D42) &&
@@ -687,7 +684,6 @@ uint8_t* canvas::pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
         size_t file_size = ftell(fd);
         fseek(fd, 0, SEEK_SET);
 
-        /////////////////////////////////////////////////////////////////
         if (fgets(trash, 5, fd) != NULL) {
             if (!strcmp(trash, "P4\n")) {
                 do {
@@ -707,7 +703,6 @@ uint8_t* canvas::pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
                 }
             }
         }
-        /////////////////////////////////////////////////////////////////
 
         if (!err) {
             image_size = (uint32_t)(file_size - ftell(fd));

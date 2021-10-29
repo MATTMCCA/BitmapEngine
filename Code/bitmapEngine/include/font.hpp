@@ -126,15 +126,8 @@ private:
     bool drawChar(canvas* ptr, unsigned char c, int32_t x0, int32_t y0);
     bool write(canvas* ptr, unsigned char c, int32_t* cursor_x, int32_t* cursor_y, int32_t x_offset = 0);
     bool print(canvas* ptr, const char* str, int32_t x0, int32_t y0, int32_t x_offset = 0);
-
-    bool charBounds(unsigned char c, int32_t* x, int32_t* y,
-        int32_t* minx, int32_t* miny, int32_t* maxx,
-        int32_t* maxy);
-
-    bool getTextBounds(const char* str, int32_t x, int32_t y,
-        int32_t* x1, int32_t* y1, uint32_t* w,
-        uint32_t* h);
-
+    bool charBounds(unsigned char c, int32_t* x, int32_t* y, int32_t* minx, int32_t* miny, int32_t* maxx, int32_t* maxy);
+    bool getTextBounds(const char* str, int32_t x, int32_t y, int32_t* x1, int32_t* y1, uint32_t* w, uint32_t* h);
     void enbit(uint8_t value, std::vector<uint8_t> *bmp);
 
     void GFX_free(void)

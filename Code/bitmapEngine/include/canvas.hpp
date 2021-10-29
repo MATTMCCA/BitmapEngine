@@ -7,7 +7,7 @@
 
     File: canvas.hpp
 
-        Notes: Very little error handling.
+        Notes: 
 
     =======================================================================================
 
@@ -222,24 +222,6 @@ public:
     bool savePBM(const char* fileName); //portable bitmap raw
     bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
     bool saveXBM(const char* fileName, const char* structName);
-
-    /* debug function */
-    void debug(void) {
-        /*
-        int num = 11, u = 0x0F, h = 4;
-        uint32_t __table[] = {
-            0x9FC1D2CF, 0xA9C2CC84, 0xFECCD08B, 0xFEC3D1CF,
-            0xAEC1DF96, 0xFEC0DF84, 0xBBDE9EA2, 0xBFD9CACF,
-            0xBF8DDA9A, 0xB2C19E8D, 0xB1D490E5
-        };
-        
-        do
-            for (int i = 0, j = h << (sizeof(uint32_t)-1); i < num; i++)
-                for (int m = 0; m < h; m++)
-                    printf("%c", (char)(((__table[i] ^ 0xDEADBEEF) >> (j -= (h*2))) & 0xFF));
-        while (u--);
-        */
-    }
 
     ~canvas();
 
