@@ -213,7 +213,8 @@ public:
     bool drawBox(int32_t x0, int32_t y0, int32_t length, int32_t width, int32_t thick, bool val);
     bool drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val);
 
-    bool import_24bit(const char* fileName, DITHER type = DITHER::Threshold);
+    bool import_24bit(const char* fileName, DITHER type = DITHER::Threshold, int b_level = 0, int c_level = 0);
+
     bool import_jbg(const char* fileName);
     bool import_pbm(const char* fileName);
 
@@ -252,6 +253,9 @@ public:
     }
 
 private:
+
+    bool adj_brightness(uint8_t *ptr, uint32_t x0, uint32_t y0, int val);
+    bool adj_contrast(uint8_t* ptr, uint32_t x0, uint32_t y0, int val);
 
     uint8_t* bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
     uint8_t* jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);

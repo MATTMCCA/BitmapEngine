@@ -762,13 +762,16 @@ bool canvas::import_jbg(const char* fileName)
     return err;
 }
 
-bool canvas::import_24bit(const char* fileName, DITHER type)
+bool canvas::import_24bit(const char* fileName, DITHER type, int b_level, int c_level)
 {
     float* tmp;
     bool err = 0;
     uint32_t x = 0, y = 0, s = 0, q = 0;
     uint32_t _x = 0, _y = 0, _yi;
     uint8_t* image = bmp_open(fileName, &x, &y, &s);
+
+    if (b_level != 0) err |= adj_brightness(image, x, y, b_level);
+    if (c_level != 0) err |= adj_contrast(image, x, y, c_level);
 
     if (image != nullptr) {
         float* _d = new float[s];
@@ -1142,6 +1145,48 @@ bool canvas::cluster(img* image)
             for (x = 0; x < image->__img_x; x++) {
                 newpixel = (_img_get(image, x, y) >= c_4x4[(y % 4 + x % 4)]) ? 255 : 0;
                 _img_set(image, x, y, (uint8_t)newpixel);
+            }
+        }
+        return 0;
+    }
+    return 1;
+}
+
+bool canvas::adj_brightness(uint8_t* ptr, uint32_t x0, uint32_t y0, int val)
+{
+    int pix;
+    uint8_t* p;
+    uint32_t y = 0, x = 0;
+
+    if (ptr != nullptr) {
+        for (y = 0; y < y0; y++) {
+            for (x = 0; x < x0; x++) {
+                p = &ptr[(x * y0) + y];
+                pix = *p + val;
+                if (pix > 255) pix = 255;
+                if (pix < 0) pix = 0;
+                *p = (uint8_t)pix;
+            }
+        }
+        return 0;
+    }
+    return 1;
+}
+
+bool canvas::adj_contrast(uint8_t* ptr, uint32_t x0, uint32_t y0, int val)
+{
+    uint8_t* p;
+    uint32_t y = 0, x = 0;
+    float _P = 0.0, F = (259.0F * (val + 255.0F)) / (255.0F * (259.0F - val));
+
+    if (ptr != nullptr) {
+        for (y = 0; y < y0; y++) {
+            for (x = 0; x < x0; x++) {
+                p = &ptr[(x * y0) + y];
+                _P = (F * (*p - 128.0F)) + 128.0F;
+                if (_P > 255.0F) _P = 255.0F;
+                if (_P < 0.0F) _P = 0.0F;
+                *p = (uint8_t)_P;
             }
         }
         return 0;
