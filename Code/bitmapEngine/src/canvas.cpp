@@ -132,23 +132,19 @@ static void data_out(unsigned char* start, size_t len, void* file)
 
 bool canvas::saveJBG(const char* fileName)
 {
+    bool err = 0;
     if (ptr != nullptr) {
         uint32_t image_y = _y;
         uint32_t image_x = (uint32_t)(_x / 8.0);
-
-        if ((image_x * 8) < (uint32_t)_x)
-            image_x++;   //math fix
-
-        if (image_x == 0)
-            image_x = 1; //non 0 byte width
+        if ((image_x * 8) < (uint32_t)_x)           image_x++;   //math fix
+        if (image_x == 0)                           image_x = 1; //non 0 byte width
 
         uint8_t* BMPDATA = nullptr;
         uint32_t q = image_x * image_y;
         size_t BMPDATASIZE = q * sizeof(uint8_t);
         BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
 
-        if (BMPDATA != nullptr)
-        {
+        if (BMPDATA != nullptr) {
             memset(BMPDATA, 0x00, BMPDATASIZE);
 
             bool* in_line;
@@ -159,28 +155,26 @@ bool canvas::saveJBG(const char* fileName)
                 in_line = &ptr[(__y * _x)];
                 out_line = &BMPDATA[(__y * image_x)];
 
-                for (__x = 0; __x < _x; __x++) {
+                for (__x = 0; __x < _x; __x++)
                     if (in_line[__x] ^ _inv)
                         BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
-                }
             }
 
             struct jbg85_enc_state s;
-
             size_t bpl = image_x;
-            uint32_t width = _x, height = _y, y;      
+            uint32_t width = _x, height = _y, y;
 
             FILE* fd;
-            fd = fopen(fileName, "wb");
-            if (fd != NULL) 
-            {                
+            //fopen(fileName, "wb");
+            fopen_s(&fd, fileName, "wb");
+
+            if (fd != NULL) {
                 jbg85_enc_init(&s, _x, _y, data_out, fd);
                 jbg85_enc_options(&s, JBG_TPBON, 0, -1);
 
-                unsigned char *next_line = nullptr, *prev_line = nullptr, *prevprev_line = nullptr;
+                unsigned char* next_line = nullptr, * prev_line = nullptr, * prevprev_line = nullptr;
 
                 for (y = 0; y < _y; y++) {
-
                     /* Use a 3-line ring buffer, because the encoder requires that the two
                      * previously supplied lines are still in memory when the next line is
                      * processed. */
@@ -195,36 +189,34 @@ bool canvas::saveJBG(const char* fileName)
                     if (y == _y)
                         jbg85_enc_newlen(&s, _y);
                 }
-                fclose(fd);
+                if ((fclose(fd) != 0) || (ferror(fd)))
+                    err |= 1;
             }
-
+            else err |= 1;
             delete[] BMPDATA; //release when done
-            return 0;
         }
-        return 1;
+        else err |= 1;
     }
-    return 1;
+    else err |= 1;
+
+    return err;
 }
 
 bool canvas::savePBM(const char* fileName)
 {
+    bool err = 0;
     if (ptr != nullptr) {
         uint32_t image_y = _y;
         uint32_t image_x = (uint32_t)(_x / 8.0);
-
-        if ((image_x * 8) < (uint32_t)_x)
-            image_x++;   //math fix
-
-        if (image_x == 0)
-            image_x = 1; //non 0 byte width
+        if ((image_x * 8) < (uint32_t)_x)   image_x++;   //math fix
+        if (image_x == 0)                   image_x = 1; //non 0 byte width
 
         uint8_t* BMPDATA = nullptr;
         uint32_t q = image_x * image_y;
         size_t BMPDATASIZE = q * sizeof(uint8_t);
         BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
 
-        if (BMPDATA != nullptr) 
-        {
+        if (BMPDATA != nullptr) {
             memset(BMPDATA, 0x00, BMPDATASIZE);
 
             bool* in_line;
@@ -235,45 +227,40 @@ bool canvas::savePBM(const char* fileName)
                 in_line = &ptr[(__y * _x)];
                 out_line = &BMPDATA[(__y * image_x)];
 
-                for (__x = 0; __x < _x; __x++) {
+                for (__x = 0; __x < _x; __x++)
                     if (in_line[__x] ^ _inv)
                         BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
-                }
             }
 
             FILE* fd;
-            fd = fopen(fileName, "wb");
+            //fopen(fileName, "wb");
+            fopen_s(&fd, fileName, "wb");
 
             if (fd != NULL) {
-                //TODO: add error handling, or not...
-                /////////////////////////////////////////////////////////////////////////
                 fprintf(fd, "P4\n# Created by BitmapEngine\n%d %d\n", _x, _y);
-                /////////////////////////////////////////////////////////////////////////
                 fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
-                /////////////////////////////////////////////////////////////////////////
-                fclose(fd);
+                if ((fclose(fd) != 0) || (ferror(fd)))
+                    err |= 1;
             }
-
+            else err |= 1;
             delete[] BMPDATA; //release when done
-            return 0;
         }
-        return 1;
+        else err |= 1;
     }
-    return 1;
+    else err |= 1;
+
+    return err;
 }
 
 /* mainly for debugging */
 bool canvas::saveXBM(const char* fileName, const char* structName)
 {
+    bool err = 0;
     if (ptr != nullptr) {
         uint32_t image_y = _y;
         uint32_t image_x = (uint32_t)(_x / 8.0);
-
-        if ((image_x * 8) < (uint32_t)_x)
-            image_x++;   //math fix
-
-        if (image_x == 0)
-            image_x = 1; //non 0 byte width
+        if ((image_x * 8) < (uint32_t)_x)            image_x++;   //math fix
+        if (image_x == 0)                            image_x = 1; //non 0 byte width
 
         uint8_t* BMPDATA = nullptr;
         uint32_t q = image_x * image_y;
@@ -286,16 +273,16 @@ bool canvas::saveXBM(const char* fileName, const char* structName)
             uint32_t __y = 0, __x = 0;
 
             FILE* fd;
-            fd = fopen(fileName, "wb");
+            //fopen(fileName, "wb");
+            fopen_s(&fd, fileName, "wb");
 
             if (fd != NULL) {
-                uint32_t k = 1;
-
                 fprintf(fd, "#define IMG_width %d\n", _x);
                 fprintf(fd, "#define IMG_height %d\n", _y);
                 fprintf(fd, "static unsigned char IMG_bits[] = {\n\t");
 
                 /* jank lookup table */
+                uint32_t k = 1;
                 uint8_t xbm_table[256];
                 for (int i = 0; i < 256; i++) {
                     int k = i;
@@ -312,50 +299,43 @@ bool canvas::saveXBM(const char* fileName, const char* structName)
                     in_line = &ptr[(__y * _x)];
                     memset(out_line, 0x00, image_x);
 
-                    for (__x = 0; __x < _x; __x++) {
+                    for (__x = 0; __x < _x; __x++)
                         if (in_line[__x] ^ _inv)
                             BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
-                    }
 
-                    for (__x = 0; __x < image_x; __x++, k++) {                        
+                    for (__x = 0; __x < image_x; __x++, k++) {
                         fprintf(fd, "0x%.2x%s", xbm_table[out_line[__x]], k != BMPDATASIZE ? ", " : "\n};");
-                        if ((k % image_x) == 0) {
+                        if ((k % image_x) == 0)
                             fprintf(fd, "\n\t");
-                        }
                     }
-                }
-
-                fclose(fd);
+                }                                
+                if ((fclose(fd) != 0) || ferror(fd))
+                    err |= 1;
             }
-
+            else err |= 1;
             delete[] BMPDATA; //release when done
-            return 0;
         }
-        return 1;
+        else err |= 1;
     }
-    return 1;
+    else err |= 1;
+
+    return err;
 }
 
 bool canvas::saveBMP(const char* fileName, int DPI)
 {
+    bool err = 0;
     if (ptr != nullptr) {
         uint32_t image_y = _y;
         uint32_t image_x = (uint32_t)(_x / 8.0);
 
-        if ((image_x * 8) < (uint32_t)_x)
-            image_x++;   //math fix
-
-        if (image_x == 0)
-            image_x = 1; //non 0 byte width
-
-        while ((image_x % 4))
-            image_x++;   //4 byte padding
+        if ((image_x * 8) < (uint32_t)_x)   image_x++;   //math fix
+        if (image_x == 0)                   image_x = 1; //non 0 byte width
+        while ((image_x % 4))               image_x++;   //4 byte padding
 
         header bmpHead;
         bmpHead.Signature = 0x4D42;
-
         bmpHead.FileSize = 54 /*header*/ + 8 /*color table*/ + (image_x * image_y) /*bytes*/;
-
         bmpHead.reserved = 0x00;
         bmpHead.DataOffset = 62;
 
@@ -388,24 +368,20 @@ bool canvas::saveBMP(const char* fileName, int DPI)
             for (__y = 0; __y < _y; __y++) {
                 in_line = &ptr[(__y * _x)];
                 out_line = &BMPDATA[(((image_y)-__y) * image_x)];
-
-                for (__x = 0; __x < _x; __x++) {
+                for (__x = 0; __x < _x; __x++) 
                     if (in_line[__x] ^ _inv)
                         BIT_CLEAR(out_line[(__x / 8)], (7 - (__x % 8)));
-                }
             }
 
             FILE* fd;
-            fd = fopen(fileName, "wb");
+            //fopen(fileName, "wb");
+            fopen_s(&fd, fileName, "wb");
 
             if (fd != NULL) {
-                //TODO: add error handling, or not...
-                /////////////////////////////////////////////////////////////////////////
                 fwrite(&bmpHead.Signature, sizeof(uint16_t), 1, fd);
                 fwrite(&bmpHead.FileSize, sizeof(uint32_t), 1, fd);
                 fwrite(&bmpHead.reserved, sizeof(uint32_t), 1, fd);
                 fwrite(&bmpHead.DataOffset, sizeof(uint32_t), 1, fd);
-                /////////////////////////////////////////////////////////////////////////
                 fwrite(&bmpInfoHead.Size, sizeof(uint32_t), 1, fd);
                 fwrite(&bmpInfoHead.Width, sizeof(uint32_t), 1, fd);
                 fwrite(&bmpInfoHead.Height, sizeof(uint32_t), 1, fd);
@@ -417,20 +393,20 @@ bool canvas::saveBMP(const char* fileName, int DPI)
                 fwrite(&bmpInfoHead.YpixelsPerM, sizeof(uint32_t), 1, fd);
                 fwrite(&bmpInfoHead.Colors_Used, sizeof(uint32_t), 1, fd);
                 fwrite(&bmpInfoHead.Important_Colors, sizeof(uint32_t), 1, fd);
-                /////////////////////////////////////////////////////////////////////////
                 fwrite(&COLOR_TABLE, sizeof(uint32_t), 2, fd);
-                /////////////////////////////////////////////////////////////////////////
                 fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
-                /////////////////////////////////////////////////////////////////////////
-                fclose(fd);
-            }
 
+                if ((fclose(fd) != 0) || ferror(fd))
+                    err |= 1;
+            }
+            else err |= 1;
             delete[] BMPDATA; //release when done
-            return 0;
         }
-        return 1;
+        else err |= 1;
     }
-    return 1;
+    else err |= 1;
+
+    return err;
 }
 
 bool canvas::invert(bool invert)
@@ -439,7 +415,6 @@ bool canvas::invert(bool invert)
     return 0;
 }
 
-/* calling function should guard nullptr */
 bool canvas::getPixle(uint32_t x, uint32_t y)
 {
     if (ptr == nullptr) return 1;
@@ -454,8 +429,6 @@ bool canvas::getInvert(void)
     return _inv;
 }
 
-/* calling function should guard nullptr */
-//umm passing signed into this might be bad....
 bool canvas::setPixle(uint32_t x, uint32_t y, bool val)
 {
     if (ptr == nullptr) return 1;
@@ -469,6 +442,7 @@ canvas::~canvas()
 {
     if (ptr != nullptr)
         delete[] ptr;
+    ptr = nullptr;
 }
 
 bool canvas::drawHorizontalLine(int32_t x0, int32_t y0, int32_t width, int32_t thick, bool val)
@@ -522,7 +496,6 @@ bool canvas::drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, 
  */
 static int line_out(const struct jbg85_dec_state* s, unsigned char* start, size_t len, unsigned long y, void* file)
 {
-    /* this is awfull and needs work, infact most of this is awfull lol*/
     if (file != nullptr) {
         jbg_buffer* buf = (jbg_buffer*)file;
 
@@ -537,7 +510,7 @@ static int line_out(const struct jbg85_dec_state* s, unsigned char* start, size_
                 buf->__img = (uint8_t*) malloc(len);
                 if (buf->__img != nullptr) {
                     memcpy(buf->__img, start, len);
-                    buf->__img_len += len;
+                    buf->__img_len += (uint32_t) len;
                 }
             }
             return 0;
@@ -548,7 +521,7 @@ static int line_out(const struct jbg85_dec_state* s, unsigned char* start, size_
             buf->__img = (uint8_t*)realloc(org, buf->__img_len + len);
             if (buf->__img != nullptr) {
                 memcpy(((uint8_t*)buf->__img) + buf->__img_len, start, len);
-                buf->__img_len += len;
+                buf->__img_len += (uint32_t) len;
             } else {
                 free(org);
                 org = nullptr;
@@ -562,18 +535,17 @@ static int line_out(const struct jbg85_dec_state* s, unsigned char* start, size_
 uint8_t* canvas::jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size)
 {
     *x0 = *y0 = *_size = 0;
-
     int result;
     unsigned char* inbuf, * outbuf;
     size_t bytes_read = 0, len, cnt;
     size_t inbuflen = 1024, outbuflen;
-    unsigned long xmax = COMP_XMAX;
+    unsigned long xmax = COMP_XMAX; // working buffer, make larger on fail
 
     jbg_buffer buf{ nullptr };
     struct jbg85_dec_state s;
 
     inbuf = (unsigned char*)malloc(inbuflen);
-    outbuflen = ((xmax >> 3) + !!(xmax & 7)) * 3;
+    outbuflen = ((xmax >> 3) + !!(xmax & 7)) * 3; //<--- this line, not my code, im not fixing it since it works.
     outbuf = (unsigned char*)malloc(outbuflen);
 
     if (!inbuf || !outbuf) {
@@ -581,7 +553,8 @@ uint8_t* canvas::jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
     }
 
     FILE* fd;
-    fd = fopen(fileName, "rb");
+    //fopen(fileName, "rb");
+    fopen_s(&fd, fileName, "rb");
 
     if (fd != NULL) {
         /* send input file to decoder */
@@ -623,7 +596,8 @@ uint8_t* canvas::bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
     infoHeader bmpInfoHead = { 0x00 };
 
     FILE* fd;
-    fd = fopen(fileName, "rb");
+    //fopen(fileName, "rb");
+    fopen_s(&fd, fileName, "rb");
 
     if (fd != NULL) {
         fseek(fd, 0, SEEK_END);
@@ -705,7 +679,8 @@ uint8_t* canvas::pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
     uint32_t dim[2] = { 0x00 };
 
     FILE* fd;
-    fd = fopen(fileName, "rb");
+    //fopen(fileName, "rb");
+    fopen_s(&fd, fileName, "rb");
 
     if (fd != NULL) {
         fseek(fd, 0, SEEK_END);
@@ -721,11 +696,14 @@ uint8_t* canvas::pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
                         break;
                     }
                 } while (trash[0] == '#');
-                int i = 0; char* pch;
-                pch = strtok(trash, " \n");
+                int i = 0; 
+                char* pch = nullptr, * pchb = nullptr;
+                //pch = strtok_s(trash, " \n");
+                pch = strtok_s(trash, " \n", &pchb);
                 while (pch != NULL) {
                     dim[i++] = atoi(pch);
-                    pch = strtok(NULL, " \n");
+                    //pch = strtok_s(NULL, " \n");
+                    pch = strtok_s(NULL, " \n", &pchb);
                 }
             }
         }

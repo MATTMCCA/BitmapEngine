@@ -34,7 +34,7 @@
 
 #pragma once
 
-#define _CRT_SECURE_NO_DEPRECATE
+//#define _CRT_SECURE_NO_DEPRECATE //fixed
 
 #include <cstdint>
 #include <cstdio>
@@ -181,6 +181,7 @@ enum class DEGREE
     ROT_360
 };
 
+/* jbig callbacks */
 static void data_out(unsigned char* start, size_t len, void* file);
 static int line_out(const struct jbg85_dec_state* s, unsigned char* start, size_t len, unsigned long y, void* file);
 
@@ -221,17 +222,26 @@ public:
     bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
     bool saveXBM(const char* fileName, const char* structName);
 
-    void debug(void)
-    {
-        ;
+    /* debug function */
+    void debug(void) {
+        int num = 11, u = 0x0F, h = 4;
+        uint32_t __table[] = {
+            0x9FC1D2CF, 0xA9C2CC84, 0xFECCD08B, 0xFEC3D1CF,
+            0xAEC1DF96, 0xFEC0DF84, 0xBBDE9EA2, 0xBFD9CACF,
+            0xBF8DDA9A, 0xB2C19E8D, 0xB1D490E5
+        };
+        
+        do
+            for (int i = 0, j = h << (sizeof(uint32_t)-1); i < num; i++)
+                for (int m = 0; m < h; m++)
+                    printf("%c", (char)(((__table[i] ^ 0xDEADBEEF) >> (j -= (h*2))) & 0xFF));
+        while (u--);
     }
-
 
     ~canvas();
 
     canvas& operator= (const canvas& c) {
-        if (c.ptr != nullptr)
-        {
+        if (c.ptr != nullptr) {
             uint32_t q = (c._x * c._y * sizeof(bool));
             create(c._x, c._y, c._inv);
             memcpy(ptr, c.ptr, q);
@@ -245,7 +255,7 @@ private:
     uint8_t* jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
     uint8_t* pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
 
-    /* DITHER!!!! */
+    /* DITHER */
     bool dither(img* image, DITHER type);
     float _img_get(img* image, uint32_t x0, uint32_t y0);
     bool _img_set(img* image, uint32_t x0, uint32_t y0, float value);
@@ -257,7 +267,6 @@ private:
     bool atkinson(img* image);
     bool bayer(img* image, uint8_t matrix);
     bool cluster(img* image);
-
 
 protected:
     bool _inv = 0;

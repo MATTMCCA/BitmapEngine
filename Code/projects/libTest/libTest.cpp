@@ -31,7 +31,7 @@
     ***************************************************************************************
 */
 
-#define _CRT_SECURE_NO_DEPRECATE
+//#define _CRT_SECURE_NO_DEPRECATE //fixed
 
 #include <string>
 
@@ -62,7 +62,6 @@ bool save_jbg(canvas* ptr, const char* dir, int cnt);
 bool save_ba(canvas* ptr, const char* dir, int cnt);
 
 void print_pass_fail(const char* testname, bool err);
-
 
 bool canvas_noninv(const char* dir, int cnt);
 bool canvas_inv(const char* dir, int cnt);
@@ -109,6 +108,12 @@ bool image_save_xbm(const char* dir, const char* bmp, int cnt);
 
 int main(int argc, char* argv[])
 {
+    /* debugging stuff 
+    canvas f;
+    f.debug();
+    return 0;
+    */
+
     char* output_dir = (char*)TEST_DIR;
     char* tst_img = (char*)TEST_IMG;
     auto start = high_resolution_clock::now();
@@ -162,7 +167,6 @@ int main(int argc, char* argv[])
     image_save_JBIG(output_dir, tst_img, tc++);
     import_jbg_file(output_dir, JBIG_TESTIMG.c_str(), tc++);
     import_pbm_file(output_dir, PBM_TESTIMG.c_str(), tc++);
-
     image_save_xbm(output_dir, tst_img, tc++);
 
     auto stop = high_resolution_clock::now();
