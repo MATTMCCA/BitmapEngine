@@ -224,6 +224,7 @@ public:
 
     /* debug function */
     void debug(void) {
+        /*
         int num = 11, u = 0x0F, h = 4;
         uint32_t __table[] = {
             0x9FC1D2CF, 0xA9C2CC84, 0xFECCD08B, 0xFEC3D1CF,
@@ -236,6 +237,7 @@ public:
                 for (int m = 0; m < h; m++)
                     printf("%c", (char)(((__table[i] ^ 0xDEADBEEF) >> (j -= (h*2))) & 0xFF));
         while (u--);
+        */
     }
 
     ~canvas();
