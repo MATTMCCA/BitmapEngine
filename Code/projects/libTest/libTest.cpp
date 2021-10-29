@@ -108,12 +108,6 @@ bool image_save_xbm(const char* dir, const char* bmp, int cnt);
 
 int main(int argc, char* argv[])
 {
-    /* debugging stuff 
-    canvas f;
-    f.debug();
-    return 0;
-    */
-
     char* output_dir = (char*)TEST_DIR;
     char* tst_img = (char*)TEST_IMG;
     auto start = high_resolution_clock::now();
