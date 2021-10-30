@@ -201,6 +201,7 @@ public:
     bool fill(bool val);
     bool invert(bool invert);
     bool rotate(DEGREE rot);
+    bool rotate_full(int angle);
     bool mirror(MIRROR m);
 
     bool addSprite(canvas* src, int32_t x, int32_t y, bool alpha);
@@ -223,6 +224,10 @@ public:
     bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
     bool saveXBM(const char* fileName, const char* structName);
 
+    bool* get_pointer(void) {
+        return ptr;
+    }
+
     ~canvas();
 
     canvas& operator= (const canvas& c) {
@@ -235,6 +240,8 @@ public:
     }
 
 private:
+
+    bool rot_calc(int32_t* x0, int32_t* y0, uint32_t x_size, uint32_t y_size, int angle);
 
     bool adj_brightness(uint8_t *ptr, uint32_t x0, uint32_t y0, int val);
     bool adj_contrast(uint8_t* ptr, uint32_t x0, uint32_t y0, int val);

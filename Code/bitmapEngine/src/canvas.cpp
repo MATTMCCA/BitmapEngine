@@ -914,6 +914,74 @@ bool canvas::rotate(DEGREE rot)
     return 1;
 }
 
+/* found here: https://eab.abime.net/showthread.php?t=29492 */
+bool canvas::rot_calc(int32_t* x0, int32_t* y0, uint32_t x_size, uint32_t y_size, int angle)
+{
+    float a = (float)(angle * (3.14159 / 180.0)); //in rad
+
+    float center_x = (float)(x_size / 2);
+    float center_y = (float)(y_size / 2);
+    
+    int32_t xp = (int32_t)((*x0 - center_x) * cos(a) - (*y0 - center_y) * sin(a) /*+ center_x*/);
+    int32_t yp = (int32_t)((*x0 - center_x) * sin(a) + (*y0 - center_y) * cos(a) /*+ center_y*/);
+
+    *x0 = xp;
+    *y0 = yp;
+
+    return 0;
+}
+
+/* found here: https://eab.abime.net/showthread.php?t=29492 */
+bool canvas::rotate_full(int angle)
+{
+    bool err = 0;
+    canvas temp;
+
+    if (ptr != nullptr) {
+
+        /* min-max search */
+        int32_t MAX_X = 0, MAX_Y = 0;
+        int32_t MIN_X = 0, MIN_Y = 0;
+
+        int32_t __x[4] = { 0,            0, (int32_t) _x, (int32_t) _x };
+        int32_t __y[4] = { 0, (int32_t) _y,            0, (int32_t) _y };
+
+        for (int i = 0; i < 4; i++) {
+            rot_calc(&__x[i], &__y[i], _x, _y, angle);
+            if (__x[i] < MIN_X) MIN_X = __x[i];
+            if (__y[i] < MIN_Y) MIN_Y = __y[i];
+            if (__x[i] > MAX_X) MAX_X = __x[i];
+            if (__y[i] > MAX_Y) MAX_Y = __y[i];
+        }
+
+        MIN_X = abs(MIN_X);
+        MIN_Y = abs(MIN_Y);
+        MAX_X += MIN_X;
+        MAX_Y += MIN_Y;
+        
+        if (temp.create(MAX_X, MAX_Y, 0) == 1)
+            return 1;
+
+        int32_t xs = 0;
+        int32_t ys = 0;
+
+        for (uint32_t y = 0; y < _y; y++) {
+            for (uint32_t x = 0; x < _x; x++) {
+                xs = x;
+                ys = y;
+                rot_calc(&xs, &ys, _x, _y, angle);
+                temp.setPixle(xs + MIN_X, ys + MIN_Y, getPixle(x, y));
+            }
+        }
+
+        delete[] ptr;
+        ptr = nullptr;
+        err |= create(temp.get_pointer(), MAX_X, MAX_Y, 0);
+    }
+
+    return err;
+}
+
 bool canvas::dither(img* image, DITHER type)
 {
     bool err = 0;
