@@ -1,3 +1,4 @@
-"%CD%\x86\IDApp.exe" "%CD%\logo.bmp" "%CD%\girl.bmp" "Betty White" "%CD%\img\ID1.bmp"
-"%CD%\x86\IDApp.exe" "%CD%\logo.bmp" "%CD%\rdj.bmp" "Robert Downey Jr" "%CD%\img\ID2.bmp"
+"%CD%\x86\IDApp.exe" "Robert" "Downey Jr" "AKA IronMan" "%CD%\logo.bmp" "%CD%\rdj.bmp" "%CD%\img"
+"%CD%\x86\IDApp.exe" "Joann" "Bowers" "AKA Candy" "%CD%\logo.bmp" "%CD%\girl.bmp" "%CD%\img"
+"%CD%\x86\IDApp.exe" "Anibell" "Lecter" " " "%CD%\logo.bmp" "%CD%\mrsl.bmp" "%CD%\img"
 pause
