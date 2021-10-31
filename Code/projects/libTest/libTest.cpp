@@ -108,6 +108,9 @@ bool import_pbm_file(char* dir, const char* bmp, int cnt);
 bool image_save_xbm(const char* dir, const char* bmp, int cnt);
 bool image_brightness_adj(const char* dir, const char* bmp, int cnt);
 bool image_contrast_adj(const char* dir, const char* bmp, int cnt);
+bool canvas_scale_grow(const char* dir, const char* bmp, int cnt);
+bool canvas_scale_shrink(const char* dir, const char* bmp, int cnt);
+bool canvas_scale_grow_width(const char* dir, const char* bmp, int cnt);
 
 bool canvas_rotate_15(const char* dir, const char* bmp, int cnt);
 
@@ -170,6 +173,9 @@ int main(int argc, char* argv[])
     image_brightness_adj(output_dir, tst_img, tc++);
     image_contrast_adj(output_dir, tst_img, tc++);
     canvas_rotate_15(output_dir, tst_img, tc++);
+    canvas_scale_grow(output_dir, tst_img, tc++);
+    canvas_scale_shrink(output_dir, tst_img, tc++);
+    canvas_scale_grow_width(output_dir, tst_img, tc++);
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
@@ -783,5 +789,41 @@ bool canvas_rotate_15(const char* dir, const char* bmp, int cnt)
 
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("Canvas (bitmap_rot_45)", err);
+    return err;
+}
+
+bool canvas_scale_grow(const char* dir, const char* bmp, int cnt)
+{
+    bool err = 0;
+    canvas c;
+    err |= c.import_24bit(bmp, DITHER::Jarvis);
+    c.scale(2.0, 2.0);
+
+    err |= save_bmp(&c, dir, cnt);
+    print_pass_fail("Canvas (scale X 2)", err);
+    return err;
+}
+
+bool canvas_scale_shrink(const char* dir, const char* bmp, int cnt)
+{
+    bool err = 0;
+    canvas c;
+    err |= c.import_24bit(bmp, DITHER::Jarvis);
+    c.scale(0.5, 0.5);
+
+    err |= save_bmp(&c, dir, cnt);
+    print_pass_fail("Canvas (scale X 1/2)", err);
+    return err;
+}
+
+bool canvas_scale_grow_width(const char* dir, const char* bmp, int cnt)
+{
+    bool err = 0;
+    canvas c;
+    err |= c.import_24bit(bmp, DITHER::Jarvis);
+    c.scale(2.0, 1);
+
+    err |= save_bmp(&c, dir, cnt);
+    print_pass_fail("Canvas (scale)", err);
     return err;
 }

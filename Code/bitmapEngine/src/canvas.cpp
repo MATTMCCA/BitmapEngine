@@ -1256,3 +1256,30 @@ bool canvas::adj_contrast(uint8_t* ptr, uint32_t x0, uint32_t y0, int val)
     }
     return 1;
 }
+
+bool canvas::scale(float x0, float y0)
+{
+    bool err = 0;
+    canvas temp;
+
+    if (x0 <= 0 || y0 <= 0)
+        return 1;
+
+    if (ptr != nullptr) {
+        uint32_t newX = (int32_t)(_x * x0);
+        uint32_t newY = (int32_t)(_y * y0);
+
+        if (temp.create(newX, newY, 0) == 1)
+            return 1;
+
+        for (uint32_t y = 0; y < newY; y++)
+            for (uint32_t x = 0; x < newX; x++)
+                temp.setPixle(x, y, getPixle((uint32_t)(x/x0), (uint32_t)(y/y0)));
+
+        delete[] ptr;
+        ptr = nullptr;
+        err |= create(temp.get_pointer(), newX, newY, 0);
+    }
+
+    return err;
+}
