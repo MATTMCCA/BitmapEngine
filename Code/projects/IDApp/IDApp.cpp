@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
     /* render barcode */
     temp = new canvas;
     if (getBARCODE(temp, data.DB_TOKEN.c_str()) == 1)               return 1;
-    if (master.addSprite(temp, 430, 500, 0) == 1)                   return 1;
+    if (master.addSprite(temp, 465, 495, 0) == 1)                   return 1;
     delete temp;
 
     /* Save as MONO Thermal Bitmap */
@@ -274,8 +274,8 @@ int getBARCODE(canvas* can, const char* str)
 
     my_symbol = ZBarcode_Create();
 
-    my_symbol->symbology = BARCODE_MICROPDF417;
-    my_symbol->scale = 2;
+    my_symbol->symbology = BARCODE_PDF417;
+    my_symbol->scale = 1.5;
     my_symbol->output_options |= OUT_BUFFER_INTERMEDIATE;
 
     zint_error |= ZBarcode_Encode(my_symbol, (const unsigned char*)str, strlen(str));
