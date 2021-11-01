@@ -1,4 +1,5 @@
 
+
 # BitmapEngine
 
 I was in need of a simple way to generate monochrome bitmaps for testing various things.
@@ -9,7 +10,7 @@ VS-2019
 
 ----
 
-Example project are located in the `BitmapEngine\Code\projects` directory.
+Example projects are located in the `BitmapEngine\Code\projects` directory.
 
 ### Samples include:
 - libtest [ Library function test ]
@@ -17,4 +18,5 @@ Example project are located in the `BitmapEngine\Code\projects` directory.
 - usps_demo [ label maker demo ]
 - zint_test [ QR code test ]
 - skeletonApp [ base for dev ]
+- IDApp [demo temp ID application]
 
