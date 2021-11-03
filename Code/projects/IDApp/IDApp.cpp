@@ -69,9 +69,9 @@ typedef struct
     std::string HEADER;           //4
     std::string ID_PHOTO;         //5
     std::string FILE_PATH;        //6
-}META;
+} META;
 
-int catch_barcode_error(int zerr);
+int catch_barcode_error(int zerr, char* cptr);
 int add_barcode_to_canvas(canvas* can, zint_symbol* my_symbol);
 
 int getBARCODE(canvas* can, const char* str);
