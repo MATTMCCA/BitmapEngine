@@ -71,6 +71,7 @@ typedef struct
     std::string FILE_PATH;        //6
 }META;
 
+int catch_barcode_error(int zerr);
 int add_barcode_to_canvas(canvas* can, zint_symbol* my_symbol);
 
 int getBARCODE(canvas* can, const char* str);
@@ -265,6 +266,15 @@ int getSubject(canvas* can, const char *str, int brightness, int contrast)
     return can->import_24bit(str, DITHER::Jarvis, brightness, contrast);
 }
 
+int catch_barcode_error(int zerr, char* cptr)
+{
+    if (zerr != 0) {
+        printf("ZINT_ERR: %s\n", cptr); //remove?
+        return 1;
+    }
+    return 0;
+}
+
 int getBARCODE(canvas* can, const char* str)
 {
     int zint_error = 0;
@@ -278,13 +288,14 @@ int getBARCODE(canvas* can, const char* str)
     my_symbol->scale = 1.5;
     my_symbol->output_options |= OUT_BUFFER_INTERMEDIATE;
 
-    zint_error |= ZBarcode_Encode(my_symbol, (const unsigned char*)str, strlen(str));
-    zint_error |= ZBarcode_Buffer(my_symbol, 0);
-
-    if (zint_error == 0)
-        add_barcode_to_canvas(can, my_symbol);
-
-    ZBarcode_Delete(my_symbol); //<-- will crash if the barcode is in the wrong format
+    zint_error = ZBarcode_Encode(my_symbol, (const unsigned char*)str, strlen(str));
+    if (!catch_barcode_error(zint_error, my_symbol->errtxt)) {
+        zint_error = ZBarcode_Buffer(my_symbol, 0);
+        if (!catch_barcode_error(zint_error, my_symbol->errtxt))
+            zint_error = add_barcode_to_canvas(can, my_symbol);
+    }
+   
+    ZBarcode_Delete(my_symbol);
 
     return zint_error ? 1 : 0;
 }
