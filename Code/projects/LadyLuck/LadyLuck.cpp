@@ -87,9 +87,6 @@ int main(int argc, char* argv[])
     canvas* temp;
     canvas master;
     
-    /* gen dynamic data */
-    //getDate(&data.DATE);
-    //getTime(&data.TIME);
     getToekn(&DB_TOKEN);
     FILE_PATH += (std::string("\\") + DB_TOKEN + std::string(".bmp"));
 
@@ -100,6 +97,7 @@ int main(int argc, char* argv[])
     /* Create Master Canvas */
     if (master.create(812, 1624) == 1)                              return 1;
 
+    /* open logo */
     temp = new canvas;
     if (getLogo(temp, LOGO) == 1)                                   return 1;
     if (master.addSprite(temp, 
@@ -107,12 +105,14 @@ int main(int argc, char* argv[])
         30, 0) == 1)                                                return 1;
     delete temp;
 
+    /* open logo part 2 */
     temp = new canvas;
     if (getLogo2(temp, LIPS, 0, 0) == 1)                            return 1;
     if (master.addSprite(temp, 
         210, 190, 1) == 1)                                          return 1;
     delete temp;
 
+    /* gen play field */
     temp = new canvas;
     if (create_play_area(temp) == 1)                                return 1;
     if (master.addSprite(temp, 
@@ -120,56 +120,6 @@ int main(int argc, char* argv[])
         400, 0) == 1)                                               return 1;
     delete temp;
 
-
-
-
-    /* open header logo */
-    //temp = new canvas;
-    //if (getLogo(temp, data.HEADER.c_str()) == 1)                    return 1;
-    //if (master.addSprite(temp, 75, 20, 0) == 1)                     return 1;
-    //delete temp;
-
-    /* open ID Photo */
-    //temp = new canvas;
-    //if (getSubject(temp, data.ID_PHOTO.c_str(), 0, 0) == 1)         return 1;
-    //if (master.addSprite(temp, 10, 180, 0) == 1)                    return 1;
-    //delete temp;
-
-    /* render first name */
-    //temp = new canvas;
-    //if (getTXT_C(temp, data.FIRSTNAME.c_str()) == 1)                return 1;
-    //if (master.addSprite(temp, 380, 160, 0) == 1)                   return 1;
-    //delete temp;
-
-    /* render last name */
-    //temp = new canvas;
-    //if (getTXT_C(temp, data.LASTNAME.c_str()) == 1)                 return 1;
-    //if (master.addSprite(temp, 380, 212, 0) == 1)                   return 1;
-    //delete temp;
-
-    /* render extra */
-    //temp = new canvas;
-    //if (getTXT_B(temp, data.EXTRA_FEILD.c_str()) == 1)              return 1;
-    //if (master.addSprite(temp, 380, 270, 0) == 1)                   return 1;
-    //delete temp;
-
-    /* render date */
-    //temp = new canvas;
-    //if (getTXT_A(temp, data.DATE.c_str()) == 1)                     return 1;
-    //if (master.addSprite(temp, 380, 400, 0) == 1)                   return 1;
-    //delete temp;
-
-    /* render time */
-    //temp = new canvas;
-    //if (getTXT_A(temp, data.TIME.c_str()) == 1)                     return 1;
-    //if (master.addSprite(temp, 380, 440, 0) == 1)                   return 1;
-    //delete temp;
-
-    /* render token */
-    //temp = new canvas;
-    //if (getTXT_A(temp, data.DB_TOKEN.c_str()) == 1)                 return 1;
-    //if (master.addSprite(temp, 380, 330, 0) == 1)                   return 1;
-    //delete temp;
 
     /* Save as MONO Thermal Bitmap */
     if (master.saveBMP(FILE_PATH.c_str(), DPI) == 1)           return 1;
@@ -199,7 +149,7 @@ int get_calls(canvas* can)
 
 
 
-
+    //finish
 
 
     return err;
@@ -248,24 +198,19 @@ int create_play_area(canvas* can)
 
     srand((unsigned)time(NULL) * _getpid());
 
-    for (int y = 0; y < 6; y++)
-    {
-        for (int x = 0; x < 5; x++)
-        {
+    for (int y = 0; y < 6; y++) {
+        for (int x = 0; x < 5; x++) {
 
             canvas* temp = new canvas;
             char *k = &table[x + (y * 5)];
 
-            if (*k != 0)
-            {
+            if (*k != 0) {
                 err |= (bool) create_cell(temp, *k, cell_size, 1);
             }
-            else
-            {
+            else {
                 bool ch = 0;
                 char* p = &table[5];
-                do
-                {
+                do {
                     ch = 0;
                     *k = (rand() % 75) + 1;
                     for (int i = 0; i < 25; i++)
@@ -275,6 +220,8 @@ int create_play_area(canvas* can)
                         
                 err |= (bool) create_cell(temp, *k, cell_size);
             }
+
+            // gen free spaces?
 
             err |= can->addSprite(temp, (x * cell_size), (y * cell_size), 0);
             delete temp;
@@ -286,7 +233,7 @@ int create_play_area(canvas* can)
     return err;
 }
 
-
+/*
 int getTime(std::string* str)
 {
     char c[100];
@@ -308,6 +255,7 @@ int getDate(std::string* str)
     *str = std::string(c);
     return 0;
 }
+*/
 
 int getToekn(std::string* str)
 {
