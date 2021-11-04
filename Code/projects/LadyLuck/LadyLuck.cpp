@@ -6,12 +6,7 @@
 
     =======================================================================================
 
-        Notes: 
-        
-        DUDE! https://www.youtube.com/watch?v=Th83z2ddz9c
-        https://www.thresholdsecurity.com/products/tab_expiring_direct_thermal_badges/
-        3"x2" = 2.8125" x 1.9375"
-        @ 300DPI, 843 x 581
+        Notes: <NONE>
 
     =======================================================================================
 
@@ -53,8 +48,18 @@
 #define LOGO            "A:\\Users\\Matt\\Pictures\\TRASH\\LL.bmp"
 #define LIPS            "A:\\Users\\Matt\\Pictures\\TRASH\\lips.bmp"
 
+enum game_state { LOST, FIVE_IN_ANY_ROW, FOUR_CORNERS, X_PATT, Z_PATT, FRAME, BLACKOUT };
 
-const int DPI = 203; //used for bitmap
+typedef struct {
+    char brd[5][5];
+    int call_char[30];
+    int call_val[30];
+    game_state this_state;
+
+} CHECK_PLAY;
+
+const int DPI = 203;        //used for bitmap
+//static CHECK_PLAY my_game;  //quick and dirty
 
 int getLogo2(canvas* can, const char* str, int brightness, int contrast);
 int getLogo(canvas* can, const char* str);
@@ -62,24 +67,31 @@ int getLogo(canvas* can, const char* str);
 int getTXT_A(canvas* can, const char* str);
 int getTXT_B(canvas* can, const char* str);
 int getTXT_C(canvas* can, const char* str);
+int getTXT_D(canvas* can, const char* str);
 
-int getTime(std::string *str);
-int getDate(std::string* str);
 int getToekn(std::string* str);
 
 int create_cell(canvas* can, char num, int c_size, bool idk);
-int create_play_area(canvas* can);
+int create_cell(canvas* can, std::string *str, int c_sizeX, int c_sizeY);
+int create_play_area(canvas* can, CHECK_PLAY *game);
+int get_calls(canvas* can, CHECK_PLAY* game);
+int gen_cb(canvas* can, int c_size);
+void gen_table(char* tbl, int x0, int y0);
+void gen_calls(std::string* tbl, int num, CHECK_PLAY* game);
 
-int get_calls(canvas* can);
-
+game_state solve_game(CHECK_PLAY* game);
 
 int calc_offset(int32_t m, int32_t s)
 {
     return (m - s) / 2;
 }
 
+
 int main(int argc, char* argv[])
 {
+    srand((unsigned)time(NULL) * _getpid());
+
+    CHECK_PLAY my_game;
 
     std::string DB_TOKEN;
     std::string FILE_PATH = std::string(SAVE_AS);
@@ -114,44 +126,84 @@ int main(int argc, char* argv[])
 
     /* gen play field */
     temp = new canvas;
-    if (create_play_area(temp) == 1)                                return 1;
+    if (create_play_area(temp, &my_game) == 1)                      return 1;
     if (master.addSprite(temp, 
         calc_offset(master.get_x(), temp->get_x()), 
-        400, 0) == 1)                                               return 1;
+        320, 0) == 1)                                               return 1;
+    delete temp;
+
+    /* call lable */
+    temp = new canvas;
+    if (getTXT_D(temp, "CALL NUMBERS") == 1)                        return 1;
+    if (master.addSprite(temp,
+        calc_offset(master.get_x(), temp->get_x()),
+        1000, 0) == 1)                                              return 1;
+    delete temp;
+
+    /* gen calls field */
+    temp = new canvas;
+    if (get_calls(temp, &my_game) == 1)                             return 1;
+    if (master.addSprite(temp,
+        calc_offset(master.get_x(), temp->get_x()),
+        1100, 0) == 1)                                              return 1;
     delete temp;
 
 
+
+    game_state BCD = solve_game(&my_game);
+
+
+
+
     /* Save as MONO Thermal Bitmap */
-    if (master.saveBMP(FILE_PATH.c_str(), DPI) == 1)           return 1;
+    if (master.saveBMP(FILE_PATH.c_str(), DPI) == 1)                return 1;
 
     return 0;
 }
 
-int get_calls(canvas* can)
+/* AI MAGIC */
+game_state solve_game(CHECK_PLAY* game)
 {
-    bool ch;
-    bool err = 0;
-    char bingo[5] = { 'B', 'I', 'N', 'G', 'O' };
-    int _calls[5 * 6];
 
-    for (int i = 0; i < (5 * 6); i++)
-    {
-        int* k = &_calls[i];
-        do
-        {
-            ch = 0;
-            *k = (rand() % 75) + 1;
-            for (int i = 0; i < 25; i++)
-                if (k != &_calls[i])
-                    ch |= (*k == _calls[i]);
-        } while (ch);
+
+    //unfinished, takeing a break
+    return (game_state) NULL;
+}
+
+int get_calls(canvas* can, CHECK_PLAY* game)
+{
+    bool err = 0;
+    const int cell_sizeX = 140, cell_sizeY = 50;
+    err |= can->create((cell_sizeX * 5), (cell_sizeY * 6), 0);
+
+    std::string* ptr = new std::string[30];
+    gen_calls(ptr, 30, game);
+
+    for (int y = 0; y < 6; y++) {
+        for (int x = 0; x < 5; x++) {
+            canvas* temp = new canvas;
+            err |= (bool)create_cell(temp, &ptr[x + (y * 5)], cell_sizeX, cell_sizeY);
+            err |= can->addSprite(temp, (x * cell_sizeX), (y * cell_sizeY), 0);
+            delete temp;
+        }
     }
 
+    delete[] ptr;
+    return err;
+}
 
+int create_cell(canvas* can, std::string* str, int c_sizeX, int c_sizeY)
+{
+    bool err = 0;
+    canvas* temp = new canvas;
+    err |= can->create(c_sizeX, c_sizeY, 0);
+    err |= (bool)getTXT_C(temp, str->c_str());
+    err |= can->addSprite(temp,
+        calc_offset(can->get_x(), temp->get_x()),
+        calc_offset(can->get_y(), temp->get_y()),
+        1);
 
-    //finish
-
-
+    delete temp;
     return err;
 }
 
@@ -162,14 +214,15 @@ int create_cell(canvas* can, char num, int c_size, bool idk = 0)
     err |= can->create(c_size, c_size, 0);
     err |= can->drawBox(0, 0, c_size+1, c_size+1, 1, 1);
 
-
     if (idk) //char
     {
         err |= (bool)getTXT_C(temp, std::string(1, num).c_str());
     }
-    else //num
+    else     //num
     {
-        err |= (bool)getTXT_C(temp, std::to_string((int)num).c_str());
+        char tmp[3];
+        snprintf(tmp, 3, "%02d", num);
+        err |= (bool)getTXT_C(temp, tmp);
     }
 
     err |= can->addSprite(temp,
@@ -178,14 +231,13 @@ int create_cell(canvas* can, char num, int c_size, bool idk = 0)
         1);
 
     delete temp;
-
     return err;
 }
 
-int create_play_area(canvas* can)
+int create_play_area(canvas* can, CHECK_PLAY* game)
 {
     bool err = 0;
-    const int cell_size = 150;
+    const int cell_size = 100;
     err |= can->create((cell_size * 5), (cell_size * 6), 0);
 
     char table[5 * 6];
@@ -196,7 +248,8 @@ int create_play_area(canvas* can)
     table[3] = 'G';
     table[4] = 'O';
 
-    srand((unsigned)time(NULL) * _getpid());
+    gen_table(&table[5], 5, 5);
+    memcpy(&game->brd, &table[5], 5 * 5); //copy board
 
     for (int y = 0; y < 6; y++) {
         for (int x = 0; x < 5; x++) {
@@ -204,24 +257,17 @@ int create_play_area(canvas* can)
             canvas* temp = new canvas;
             char *k = &table[x + (y * 5)];
 
-            if (*k != 0) {
+            if (x + (y * 5) < 5) {
                 err |= (bool) create_cell(temp, *k, cell_size, 1);
-            }
-            else {
-                bool ch = 0;
-                char* p = &table[5];
-                do {
-                    ch = 0;
-                    *k = (rand() % 75) + 1;
-                    for (int i = 0; i < 25; i++)
-                        if(k != &p[i])
-                            ch |= (*k == p[i]);
-                } while (ch);
-                        
+            } else {                      
                 err |= (bool) create_cell(temp, *k, cell_size);
             }
 
-            // gen free spaces?
+            // gen free spaces
+            if (x == 2 && y == 3) {
+                temp->fill(0);
+                gen_cb(temp, cell_size);
+            }
 
             err |= can->addSprite(temp, (x * cell_size), (y * cell_size), 0);
             delete temp;
@@ -233,34 +279,56 @@ int create_play_area(canvas* can)
     return err;
 }
 
-/*
-int getTime(std::string* str)
+int gen_cb(canvas* can, int c_size)
 {
-    char c[100];
-    time_t t = time(NULL);
-    struct tm tm;
-    localtime_s(&tm, &t);
-    snprintf(c, 100, "%02d:%02d:%02d", tm.tm_hour, tm.tm_min, tm.tm_sec);
-    *str = std::string(c);
-    return 0;
+    int32_t K = can->get_x() * can->get_y();
+    bool* ptr = can->get_pointer();
+
+    for (int32_t i = 0; i < K; i++) 
+        ptr[i] = (i % 6) ? 0 : 1; //pixle hack!
+
+    return can->drawBox(0, 0, c_size + 1, c_size + 1, 1, 1);
 }
 
-int getDate(std::string* str)
+/* This should mind the rules of 'BINGO' */
+void gen_table(char* tbl, int x0 = 5, int y0 = 5)
 {
-    char c[100];
-    time_t t = time(NULL);
-    struct tm tm;
-    localtime_s(&tm, &t);
-    snprintf(c, 100, "%d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
-    *str = std::string(c);
-    return 0;
+    for (int y = 0; y < y0; y++) {
+        for (int x = 0; x < x0; x++) {
+            bool ch = 0;
+            char* k = &tbl[x + (y * y0)];
+            do
+            {
+                ch = 0;
+                *k = (rand() % 15) + (15 * x) + 1;
+                for (int i = 0; i < (x0*y0); i++)
+                    if (k != &tbl[i])
+                        ch |= (*k == tbl[i]);
+            } while (ch);
+        }
+    }
+    return; //break point
 }
-*/
+
+/* This should mind the rules of 'BINGO' too */
+void gen_calls(std::string *tbl, int num, CHECK_PLAY* game)
+{
+    // !!! due to game check, num needs to be = to 30 !!!
+
+    char bingo[] = { 'B', 'I', 'N', 'G', 'O' };
+    for (int i = 0; i < num; i++) {
+        char tmp[3];
+        int _char = game->call_char[i] = rand() % 5;
+        int _call = game->call_val[i]  = (rand() % 15) + (15 * _char) + 1;
+        snprintf(tmp, 3, "%02d", _call);
+        tbl[i] = std::string(1, bingo[_char]) + std::string(tmp);
+    }
+    return; //break point
+}
 
 int getToekn(std::string* str)
 {
     str->clear();
-    srand((unsigned)time(NULL) * _getpid());
     for (int i = 0; i < 10; i++) {
         int h = rand() % 10;
         *str += std::to_string(h);
@@ -292,6 +360,15 @@ int getTXT_C(canvas* can, const char* str)
     bool err = 0;
     font t;
     err |= t.create(FONT_ARIAL, 12, DPI);
+    err |= t.writeCanvas(can, str);
+    return err;
+}
+
+int getTXT_D(canvas* can, const char* str)
+{
+    bool err = 0;
+    font t;
+    err |= t.create(FONT_ARIAL, 16, DPI);
     err |= t.writeCanvas(can, str);
     return err;
 }
