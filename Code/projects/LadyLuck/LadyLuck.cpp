@@ -48,7 +48,7 @@
 #define LOGO            "A:\\Users\\Matt\\Pictures\\TRASH\\LL.bmp"
 #define LIPS            "A:\\Users\\Matt\\Pictures\\TRASH\\lips.bmp"
 
-enum game_state { LOST, FIVE_IN_ANY_ROW, FOUR_CORNERS, X_PATT, Z_PATT, FRAME, BLACKOUT };
+enum class game_state { LOST, FIVE_IN_ANY_ROW, FOUR_CORNERS, X_PATT, Z_PATT, FRAME, BLACKOUT };
 
 typedef struct {
     char brd[5][5];
@@ -59,7 +59,6 @@ typedef struct {
 } CHECK_PLAY;
 
 const int DPI = 203;        //used for bitmap
-//static CHECK_PLAY my_game;  //quick and dirty
 
 int getLogo2(canvas* can, const char* str, int brightness, int contrast);
 int getLogo(canvas* can, const char* str);
@@ -78,6 +77,9 @@ int get_calls(canvas* can, CHECK_PLAY* game);
 int gen_cb(canvas* can, int c_size);
 void gen_table(char* tbl, int x0, int y0);
 void gen_calls(std::string* tbl, int num, CHECK_PLAY* game);
+
+void debug_print(char ptr[][5]);
+void debug_state(game_state gs);
 
 game_state solve_game(CHECK_PLAY* game);
 
@@ -148,12 +150,9 @@ int main(int argc, char* argv[])
         1100, 0) == 1)                                              return 1;
     delete temp;
 
-
-
+    /* TEMP */
     game_state BCD = solve_game(&my_game);
-
-
-
+    debug_state(BCD);
 
     /* Save as MONO Thermal Bitmap */
     if (master.saveBMP(FILE_PATH.c_str(), DPI) == 1)                return 1;
@@ -164,10 +163,56 @@ int main(int argc, char* argv[])
 /* AI MAGIC */
 game_state solve_game(CHECK_PLAY* game)
 {
+    int zc = 1;
+    game->brd[2][2] = 0; //free space
+    for (int i = 0; i < 30; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (game->brd[j][  game->call_char[i] ] == game->call_val[i]) {
+                game->brd[j][  game->call_char[i] ] = 0;
+                zc++;
+            }
+        }
+    }
+    debug_print(game->brd);
 
+    int forward_slash = 0, back_slash = 0, bottom_row = 0, top_row = 0;
+    int right_row = 0, left_row = 0, four_cor = 0, black_out = 0, extra = 0;
+    int any_row = 0;
 
-    //unfinished, takeing a break
-    return (game_state) NULL;
+    for (int i = 0; i < 5; i++)
+        forward_slash += game->brd[4-i][i];
+
+    for (int i = 0; i < 5; i++)
+        back_slash += game->brd[i][i];
+
+    for (int i = 0; i < 5; i++) {
+        bottom_row += game->brd[4][i];
+        top_row += game->brd[0][i];
+        right_row += game->brd[i][4];
+        left_row += game->brd[i][0];
+    }
+
+    for (int i = 0; i < 5; i++) {
+        int g = 0, h = 0;
+        for (int j = 0; j < 5; j++) {
+            g += game->brd[i][j];
+            h += game->brd[j][i];
+        }
+        if (g == 0 || h == 0) any_row++;
+    }
+
+    extra = game->brd[1][2] + game->brd[3][2] + game->brd[2][1] + game->brd[2][3];
+    four_cor = game->brd[0][0] + game->brd[4][4] + game->brd[4][0] + game->brd[0][4];
+    black_out = forward_slash + back_slash + bottom_row + top_row + right_row + left_row + extra;
+
+    if (black_out == 0)                                     return game_state::BLACKOUT;
+    if ((bottom_row + top_row + right_row + left_row) == 0) return game_state::FRAME;
+    if ((bottom_row + top_row + forward_slash) == 0)        return game_state::Z_PATT;
+    if ((forward_slash + back_slash) == 0)                  return game_state::X_PATT;
+    if (four_cor == 0)                                      return game_state::FOUR_CORNERS;
+    if (any_row != 0)                                       return game_state::FIVE_IN_ANY_ROW;
+
+    return game_state::LOST;
 }
 
 int get_calls(canvas* can, CHECK_PLAY* game)
@@ -316,12 +361,19 @@ void gen_calls(std::string *tbl, int num, CHECK_PLAY* game)
     // !!! due to game check, num needs to be = to 30 !!!
 
     char bingo[] = { 'B', 'I', 'N', 'G', 'O' };
-    for (int i = 0; i < num; i++) {
+    for (int i = 0; i < 30; i++) {
         char tmp[3];
-        int _char = game->call_char[i] = rand() % 5;
-        int _call = game->call_val[i]  = (rand() % 15) + (15 * _char) + 1;
-        snprintf(tmp, 3, "%02d", _call);
-        tbl[i] = std::string(1, bingo[_char]) + std::string(tmp);
+        bool ch = 0;
+        game->call_char[i] = rand() % 5;
+        do {
+            ch = 0;
+            game->call_val[i] = (rand() % 15) + (15 * game->call_char[i]) + 1;
+            for (int j = 0; j < 30; j++)
+                if (i != j)
+                    ch |= (game->call_val[i] == game->call_val[j]);
+        } while (ch);
+        snprintf(tmp, 3, "%02d", game->call_val[i]);
+        tbl[i] = std::string(1, bingo[game->call_char[i]]) + std::string(tmp);
     }
     return; //break point
 }
@@ -381,4 +433,28 @@ int getLogo(canvas* can, const char* str)
 int getLogo2(canvas* can, const char *str, int brightness, int contrast)
 {
     return can->import_24bit(str, DITHER::Stucki, brightness, contrast);
+}
+
+void debug_print(char ptr[][5])
+{
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++)
+            printf("%02d ", ptr[i][j]);
+        printf("\n");
+    }
+}
+
+void debug_state(game_state gs)
+{
+    switch (gs)
+    {
+        case game_state::BLACKOUT:         printf("WIN - BLACKOUT\n");     break;
+        case game_state::FIVE_IN_ANY_ROW:  printf("WIN - 5 IN ANY ROW\n"); break;
+        case game_state::FOUR_CORNERS:     printf("WIN - 4 CORNERS\n");    break;
+        case game_state::FRAME:            printf("WIN - FRAME\n");        break;
+        case game_state::X_PATT:           printf("WIN - X PATERN\n");     break;
+        case game_state::Z_PATT:           printf("WIN - Z PATTERN\n");    break;
+        default:                           printf("LOST\n");               break;
+    };
+    return; //break point
 }
