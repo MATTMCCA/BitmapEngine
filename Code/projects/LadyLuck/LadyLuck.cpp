@@ -36,17 +36,19 @@
 #include <cstdint>
 #include <cctype>
 #include <ctime>
-
 #include <process.h>
 
+#include <zint.h>
 #include "canvas.hpp"
 #include "font.hpp"
 
 #define FONT_ARIAL      "C:\\Windows\\Fonts\\arialbd.ttf"
 
-#define SAVE_AS         "A:\\Users\\Matt\\Pictures\\TRASH\\LLOUT\\"
-#define LOGO            "A:\\Users\\Matt\\Pictures\\TRASH\\LL.bmp"
-#define LIPS            "A:\\Users\\Matt\\Pictures\\TRASH\\lips.bmp"
+//#define SAVE_AS         "A:\\Users\\Matt\\Pictures\\TRASH\\LLOUT\\"
+//#define LOGO            "A:\\Users\\Matt\\Pictures\\TRASH\\LL.bmp"
+//#define LIPS            "A:\\Users\\Matt\\Pictures\\TRASH\\lips.bmp"
+#define LOGO            "LL.bmp"
+#define LIPS            "lips.bmp"
 
 enum class game_state { LOST, FIVE_IN_ANY_ROW, FOUR_CORNERS, X_PATT, Z_PATT, FRAME, BLACKOUT };
 
@@ -60,6 +62,11 @@ typedef struct {
 
 const int DPI = 203;        //used for bitmap
 
+int catch_barcode_error(int zerr, char* cptr);
+int add_barcode_to_canvas(canvas* can, zint_symbol* my_symbol);
+
+int getBARCODE(canvas* can, const char* str);
+
 int getLogo2(canvas* can, const char* str, int brightness, int contrast);
 int getLogo(canvas* can, const char* str);
 
@@ -69,6 +76,8 @@ int getTXT_C(canvas* can, const char* str);
 int getTXT_D(canvas* can, const char* str);
 
 int getToekn(std::string* str);
+int getTime(std::string* str);
+int getDate(std::string* str);
 
 int create_cell(canvas* can, char num, int c_size, bool idk);
 int create_cell(canvas* can, std::string *str, int c_sizeX, int c_sizeY);
@@ -81,6 +90,8 @@ void gen_calls(std::string* tbl, int num, CHECK_PLAY* game);
 void debug_print(char ptr[][5]);
 void debug_state(game_state gs);
 
+std::string get_code_string(game_state gs);
+
 game_state solve_game(CHECK_PLAY* game);
 
 int calc_offset(int32_t m, int32_t s)
@@ -92,12 +103,17 @@ int calc_offset(int32_t m, int32_t s)
 int main(int argc, char* argv[])
 {
     srand((unsigned)time(NULL) * _getpid());
+    std::string FILE_PATH, DB_TOKEN, TIME, DATE;
+
+    if (argc > 1) {
+        FILE_PATH = std::string(argv[1]);
+    }
+    else {
+        printf("USEAGE: %s C:\\path\n", argv[0]);
+        return 1;
+    }
 
     CHECK_PLAY my_game;
-
-    std::string DB_TOKEN;
-    std::string FILE_PATH = std::string(SAVE_AS);
-
     canvas* temp;
     canvas master;
     
@@ -105,11 +121,11 @@ int main(int argc, char* argv[])
     FILE_PATH += (std::string("\\") + DB_TOKEN + std::string(".bmp"));
 
     /* runtime debug */
-    printf("FilePath: %s\n",    FILE_PATH.c_str());
-    printf("Token: %s\n",       DB_TOKEN.c_str());
+    //printf("FilePath: %s\n",    FILE_PATH.c_str());
+    //printf("Token: %s\n",       DB_TOKEN.c_str());
 
     /* Create Master Canvas */
-    if (master.create(812, 1624) == 1)                              return 1;
+    if (master.create(812, 1827) == 1)                              return 1;
 
     /* open logo */
     temp = new canvas;
@@ -124,6 +140,20 @@ int main(int argc, char* argv[])
     if (getLogo2(temp, LIPS, 0, 0) == 1)                            return 1;
     if (master.addSprite(temp, 
         210, 190, 1) == 1)                                          return 1;
+    delete temp;
+
+    /* render date */
+    temp = new canvas;
+    getDate(&DATE);
+    if (getTXT_A(temp, DATE.c_str()) == 1)                          return 1;
+    if (master.addSprite(temp, 650, 260, 0) == 1)                   return 1;
+    delete temp;
+
+    /* render time */
+    temp = new canvas;
+    getTime(&TIME);
+    if (getTXT_A(temp, TIME.c_str()) == 1)                          return 1;
+    if (master.addSprite(temp, 650, 280, 0) == 1)                   return 1;
     delete temp;
 
     /* gen play field */
@@ -152,7 +182,15 @@ int main(int argc, char* argv[])
 
     /* TEMP */
     game_state BCD = solve_game(&my_game);
-    debug_state(BCD);
+    //debug_state(BCD); //DEBUG
+
+    /* render barcode */
+    temp = new canvas;
+    if (getBARCODE(temp, get_code_string(BCD).c_str()) == 1)        return 1;
+    if (master.addSprite(temp, 
+        calc_offset(master.get_x(), temp->get_x()),
+        1500, 0) == 1)                                              return 1;
+    delete temp;
 
     /* Save as MONO Thermal Bitmap */
     if (master.saveBMP(FILE_PATH.c_str(), DPI) == 1)                return 1;
@@ -173,7 +211,7 @@ game_state solve_game(CHECK_PLAY* game)
             }
         }
     }
-    debug_print(game->brd);
+    //debug_print(game->brd);
 
     int forward_slash = 0, back_slash = 0, bottom_row = 0, top_row = 0;
     int right_row = 0, left_row = 0, four_cor = 0, black_out = 0, extra = 0;
@@ -393,7 +431,7 @@ int getTXT_A(canvas* can, const char* str)
 {
     bool err = 0;
     font t;
-    err |= t.create(FONT_ARIAL, 8, DPI);
+    err |= t.create(FONT_ARIAL, 6, DPI);
     err |= t.writeCanvas(can, str);
     return err;
 }
@@ -446,15 +484,89 @@ void debug_print(char ptr[][5])
 
 void debug_state(game_state gs)
 {
+    printf("%s\n", get_code_string(gs).c_str());
+}
+
+std::string get_code_string(game_state gs)
+{
     switch (gs)
     {
-        case game_state::BLACKOUT:         printf("WIN - BLACKOUT\n");     break;
-        case game_state::FIVE_IN_ANY_ROW:  printf("WIN - 5 IN ANY ROW\n"); break;
-        case game_state::FOUR_CORNERS:     printf("WIN - 4 CORNERS\n");    break;
-        case game_state::FRAME:            printf("WIN - FRAME\n");        break;
-        case game_state::X_PATT:           printf("WIN - X PATERN\n");     break;
-        case game_state::Z_PATT:           printf("WIN - Z PATTERN\n");    break;
-        default:                           printf("LOST\n");               break;
+        case game_state::BLACKOUT:         return std::string("WIN - BLACKOUT");
+        case game_state::FIVE_IN_ANY_ROW:  return std::string("WIN - 5 IN ANY ROW");
+        case game_state::FOUR_CORNERS:     return std::string("WIN - 4 CORNERS");
+        case game_state::FRAME:            return std::string("WIN - FRAME");
+        case game_state::X_PATT:           return std::string("WIN - X PATERN");
+        case game_state::Z_PATT:           return std::string("WIN - Z PATTERN");
+        default:                           return std::string("NOT A WINNER");
     };
-    return; //break point
+
+    return std::string();
+}
+
+int getTime(std::string* str)
+{
+    char c[100];
+    time_t t = time(NULL);
+    struct tm tm;
+    localtime_s(&tm, &t);
+    snprintf(c, 100, "%02d:%02d:%02d", tm.tm_hour, tm.tm_min, tm.tm_sec);
+    *str = std::string(c);
+    return 0;
+}
+
+int getDate(std::string* str)
+{
+    char c[100];
+    time_t t = time(NULL);
+    struct tm tm;
+    localtime_s(&tm, &t);
+    snprintf(c, 100, "%d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+    *str = std::string(c);
+    return 0;
+}
+
+int catch_barcode_error(int zerr, char* cptr)
+{
+    if (zerr != 0) {
+        printf("ZINT_ERR: %s\n", cptr); //remove?
+        return 1;
+    }
+    return 0;
+}
+
+int getBARCODE(canvas* can, const char* str)
+{
+    int zint_error = 0;
+    int canvas_error = 0;
+
+    struct zint_symbol* my_symbol;
+
+    my_symbol = ZBarcode_Create();
+
+    my_symbol->symbology = BARCODE_QRCODE;
+    my_symbol->scale = 4;
+    my_symbol->output_options |= OUT_BUFFER_INTERMEDIATE;
+
+    zint_error = ZBarcode_Encode(my_symbol, (const unsigned char*)str, strlen(str));
+    if (!catch_barcode_error(zint_error, my_symbol->errtxt)) {
+        zint_error = ZBarcode_Buffer(my_symbol, 0);
+        if (!catch_barcode_error(zint_error, my_symbol->errtxt))
+            zint_error = add_barcode_to_canvas(can, my_symbol);
+    }
+
+    ZBarcode_Delete(my_symbol);
+
+    return zint_error ? 1 : 0;
+}
+
+int add_barcode_to_canvas(canvas* can, zint_symbol* my_symbol)
+{
+    bool err;
+    int row, col, i = 0;
+    err = can->create(my_symbol->bitmap_width, my_symbol->bitmap_height, 0);
+    for (row = 0; row < my_symbol->bitmap_height; row++)
+        for (col = 0; col < my_symbol->bitmap_width; col++, i++)
+            if (my_symbol->bitmap[i] == '1')
+                can->setPixle(col, row, 1);
+    return err;
 }
