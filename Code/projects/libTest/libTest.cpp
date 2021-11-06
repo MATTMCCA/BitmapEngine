@@ -61,6 +61,7 @@ bool save_bmp(canvas* ptr, const char* dir, int cnt);
 bool save_pbm(canvas* ptr, const char* dir, int cnt);
 bool save_jbg(canvas* ptr, const char* dir, int cnt);
 bool save_ba(canvas* ptr, const char* dir, int cnt);
+bool save_zpl(canvas* ptr, const char* dir, int cnt);
 
 void print_pass_fail(const char* testname, bool err);
 
@@ -106,6 +107,7 @@ bool image_save_JBIG(const char* dir, const char* bmp, int cnt);          //JBIG
 bool import_jbg_file(char* dir, const char* bmp, int cnt);
 bool import_pbm_file(char* dir, const char* bmp, int cnt);
 bool image_save_xbm(const char* dir, const char* bmp, int cnt);
+bool image_save_zpl(const char* dir, const char* bmp, int cnt);
 bool image_brightness_adj(const char* dir, const char* bmp, int cnt);
 bool image_contrast_adj(const char* dir, const char* bmp, int cnt);
 bool canvas_scale_grow(const char* dir, const char* bmp, int cnt);
@@ -170,6 +172,7 @@ int main(int argc, char* argv[])
     import_jbg_file(output_dir, JBIG_TESTIMG.c_str(), tc++);
     import_pbm_file(output_dir, PBM_TESTIMG.c_str(), tc++);
     image_save_xbm(output_dir, tst_img, tc++);
+    image_save_zpl(output_dir, tst_img, tc++);
     image_brightness_adj(output_dir, tst_img, tc++);
     image_contrast_adj(output_dir, tst_img, tc++);
     canvas_rotate_15(output_dir, tst_img, tc++);
@@ -210,6 +213,13 @@ bool save_xbm(canvas* ptr, const char* dir, int cnt)
     std::string output = std::string(dir) + std::to_string(cnt) + std::string(".xbm");
     printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".xbm")).c_str());
     return ptr->saveXBM(output.c_str(), "myImage");
+}
+
+bool save_zpl(canvas* ptr, const char* dir, int cnt)
+{
+    std::string output = std::string(dir) + std::to_string(cnt) + std::string(".zpl");
+    printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".zpl")).c_str());
+    return ptr->saveZPL(output.c_str());
 }
 
 void print_pass_fail(const char* testname, bool err)
@@ -755,6 +765,18 @@ bool image_save_xbm(const char* dir, const char* bmp, int cnt)
 
     err |= save_xbm(&c, dir, cnt);
     print_pass_fail("XBM_TEST", err);
+    return err;
+}
+
+bool image_save_zpl(const char* dir, const char* bmp, int cnt)
+{
+    bool err = 0;
+    canvas c;
+
+    err |= c.import_24bit(bmp, DITHER::Stucki);
+
+    err |= save_zpl(&c, dir, cnt);
+    print_pass_fail("ZPL_TEST", err);
     return err;
 }
 

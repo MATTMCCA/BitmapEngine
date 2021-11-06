@@ -252,6 +252,80 @@ bool canvas::savePBM(const char* fileName)
     return err;
 }
 
+
+/* NON WORKING */
+bool canvas::saveZPL(const char* fileName)
+{
+    bool err = 0;
+    if (ptr != nullptr) {
+        uint32_t image_y = _y;
+        uint32_t image_x = (uint32_t)(_x / 8.0);
+        if ((image_x * 8) < (uint32_t)_x)   image_x++;   //math fix
+        if (image_x == 0)                   image_x = 1; //non 0 byte width
+
+        uint8_t* BMPDATA = nullptr;
+        uint32_t q = image_x * image_y;
+        size_t BMPDATASIZE = q * sizeof(uint8_t);
+        BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
+
+        if (BMPDATA != nullptr) {
+            memset(BMPDATA, 0x00, BMPDATASIZE);
+
+            bool* in_line;
+            uint8_t* out_line;
+            uint32_t __y = 0, __x = 0;
+
+            for (__y = 0; __y < _y; __y++) {
+                in_line = &ptr[(__y * _x)];
+                out_line = &BMPDATA[(__y * image_x)];
+
+                for (__x = 0; __x < _x; __x++)
+                    if (in_line[__x] ^ _inv)
+                        BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
+            }
+
+            FILE* fd;
+            //fopen(fileName, "wb");
+            fopen_s(&fd, fileName, "wb");
+
+            if (fd != NULL) {
+
+                char u[512];
+                
+                snprintf(u, 512, "^MN^XA^LH0,0^MMT^PW1200^LS0^POI^LL1800^PR8^FO0,0,0\n");
+                fwrite(u, sizeof(uint8_t), strlen(u), fd);
+
+                snprintf(u, 512, "^GFA,%d,%d,%d,", (image_x * image_y * 2) + (image_y), image_x * image_y, image_x);
+                fwrite(u, sizeof(uint8_t), strlen(u), fd);
+                
+                for (__y = 0; __y < image_y; __y++)
+                {
+                    out_line = &BMPDATA[(__y * image_x)];
+                    for (__x = 0; __x < image_x; __x++)
+                    {
+                        snprintf(u, 3, "%02X", out_line[__x]);
+                        fwrite(u, sizeof(uint8_t), 2, fd);
+                    }
+                    u[0] = '\n';
+                    fwrite(u, sizeof(uint8_t), 1, fd);
+                }
+
+                snprintf(u, 512, "^PQ1^XZ\r\n");
+                fwrite(u, sizeof(uint8_t), strlen(u), fd);
+
+                if ((fclose(fd) != 0) || (ferror(fd)))
+                    err |= 1;
+            }
+            else err |= 1;
+            delete[] BMPDATA; //release when done
+        }
+        else err |= 1;
+    }
+    else err |= 1;
+
+    return err;
+}
+
 /* mainly for debugging */
 bool canvas::saveXBM(const char* fileName, const char* structName)
 {
@@ -1283,3 +1357,4 @@ bool canvas::scale(float x0, float y0)
 
     return err;
 }
+

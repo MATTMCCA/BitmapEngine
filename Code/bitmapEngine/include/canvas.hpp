@@ -223,6 +223,7 @@ public:
     bool savePBM(const char* fileName); //portable bitmap raw
     bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
     bool saveXBM(const char* fileName, const char* structName);
+    bool saveZPL(const char* fileName); 
 
     bool scale(float x0, float y0);
 
