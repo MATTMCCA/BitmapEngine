@@ -19,4 +19,5 @@ Example projects are located in the `BitmapEngine\Code\projects` directory.
 - zint_test [ QR code test ]
 - skeletonApp [ base for dev ]
 - IDApp [demo temp ID application]
+- LogiaTest [App for printing test - ZPL]
 
