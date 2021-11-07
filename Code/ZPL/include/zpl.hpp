@@ -43,7 +43,7 @@
 #include <cmath>
 #include <string> //ugh
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 300
 
 // a=target variable, b=bit number to act upon 0-n 
 //https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
