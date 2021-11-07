@@ -6,7 +6,10 @@
 
     =======================================================================================
 
-        Notes: Logia Thermal Printer Test (I'm pore, its a cheap 300DPI printer lol)
+        Notes: 
+            Logia Thermal Printer Test (I'm pore, its a cheap 300DPI printer lol)
+
+            http://labelary.com/viewer.html
 
     =======================================================================================
 
