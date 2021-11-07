@@ -343,7 +343,7 @@ bool canvas::_bytes_to_zpl(uint8_t** ptr, int32_t* _size, int32_t row)
             }
 
             _old = line;
-            uint32_t new_size = buffer_size + _row.length();
+            uint32_t new_size = buffer_size +(uint32_t)_row.length();
             uint8_t *new_buffer = new uint8_t[new_size];
             if (new_buffer != nullptr) {
                 memcpy(new_buffer, buffer, buffer_size);
