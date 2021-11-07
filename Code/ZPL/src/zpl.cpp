@@ -249,6 +249,10 @@ zpl::~zpl()
     if (zpl_data != nullptr)
         delete[] zpl_data;
     zpl_data = nullptr;
+
+    if (_zpl != nullptr)
+        delete[] _zpl;
+    _zpl = nullptr;
 }
 
 const char* zpl::_freq_to_string(char val, int32_t freq)
