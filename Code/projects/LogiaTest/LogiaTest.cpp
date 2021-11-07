@@ -131,11 +131,25 @@ int main(int argc, char* argv[])
     myJob.set_print_rate(rate, 0, 2);
     myJob.set_darkness(dark);
     myJob.set_print_quantity(count, 0, 0, 'N', 'Y');
+
     if (myJob.add_graphic(master.get_pointer(), master.get_x(), master.get_y()))
         return 1;
-    
-    if (myJob.save_zpl(save_as))
+
+    if (myJob.generate_format())
         return 1;
+
+    if (myJob.save_format(save_as))
+        return 1;
+
+    /********** spew format **************
+    uint8_t* tmp; uint32_t tmp_size;
+    if (myJob.get_format(&tmp, &tmp_size))
+        return 1;
+
+    for (uint32_t i = 0; i < tmp_size; i++)
+        printf("%c", tmp[i]);
+    printf("\n");
+    *************************************/
 
     return 0;
 }

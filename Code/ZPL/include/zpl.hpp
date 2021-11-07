@@ -178,8 +178,9 @@ public:
     bool set_print_quantity(uint32_t q, uint32_t p, uint32_t r, char o, char e);        /* ^PQq,p,r,o,e */
     bool get_print_quantity(uint32_t* q, uint32_t* p, uint32_t* r, char* o, char* e);   /* ^PQq,p,r,o,e */
     bool add_graphic(bool* ptr, uint32_t x0, int32_t y0);                               /* ^GFA,b,c,d,data */
-    bool save_zpl(const char* fileName);
-    bool get_zpl(uint8_t* ptr, uint32_t* len);
+    bool save_format(const char* fileName);
+    bool get_format(uint8_t** ptr, uint32_t* len);
+    bool generate_format(void);
 
     ~zpl();
 
@@ -199,6 +200,9 @@ protected:
     uint8_t* zpl_data = nullptr;
     uint32_t zpl_data_size = 0;
     uint32_t zpl_row = 0;
+
+    uint8_t* _zpl = nullptr;
+    uint32_t _zpl_size = 0;
 
     char HEAD[BUFFER_SIZE] = { 0x00 };
     char FOOT[BUFFER_SIZE] = { 0x00 };

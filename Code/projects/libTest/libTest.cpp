@@ -236,11 +236,13 @@ bool save_zpl(canvas* ptr, const char* dir, int cnt)
     };
 
     zpl job(thisjob);
-    bool err = job.add_graphic(ptr->get_pointer(), ptr->get_x(), ptr->get_y());
+    bool err = 0;
+    err |= job.add_graphic(ptr->get_pointer(), ptr->get_x(), ptr->get_y());
+    err |= job.generate_format();
  
     std::string output = std::string(dir) + std::to_string(cnt) + std::string(".zpl");
     printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".zpl")).c_str());
-    return err | job.save_zpl(output.c_str());
+    return err | job.save_format(output.c_str());
 }
 
 void print_pass_fail(const char* testname, bool err)

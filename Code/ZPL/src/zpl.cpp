@@ -205,17 +205,16 @@ bool zpl::add_graphic(bool* ptr, uint32_t x0, int32_t y0)
     err |= _pack_bool(ptr, x0 * y0, x0);
     err |= _bytes_to_zpl();
     err |= _GFA_prefix(y0);
-    err |= _gen_zpl();
     return err;
 }
 
-bool zpl::save_zpl(const char* fileName)
+bool zpl::save_format(const char* fileName)
 {
     if (zpl_data != nullptr) {
        FILE* fd;
         fopen_s(&fd, fileName, "wb");
         if (fd != NULL) {
-            fwrite(zpl_data, sizeof(uint8_t), zpl_data_size, fd);
+            fwrite(_zpl, sizeof(uint8_t), _zpl_size, fd);
             if ((fclose(fd) != 0) || (ferror(fd)))
                 return 1;
             return 0;
@@ -225,14 +224,24 @@ bool zpl::save_zpl(const char* fileName)
     return 1;
 }
 
-bool zpl::get_zpl(uint8_t* ptr, uint32_t* len)
+bool zpl::get_format(uint8_t** ptr, uint32_t* len)
 {
-    if (zpl_data != nullptr) {
-        ptr = zpl_data;
-        *len = zpl_data_size;
-        return false;
+    if (_zpl != nullptr) {
+        *ptr = _zpl;
+        *len = _zpl_size;
+        return 0;
     }
-    return true;
+    return 1;
+}
+
+bool zpl::generate_format(void)
+{
+    if (_zpl != nullptr) {
+        delete[] _zpl;
+        _zpl = nullptr;
+        _zpl_size = 0;
+    }
+    return _gen_zpl();
 }
 
 zpl::~zpl()
@@ -399,20 +408,23 @@ bool zpl::_gen_zpl(void)
     bool err = 0;
     uint8_t* tmp = nullptr;
 
-    if (zpl_data != nullptr) {
-        _gen_head();
-        _gen_foot();
+    if (_zpl == nullptr) {
 
-        uint32_t _s = (uint32_t) (strlen(HEAD) + strlen(FOOT) + zpl_data_size);
-        tmp = new uint8_t[_s];
-        if (tmp != nullptr) {
-            memcpy(tmp, HEAD, strlen(HEAD));
-            memcpy(tmp + strlen(HEAD), zpl_data, zpl_data_size);
-            memcpy(tmp + strlen(HEAD) + zpl_data_size, FOOT, strlen(FOOT));
+        if (zpl_data != nullptr) {
+            _gen_head();
+            _gen_foot();
 
-            delete[] zpl_data;
-            zpl_data = tmp;
-            zpl_data_size = _s;
+            uint32_t _s = (uint32_t)(strlen(HEAD) + strlen(FOOT) + zpl_data_size);
+            tmp = new uint8_t[_s];
+            if (tmp != nullptr) {
+                memcpy(tmp, HEAD, strlen(HEAD));
+                memcpy(tmp + strlen(HEAD), zpl_data, zpl_data_size);
+                memcpy(tmp + strlen(HEAD) + zpl_data_size, FOOT, strlen(FOOT));
+
+                _zpl = tmp;
+                _zpl_size = _s;
+            }
+            else err |= 1;
         }
         else err |= 1;
     }
