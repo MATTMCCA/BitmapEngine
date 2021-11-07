@@ -219,21 +219,20 @@ bool save_xbm(canvas* ptr, const char* dir, int cnt)
     return ptr->saveXBM(output.c_str(), "myImage");
 }
 
-
 bool save_zpl(canvas* ptr, const char* dir, int cnt)
 {
     PARM thisjob = {
-    {'A', 0},       /* ^MNa         */
-    {0,0},          /* ^LHx,y       */
-    {'T', 'N'},     /* ^MMa,b       */
-    {4 * 300},      /* ^PWa         */
-    {0},            /* ^LSa         */
-    {'N'},          /* ^POa         */
-    {6 * 300},      /* ^LLy         */
-    {8,0,2},        /* ^PRp,s,b     */
-    {8},            /* ~SD##        */
-    {0,0,0},        /* ^FOx,y,z     */
-    {1,0,0,'N','Y'} /* ^PQq,p,r,o,e */
+        {'A', 0},       /* ^MNa         */
+        {0,0},          /* ^LHx,y       */
+        {'T', 'N'},     /* ^MMa,b       */
+        {4 * 300},      /* ^PWa         */
+        {0},            /* ^LSa         */
+        {'N'},          /* ^POa         */
+        {6 * 300},      /* ^LLy         */
+        {8,0,2},        /* ^PRp,s,b     */
+        {8},            /* ~SD##        */
+        {0,0,0},        /* ^FOx,y,z     */
+        {1,0,0,'N','Y'} /* ^PQq,p,r,o,e */
     };
 
     zpl job(thisjob);
@@ -243,7 +242,6 @@ bool save_zpl(canvas* ptr, const char* dir, int cnt)
     printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".zpl")).c_str());
     return err | job.save_zpl(output.c_str());
 }
-
 
 void print_pass_fail(const char* testname, bool err)
 {

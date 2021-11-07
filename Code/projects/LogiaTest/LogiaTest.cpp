@@ -43,18 +43,30 @@
 
 #include "canvas.hpp"
 #include "font.hpp"
+#include "zpl.hpp"
 
 #define ARIAL "C:\\Windows\\Fonts\\arial.ttf"
+
+/* default printer parms */
+PARM DEFAULT = {
+    {'A', 0},       /* ^MNa         */
+    {0,0},          /* ^LHx,y       */
+    {'T', 'N'},     /* ^MMa,b       */
+    {4 * 300},      /* ^PWa         */
+    {0},            /* ^LSa         */
+    {'N'},          /* ^POa         */
+    {6 * 300},      /* ^LLy         */
+    {8,0,2},        /* ^PRp,s,b     */
+    {8},            /* ~SD##        */
+    {0,0,0},        /* ^FOx,y,z     */
+    {1,0,0,'N','Y'} /* ^PQq,p,r,o,e */
+};
 
 int catch_barcode_error(int zerr, char* cptr);
 int add_barcode_to_canvas(canvas* can, zint_symbol* my_symbol);
 int getQRcode(canvas* can, const char* str);
 int getTextA(canvas* can, int DPI, const char* str);
 int getImage(canvas* can, const char* fileName);
-int save_format(
-    canvas* can, int DPI, float stock_width_inch, 
-    float stock_height_inch, int rate, int darkness, 
-    int quantity, const char* file);
 
 int32_t calc_offset(int32_t m, int32_t s)
 {
@@ -66,15 +78,9 @@ int main(int argc, char* argv[])
     canvas* temp;
     canvas master;
 
-    char* inputimage;
-    char* txt;
-    char* save_as;
-    float inch_w;
-    float inch_h;
-    int dpi;
-    int rate;
-    int count;
-    int dark;
+    char* inputimage, *txt, *save_as;
+    float inch_w, inch_h;
+    int dpi, rate, count, dark;
 
     if (argc < 9) {
         printf("%s dark, rate, dpi, w h count txt img_in save_as.zpl\n", argv[0]);
@@ -119,10 +125,17 @@ int main(int argc, char* argv[])
         delete temp;
     }
 
-    if (save_format(&master, dpi, 4.0, 6.0, 8, 8, 1, save_as)) {
-        printf("Could not Save %s\n", save_as);
+    zpl myJob(DEFAULT);
+    myJob.set_label_length((uint32_t)(dpi * inch_h));
+    myJob.set_print_width((uint32_t)(dpi * inch_w));
+    myJob.set_print_rate(rate, 0, 2);
+    myJob.set_darkness(dark);
+    myJob.set_print_quantity(count, 0, 0, 'N', 'Y');
+    if (myJob.add_graphic(master.get_pointer(), master.get_x(), master.get_y()))
         return 1;
-    }
+    
+    if (myJob.save_zpl(save_as))
+        return 1;
 
     return 0;
 }
@@ -184,70 +197,4 @@ int catch_barcode_error(int zerr, char* cptr)
         return 1;
     }
     return 0;
-}
-
-// ^MN
-// ^XA
-// ^LH0,0
-// ^MMT
-// ^PW1198
-// ^LS0
-// ^POI
-// ^LL1798
-// ^PR8
-// ~SD8 
-// ^FO0, 0, 0
-// ^GFA, 270000, 270000, 150, 
-// --<bmp>--
-// ^PQ1 
-// ^XZ
-
-int save_format(
-    canvas *can, int DPI, float stock_width_inch, 
-    float stock_height_inch, int rate, int darkness, 
-    int quantity, const char* file)
-{
-    /* Generate Format */
-    bool err = 0;
-    uint32_t _len = 0;
-    stock_height_inch *= DPI;
-    stock_width_inch *= DPI;
-    
-    FILE* fd;
-    fopen_s(&fd, file, "wb");
-    if (fd != NULL) {
-        /* Media Tracking, Start Format, Lable Home [0,0], Print Mode [Tear-Off]*/
-        fprintf(fd, "^MN\n^XA\n^LH0,0\n^MMT");
-        /* print Width (in dots) */
-        fprintf(fd, "^PW%d\n", (int)stock_width_inch);
-        /* Lable Shift, Print Orientation [normal]*/
-        fprintf(fd, "^LS0\n^PON\n");
-        /* Lable Length (in dots) */
-        fprintf(fd, "^LL%d\n", (int)stock_height_inch);
-        /* Print Rate [ips] */
-        fprintf(fd, "^PR%d\n", rate);
-        /* Set Darkness */
-        fprintf(fd, "~SD%02d\n", darkness);
-        /* Field Origin [0,0,0] */
-        fprintf(fd, "^FO0, 0, 0\n");
-
-        /* Bitmap Data */
-        uint8_t* zpldata = can->getZPL(&_len);
-        if (zpldata != nullptr) {
-            fwrite(zpldata, sizeof(uint8_t), _len, fd);
-            delete[] zpldata;
-        }
-        else err |= 1;
-
-        /* Print Quantity */
-        fprintf(fd, "\r\n^PQ%d", quantity);
-        /* End Format */
-        fprintf(fd, "^XZ\r\n");
-
-        if ((fclose(fd) != 0) || (ferror(fd)))
-            err |= 1;
-    }
-    else err |= 1;
-
-    return (int)err;
 }

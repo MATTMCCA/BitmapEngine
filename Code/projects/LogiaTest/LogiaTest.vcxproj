@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../zint/inc;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../zint/inc;../../jbigkit-2.1/libjbig;../../ZPL/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -109,7 +109,7 @@ xcopy /y /d "..\..\zint\Release\*.dll" "$(OutDir)"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../zint/inc;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../zint/inc;../../jbigkit-2.1/libjbig;../../ZPL/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,6 +157,7 @@ xcopy /y /d "..\..\zint\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\..\bitmapEngine\src\font.cpp" />
     <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig85.c" />
     <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig_ar.c" />
+    <ClCompile Include="..\..\ZPL\src\zpl.cpp" />
     <ClCompile Include="LogiaTest.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +165,7 @@ xcopy /y /d "..\..\zint\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\bitmapEngine\include\font.hpp" />
     <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig85.h" />
     <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig_ar.h" />
+    <ClInclude Include="..\..\ZPL\include\zpl.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

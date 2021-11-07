@@ -403,7 +403,7 @@ bool zpl::_gen_zpl(void)
         _gen_head();
         _gen_foot();
 
-        uint32_t _s = strlen(HEAD) + strlen(FOOT) + zpl_data_size;
+        uint32_t _s = (uint32_t) (strlen(HEAD) + strlen(FOOT) + zpl_data_size);
         tmp = new uint8_t[_s];
         if (tmp != nullptr) {
             memcpy(tmp, HEAD, strlen(HEAD));
@@ -507,7 +507,7 @@ bool zpl::_GFA_prefix(int32_t y0)
             memcpy(tmp, _b, strlen(_b));
             memcpy(tmp + strlen(_b), zpl_data, zpl_data_size);
             delete[] zpl_data;
-            zpl_data_size += strlen(_b);
+            zpl_data_size += (uint32_t)strlen(_b);
             zpl_data = tmp;
         }
         else err |= 1;

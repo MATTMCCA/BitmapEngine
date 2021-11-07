@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../ZPL/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,7 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../ZPL/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../ZPL/include;../../ZPL/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,7 +148,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../ZPL/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
