@@ -252,8 +252,121 @@ bool canvas::savePBM(const char* fileName)
     return err;
 }
 
+const char* canvas::_freq_to_string(char val, int32_t freq)
+{
+    std::string tmp;
+    if (val != '!' && val != ',') {
+        while (freq > 0) {
+            for (int i = 38; i >= 0; i--) {
+                if ((freq - _frequency[i]) >= 0) {
+                    tmp.append(1, _enc[i]);
+                    freq -= _frequency[i];
+                    break;
+                }
+            }
+        }
+    }
+    tmp.append(1, val);
+    char* ptr = new char[tmp.length() + 1]{'\0'};
+    if (ptr != nullptr)
+        memcpy(ptr, tmp.data(), tmp.length());
+    else
+        return nullptr;
 
-/* NON WORKING */
+    return ptr;
+}
+
+/* could be more eligant... */
+bool canvas::_bytes_to_zpl(uint8_t** ptr, int32_t* _size, int32_t row)
+{
+    bool err = 0;
+
+    uint32_t buffer_size = 0;
+    uint8_t* buffer = nullptr;
+    
+    if (ptr != nullptr) {
+        int32_t cnt = 0;
+        int32_t _y = *_size / row;
+        uint8_t* _old = nullptr;
+        for (int32_t y = 0; y < _y; y++) {
+            uint8_t* line = (*ptr+(y * row));
+            std::string _row, _tank;
+                        
+            if (_old != nullptr)
+                if (memcmp(_old, line, row) == 0) //if delta == 0
+                    _row = std::string(1, ':');
+            
+            if (_row.empty()) {
+                /* convert to hex */
+                for (int32_t x = 0; x < row; x++) {
+                    uint8_t j = line[x];
+                    char h[3] = { '\0' };
+
+                    h[0] = ((j >> 4) & 0x0F);
+                    h[1] = (j & 0x0F);
+                    h[0] += (h[0] > 9) ? 55 : 48;
+                    h[1] += (h[1] > 9) ? 55 : 48;
+                    _row.append(h);
+                }
+
+                /* prune */                
+                char _p = NULL;                         
+                if (_row.back() == 'F') _p = 'F';
+                if (_row.back() == '0') _p = '0';
+
+                if (_p != NULL) {
+                    do {
+                        if (!_row.empty()) {
+                            _row.pop_back();
+                            if (_row.empty())
+                                break;
+                        }
+                    } while (_row.back() == _p);
+                    if (_p == 'F') _row.append(1, '!');
+                    else           _row.append(1, ',');
+                }                
+
+                /* compress */
+                cnt = 0;
+                _p = _row.front();
+                for (int32_t i = 0; i < (int32_t)_row.length(); i++) {
+                    if (_p != _row[i]) {
+                        _tank.append(_freq_to_string(_p, cnt));
+                        _p = _row[i];
+                        cnt = 0;
+                    }
+                    cnt++;
+                }
+
+                if(cnt) _tank.append(_freq_to_string(_p, cnt));
+                _row = _tank;
+            }
+
+            _old = line;
+            uint32_t new_size = buffer_size + _row.length();
+            uint8_t *new_buffer = new uint8_t[new_size];
+            if (new_buffer != nullptr) {
+                memcpy(new_buffer, buffer, buffer_size);
+                memcpy(&new_buffer[buffer_size], _row.data(), _row.length());
+                delete[] buffer;
+                buffer = new_buffer;
+                buffer_size = new_size;
+            }
+            else err |= 1;
+        }
+
+        delete[] * ptr;
+        * _size = buffer_size;
+        *ptr = buffer;
+
+    } else
+        err |= 1;
+
+    return err;
+}
+
+//http://labelary.com/viewer.html
+/* ZPL legacy bitmap compression */
 bool canvas::saveZPL(const char* fileName)
 {
     bool err = 0;
@@ -265,7 +378,7 @@ bool canvas::saveZPL(const char* fileName)
 
         uint8_t* BMPDATA = nullptr;
         uint32_t q = image_x * image_y;
-        size_t BMPDATASIZE = q * sizeof(uint8_t);
+        int32_t BMPDATASIZE = q * sizeof(uint8_t);
         BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
 
         if (BMPDATA != nullptr) {
@@ -284,39 +397,22 @@ bool canvas::saveZPL(const char* fileName)
                         BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
             }
 
-            FILE* fd;
-            //fopen(fileName, "wb");
-            fopen_s(&fd, fileName, "wb");
+            if ((err |= _bytes_to_zpl(&BMPDATA, &BMPDATASIZE, image_x)) == 0) {
 
-            if (fd != NULL) {
+                FILE* fd;
+                //fopen(fileName, "wb");
+                fopen_s(&fd, fileName, "wb");
 
-                char u[512];
-                
-                snprintf(u, 512, "^MN^XA^LH0,0^MMT^PW1200^LS0^POI^LL1800^PR8^FO0,0,0\n");
-                fwrite(u, sizeof(uint8_t), strlen(u), fd);
-
-                snprintf(u, 512, "^GFA,%d,%d,%d,", (image_x * image_y * 2) + (image_y), image_x * image_y, image_x);
-                fwrite(u, sizeof(uint8_t), strlen(u), fd);
-                
-                for (__y = 0; __y < image_y; __y++)
-                {
-                    out_line = &BMPDATA[(__y * image_x)];
-                    for (__x = 0; __x < image_x; __x++)
-                    {
-                        snprintf(u, 3, "%02X", out_line[__x]);
-                        fwrite(u, sizeof(uint8_t), 2, fd);
-                    }
-                    u[0] = '\n';
-                    fwrite(u, sizeof(uint8_t), 1, fd);
+                if (fd != NULL) {
+                    char u[512];
+                    snprintf(u, 512, "^GFA,%d,%d,%d, ", BMPDATASIZE, image_x * image_y, image_x);
+                    fwrite(u, sizeof(uint8_t), strlen(u), fd);
+                    fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
+                    if ((fclose(fd) != 0) || (ferror(fd)))
+                        err |= 1;
                 }
-
-                snprintf(u, 512, "^PQ1^XZ\r\n");
-                fwrite(u, sizeof(uint8_t), strlen(u), fd);
-
-                if ((fclose(fd) != 0) || (ferror(fd)))
-                    err |= 1;
+                else err |= 1;
             }
-            else err |= 1;
             delete[] BMPDATA; //release when done
         }
         else err |= 1;

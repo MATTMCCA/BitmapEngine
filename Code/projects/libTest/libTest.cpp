@@ -113,7 +113,6 @@ bool image_contrast_adj(const char* dir, const char* bmp, int cnt);
 bool canvas_scale_grow(const char* dir, const char* bmp, int cnt);
 bool canvas_scale_shrink(const char* dir, const char* bmp, int cnt);
 bool canvas_scale_grow_width(const char* dir, const char* bmp, int cnt);
-
 bool canvas_rotate_15(const char* dir, const char* bmp, int cnt);
 
 int main(int argc, char* argv[])
@@ -773,7 +772,8 @@ bool image_save_zpl(const char* dir, const char* bmp, int cnt)
     bool err = 0;
     canvas c;
 
-    err |= c.import_24bit(bmp, DITHER::Stucki);
+    //err |= c.import_24bit(bmp, DITHER::Stucki);
+    err |= c.import_24bit(bmp, DITHER::Threshold);
 
     err |= save_zpl(&c, dir, cnt);
     print_pass_fail("ZPL_TEST", err);
