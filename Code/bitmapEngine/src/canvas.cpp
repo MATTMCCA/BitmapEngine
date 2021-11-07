@@ -422,6 +422,65 @@ bool canvas::saveZPL(const char* fileName)
     return err;
 }
 
+uint8_t* canvas::getZPL(uint32_t* len)
+{
+    bool err = 0;
+    uint8_t* BMPDATA = nullptr;
+    if (ptr != nullptr) {
+        uint32_t image_y = _y;
+        uint32_t image_x = (uint32_t)(_x / 8.0);
+        if ((image_x * 8) < (uint32_t)_x)   image_x++;   //math fix
+        if (image_x == 0)                   image_x = 1; //non 0 byte width
+               
+        uint32_t q = image_x * image_y;
+        int32_t BMPDATASIZE = q * sizeof(uint8_t);
+        BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
+
+        if (BMPDATA != nullptr) {
+            memset(BMPDATA, 0x00, BMPDATASIZE);
+
+            bool* in_line;
+            uint8_t* out_line;
+            uint32_t __y = 0, __x = 0;
+
+            for (__y = 0; __y < _y; __y++) {
+                in_line = &ptr[(__y * _x)];
+                out_line = &BMPDATA[(__y * image_x)];
+
+                for (__x = 0; __x < _x; __x++)
+                    if (in_line[__x] ^ _inv)
+                        BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
+            }
+
+            if ((err |= _bytes_to_zpl(&BMPDATA, &BMPDATASIZE, image_x)) == 0) {
+                char u[512];
+                uint8_t* new_ptr = nullptr;                
+                snprintf(u, 512, "^GFA,%d,%d,%d, ", BMPDATASIZE, image_x * image_y, image_x);
+                *len = BMPDATASIZE + strlen(u);
+                new_ptr = new uint8_t[*len];
+                if (new_ptr != nullptr) {
+                    memcpy(new_ptr, u, strlen(u));
+                    memcpy(&new_ptr[strlen(u)], BMPDATA, BMPDATASIZE);
+                    delete[] BMPDATA;
+                    BMPDATA = new_ptr;
+                }
+                else err |= 1;
+            }
+        }
+        else err |= 1;
+    }
+    else err |= 1;
+
+    if (err) {
+        *len = 0;
+        if (BMPDATA != nullptr) 
+            delete[] BMPDATA;
+        BMPDATA = nullptr;
+    }
+    
+    return BMPDATA;
+}
+
 /* mainly for debugging */
 bool canvas::saveXBM(const char* fileName, const char* structName)
 {

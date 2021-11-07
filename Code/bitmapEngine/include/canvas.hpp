@@ -236,6 +236,7 @@ public:
     bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
     bool saveXBM(const char* fileName, const char* structName);
     bool saveZPL(const char* fileName); 
+    uint8_t* getZPL(uint32_t* len);
 
     bool scale(float x0, float y0);
 
