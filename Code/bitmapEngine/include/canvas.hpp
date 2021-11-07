@@ -182,17 +182,6 @@ enum class DEGREE
     ROT_360
 };
 
-/* ZPL format & compression tables */
-static const int _frequency[39] = { 1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,
-                                   12,  13,  14,  15,  16,  17,  18,  19,
-                                   20,  40,  60,  80, 100, 120, 140, 160, 180, 200, 220,
-                                  240, 260, 280, 300, 320, 340, 360, 380, 400 };
-
-static const char _enc[39] = { 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 
-                               'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
-                               'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
-                               'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
-
 /* jbig callbacks */
 static void data_out(unsigned char* start, size_t len, void* file);
 static int line_out(const struct jbg85_dec_state* s, unsigned char* start, size_t len, unsigned long y, void* file);
@@ -235,9 +224,7 @@ public:
     bool savePBM(const char* fileName); //portable bitmap raw
     bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
     bool saveXBM(const char* fileName, const char* structName);
-    bool saveZPL(const char* fileName); 
-    uint8_t* getZPL(uint32_t* len);
-
+    
     bool scale(float x0, float y0);
 
     bool* get_pointer(void) {
@@ -278,10 +265,6 @@ private:
     bool atkinson(img* image);
     bool bayer(img* image, uint8_t matrix);
     bool cluster(img* image);
-
-    /* zpl */
-    const char* _freq_to_string(char val, int32_t freq);
-    bool _bytes_to_zpl(uint8_t** ptr, int32_t* _size, int32_t row);
 
 protected:
     bool _inv = 0;

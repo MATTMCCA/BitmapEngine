@@ -31,10 +31,7 @@
     ***************************************************************************************
 */
 
-//#define _CRT_SECURE_NO_DEPRECATE //fixed
-
 #include <string>
-
 #include <chrono>
 #include <cstdio>
 #include <cstdint>
@@ -43,6 +40,7 @@
 
 #include "canvas.hpp"
 #include "font.hpp"
+#include "zpl.hpp"
 
 using namespace std::chrono;
 
@@ -56,6 +54,8 @@ const int DPI = 300;
 
 std::string JBIG_TESTIMG;
 std::string PBM_TESTIMG;
+
+int DEBUG(void);
 
 bool save_bmp(canvas* ptr, const char* dir, int cnt);
 bool save_pbm(canvas* ptr, const char* dir, int cnt);
@@ -117,6 +117,11 @@ bool canvas_rotate_15(const char* dir, const char* bmp, int cnt);
 
 int main(int argc, char* argv[])
 {
+    /*
+    DEBUG();
+    return 0;
+    */
+
     char* output_dir = (char*)TEST_DIR;
     char* tst_img = (char*)TEST_IMG;
     auto start = high_resolution_clock::now();
@@ -214,12 +219,31 @@ bool save_xbm(canvas* ptr, const char* dir, int cnt)
     return ptr->saveXBM(output.c_str(), "myImage");
 }
 
+
 bool save_zpl(canvas* ptr, const char* dir, int cnt)
 {
+    PARM thisjob = {
+    {'A', 0},       /* ^MNa         */
+    {0,0},          /* ^LHx,y       */
+    {'T', 'N'},     /* ^MMa,b       */
+    {4 * 300},      /* ^PWa         */
+    {0},            /* ^LSa         */
+    {'N'},          /* ^POa         */
+    {6 * 300},      /* ^LLy         */
+    {8,0,2},        /* ^PRp,s,b     */
+    {8},            /* ~SD##        */
+    {0,0,0},        /* ^FOx,y,z     */
+    {1,0,0,'N','Y'} /* ^PQq,p,r,o,e */
+    };
+
+    zpl job(thisjob);
+    job.add_graphic(ptr->get_pointer(), ptr->get_x(), ptr->get_y());
+ 
     std::string output = std::string(dir) + std::to_string(cnt) + std::string(".zpl");
     printf("%s\t-> ", std::string(std::to_string(cnt) + std::string(".zpl")).c_str());
-    return ptr->saveZPL(output.c_str());
+    return job.save_zpl(output.c_str());
 }
+
 
 void print_pass_fail(const char* testname, bool err)
 {
@@ -771,10 +795,7 @@ bool image_save_zpl(const char* dir, const char* bmp, int cnt)
 {
     bool err = 0;
     canvas c;
-
-    //err |= c.import_24bit(bmp, DITHER::Stucki);
     err |= c.import_24bit(bmp, DITHER::Threshold);
-
     err |= save_zpl(&c, dir, cnt);
     print_pass_fail("ZPL_TEST", err);
     return err;
@@ -848,4 +869,9 @@ bool canvas_scale_grow_width(const char* dir, const char* bmp, int cnt)
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("Canvas (scale)", err);
     return err;
+}
+
+int DEBUG(void)
+{
+    return 0;
 }
