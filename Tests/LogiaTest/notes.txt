@@ -1,0 +1,4 @@
+https://supportcommunity.zebra.com/s/article/How-to-Assign-USB-Printers-to-LPT-Ports?language=en_US
+https://supportcommunity.zebra.com/s/article/Print-RAW-File-From-CMD?language=en_US
+
+see batch file for details
