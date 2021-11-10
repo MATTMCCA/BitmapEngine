@@ -232,6 +232,7 @@ bool save_zpl(canvas* ptr, const char* dir, int cnt)
         {8,0,2},        /* ^PRp,s,b     */
         {8},            /* ~SD##        */
         {0,0,0},        /* ^FOx,y,z     */
+        /***** Bitmap Data Goes Here ****/
         {1,0,0,'N','Y'} /* ^PQq,p,r,o,e */
     };
 

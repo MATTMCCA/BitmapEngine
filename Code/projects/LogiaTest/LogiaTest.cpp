@@ -75,6 +75,27 @@ int32_t calc_offset(int32_t m, int32_t s)
 
 int main(int argc, char* argv[])
 {
+
+    /*
+    char yyy[] = "testing this shit";
+    char* ttt = nullptr;
+    size_t ns = base64_encode((uint8_t*)yyy, (uint8_t*)ttt, strlen(yyy), 0);
+    printf("newsize: %d\n", ns);
+
+    ttt = new char[ns];
+    if (ttt != nullptr) {
+        ns = base64_encode((uint8_t*)yyy, (uint8_t*)ttt, strlen(yyy), 0);
+    }
+
+    for (int i = 0; i < ns; i++) {
+        printf("%c", ttt[i]);
+    }
+    printf("\n");
+
+    return 0;
+    */
+
+
     canvas* temp;
     canvas master;
 

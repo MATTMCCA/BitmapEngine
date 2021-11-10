@@ -1,0 +1,3 @@
+https://raw.githubusercontent.com/bossman48/CRC16_CCITT/main/socket.c
+
+no licence... public domain?

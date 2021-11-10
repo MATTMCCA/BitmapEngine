@@ -749,7 +749,7 @@ static size_t decode_pscd(struct jbg85_dec_state *s, unsigned char *data,
 	  line_h3 <<= 1;
 	} while ((++x & 7) && x < s->x0);
       } /* if (s->options & JBG_LRLTWO) */
-      *hp1++ = line_h1;
+      *hp1++ = (unsigned char) line_h1; // MJM added CAST
       hp2++;
       hp3++;
     } /* while (x < s->x0) */

@@ -199,12 +199,43 @@ bool zpl::get_print_quantity(uint32_t* q, uint32_t* p, uint32_t* r, char* o, cha
     return false;
 }
 
+/* TODO */
+
+/*
+
+    breakpoint here, should have CRC & z64 data, this should be enougph for a check
+
+*/
 bool zpl::add_graphic(bool* ptr, uint32_t x0, int32_t y0)
 {
     bool err = 0;
+
+    uint8_t* temp = nullptr;
+    uint32_t temp_len = 0;
+
     err |= _pack_bool(ptr, x0 * y0, x0);
-    err |= _bytes_to_zpl();
-    err |= _GFA_prefix(y0);
+
+    //err |= _bytes_to_zpl();
+
+    if ((err |= _compress(&temp, &temp_len)) == 0) {
+        if (temp != nullptr) {
+            err |= _encode(temp, temp_len);
+            delete[] temp;
+        }
+    }
+
+    if (!err) {
+        if (zpl_data != nullptr) {
+            uint16_t CRC_16 = CRC16(zpl_data, zpl_data_size);
+            printf("crc: %04X\n", CRC_16);
+        }
+    }
+
+    // calc crc
+
+    //append to buffer, im tired, this is non-working....bed......
+    
+    //err |= _GFA_prefix(y0);
     return err;
 }
 
@@ -253,8 +284,11 @@ zpl::~zpl()
     if (_zpl != nullptr)
         delete[] _zpl;
     _zpl = nullptr;
+
+    _free_int_buf();
 }
 
+/*
 const char* zpl::_freq_to_string(char val, int32_t freq)
 {
     std::string tmp;
@@ -278,7 +312,119 @@ const char* zpl::_freq_to_string(char val, int32_t freq)
 
     return ptr;
 }
+*/
 
+bool zpl::_encode(uint8_t* ptr, uint32_t len)
+{
+    bool err = 0;
+    if (ptr != nullptr) {
+        if (zpl_data != nullptr) 
+            delete[] zpl_data;
+        zpl_data = nullptr;
+
+        zpl_data_size = base64_encode(ptr, NULL, len, 0);
+        zpl_data = new uint8_t[zpl_data_size];
+
+        if (zpl_data != nullptr) {
+            if (base64_encode(ptr, zpl_data, len, 0) != zpl_data_size)
+                err |= 1;
+        }
+        else err |= 1;
+    }
+    else err |= 1;
+
+    return err;
+}
+
+bool zpl::_compress(uint8_t** ptr, uint32_t* len)
+{
+    bool err = 0;
+
+    _free_int_buf();    
+    if (_alloc_int_buf())
+        return 1;    
+
+    if (zpl_data != nullptr) {   
+
+        // Compression.
+        z_stream stream; 
+
+        // Init the z_stream
+        memset(&stream, 0, sizeof(stream));
+        stream.next_in = s_inbuf;
+        stream.avail_in = 0;
+        stream.next_out = s_outbuf;
+        stream.avail_out = BUF_SIZE;
+
+        uint32_t infile_remaining = zpl_data_size;
+
+        if (deflateInit(&stream, Z_BEST_COMPRESSION) != Z_OK) {
+            //printf("deflateInit() failed!\n");
+            return err |= 1;
+        }
+
+        while (1) {
+            int status;
+            if (!stream.avail_in) {
+                // Input buffer is empty, so read more bytes from input file.
+                uint32_t n = my_min(BUF_SIZE, infile_remaining);
+
+                memcpy(s_inbuf, zpl_data + (infile_remaining - zpl_data_size), n);
+
+                stream.next_in = s_inbuf;
+                stream.avail_in = n;
+                infile_remaining -= n;
+
+                //printf("Input bytes remaining: %u\n", infile_remaining);
+            }
+
+            status = deflate(&stream, infile_remaining ? Z_NO_FLUSH : Z_FINISH); // <- known enum warning
+
+            if ((status == Z_STREAM_END) || (!stream.avail_out)) {
+                // Output buffer is full, or compression is done, so write buffer to output file.
+                uint32_t n = BUF_SIZE - stream.avail_out;
+
+                uint8_t* l = nullptr;
+                l = new uint8_t[n + *len];
+                if (l != nullptr) {
+                    memcpy(l, *ptr, *len);
+                    memcpy(l + *len, s_outbuf, n);
+
+                    delete[] * ptr;
+                    *ptr = nullptr;
+                    if (ptr != nullptr) {
+                        *ptr = l;
+                        *len += n;
+                    }
+                    else err |= 1;
+                }
+                else err |= 1;
+
+                stream.next_out = s_outbuf;
+                stream.avail_out = BUF_SIZE;
+            }
+
+            if (status == Z_STREAM_END)
+                break;
+
+            else if (status != Z_OK) {
+                //printf("deflate() failed with status %i!\n", status);
+                return err |= 1;
+            }
+        }
+
+        if (deflateEnd(&stream) != Z_OK) {
+            //printf("deflateEnd() failed!\n");
+            return err |= 1;
+        }
+    }
+    else
+        err |= 1;
+
+    _free_int_buf();
+    return err;
+}
+/*
 bool zpl::_bytes_to_zpl(void)
 {
     bool err = 0;
@@ -298,7 +444,7 @@ bool zpl::_bytes_to_zpl(void)
                     _row = std::string(1, ':');
 
             if (_row.empty()) {
-                /* convert to hex */
+                // convert to hex
                 for (uint32_t x = 0; x < zpl_row; x++) {
                     uint8_t j = line[x];
                     char h[3] = { '\0' };
@@ -310,7 +456,7 @@ bool zpl::_bytes_to_zpl(void)
                     _row.append(h);
                 }
 
-                /* prune */
+                // prune
                 char _p = NULL;
                 if (_row.back() == 'F') _p = 'F';
                 if (_row.back() == '0') _p = '0';
@@ -327,7 +473,7 @@ bool zpl::_bytes_to_zpl(void)
                     else           _row.append(1, ',');
                 }
                 
-                /* compress */
+                // compress
                 cnt = 0;
                 _p = _row.front();
                 for (int32_t i = 0; i < (int32_t)_row.length(); i++) {
@@ -364,6 +510,8 @@ bool zpl::_bytes_to_zpl(void)
 
     return err;
 }
+
+*/
 
 bool zpl::_pack_bool(bool* ptr, uint32_t _size, uint32_t x0)
 {

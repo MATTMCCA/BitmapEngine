@@ -41,9 +41,18 @@
 #include <cstdbool>
 #include <cstring>
 #include <cmath>
-#include <string> //ugh
+#include <string>
 
-#define BUFFER_SIZE 300
+#include "crc.hpp"
+
+
+extern "C" {
+#include "base64.h"
+#include "miniz.h"
+}
+
+#define BUFFER_SIZE 300         //zpl header/footer string buffer
+#define BUF_SIZE (1024 * 1024)  //lz77 working buffer
 
 // a=target variable, b=bit number to act upon 0-n 
 //https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
@@ -57,6 +66,10 @@
 #define BITMASK_FLIP(x, mask)       ((x) ^= (mask))
 #define BITMASK_CHECK_ALL(x, mask)  (!(~(x) & (mask)))
 #define BITMASK_CHECK_ANY(x, mask)  ((x) & (mask))
+
+// lz77 macros
+#define my_max(a,b) (((a) > (b)) ? (a) : (b))
+#define my_min(a,b) (((a) < (b)) ? (a) : (b))
 
 /* ZPL format & compression tables */
 static const int _frequency[39] = { 1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,
@@ -186,13 +199,35 @@ public:
 
 private:
 
-    const char* _freq_to_string(char val, int32_t freq);
-    bool _bytes_to_zpl(void);
+    //const char* _freq_to_string(char val, int32_t freq);
+    //bool _bytes_to_zpl(void);
     bool _pack_bool(bool* ptr, uint32_t _size, uint32_t x0);
     bool _gen_zpl(void);
     bool _gen_head(void);
     bool _gen_foot(void);
     bool _GFA_prefix(int32_t y0);
+
+
+    bool _compress(uint8_t** ptr, uint32_t *len);
+    bool _encode(uint8_t* ptr, uint32_t len);
+
+
+
+    void _free_int_buf(void) {
+        if (s_inbuf != nullptr)  delete[] s_inbuf;
+        if (s_outbuf != nullptr) delete[] s_outbuf;
+        s_inbuf = nullptr;
+        s_outbuf = nullptr;
+    };
+
+    bool _alloc_int_buf(void) {
+        if (s_inbuf == nullptr)  s_inbuf = new uint8_t[BUF_SIZE];
+        if (s_outbuf == nullptr) s_outbuf = new uint8_t[BUF_SIZE];            
+        if (s_inbuf == nullptr || s_outbuf == nullptr)
+            return 1;
+        return 0;
+    };
+
 
 protected:
 
@@ -204,7 +239,11 @@ protected:
     uint8_t* _zpl = nullptr;
     uint32_t _zpl_size = 0;
 
+    /* TODO: make dynamic? */
     char HEAD[BUFFER_SIZE] = { 0x00 };
     char FOOT[BUFFER_SIZE] = { 0x00 };
+
+    uint8_t *s_inbuf = nullptr;
+    uint8_t *s_outbuf = nullptr;
 
 };
