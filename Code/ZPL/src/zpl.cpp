@@ -199,13 +199,6 @@ bool zpl::get_print_quantity(uint32_t* q, uint32_t* p, uint32_t* r, char* o, cha
     return false;
 }
 
-/* TODO */
-
-/*
-
-    breakpoint here, should have CRC & z64 data, this should be enougph for a check
-
-*/
 bool zpl::add_graphic(bool* ptr, uint32_t x0, int32_t y0)
 {
     bool err = 0;
@@ -214,8 +207,6 @@ bool zpl::add_graphic(bool* ptr, uint32_t x0, int32_t y0)
     uint32_t temp_len = 0;
 
     err |= _pack_bool(ptr, x0 * y0, x0);
-
-    //err |= _bytes_to_zpl();
 
     if ((err |= _compress(&temp, &temp_len)) == 0) {
         if (temp != nullptr) {
@@ -227,15 +218,10 @@ bool zpl::add_graphic(bool* ptr, uint32_t x0, int32_t y0)
     if (!err) {
         if (zpl_data != nullptr) {
             uint16_t CRC_16 = CRC16(zpl_data, zpl_data_size);
-            printf("crc: %04X\n", CRC_16);
+            err |= _GFA_graphic_bookend(y0, CRC_16);
         }
     }
 
-    // calc crc
-
-    //append to buffer, im tired, this is non-working....bed......
-    
-    //err |= _GFA_prefix(y0);
     return err;
 }
 
@@ -288,6 +274,7 @@ zpl::~zpl()
     _free_int_buf();
 }
 
+//legacy format, left for reference 
 /*
 const char* zpl::_freq_to_string(char val, int32_t freq)
 {
@@ -424,6 +411,8 @@ bool zpl::_compress(uint8_t** ptr, uint32_t* len)
     _free_int_buf();
     return err;
 }
+
+//legacy format, left for reference 
 /*
 bool zpl::_bytes_to_zpl(void)
 {
@@ -647,7 +636,7 @@ bool zpl::_gen_foot(void)
     memset(FOOT, 0x00, BUFFER_SIZE);
 
     snprintf(FOOT + strlen(FOOT), BUFFER_SIZE - strlen(FOOT),
-        "\r\n^PQ%d,%d,%d,%c,%c\n",
+        "\n\r^PQ%d,%d,%d,%c,%c\n",
         job.print_quantity.q,
         job.print_quantity.p,
         job.print_quantity.r,
@@ -655,24 +644,33 @@ bool zpl::_gen_foot(void)
         job.print_quantity.e);
 
     snprintf(FOOT + strlen(FOOT), BUFFER_SIZE - strlen(FOOT),
-        "^XZ\r\n");
+        "^XZ\n\r");
 
     return true;
 }
 
-bool zpl::_GFA_prefix(int32_t y0)
+bool zpl::_GFA_graphic_bookend(int32_t y0, uint16_t _crc)
 {
     bool err = 0;
     char _b[512];
     if (zpl_data != nullptr) {
-        snprintf(_b, 512, "^GFA,%d,%d,%d, ", zpl_data_size, zpl_row * y0, zpl_row);
-        uint8_t* tmp = new uint8_t[strlen(_b) + zpl_data_size];
+        snprintf(_b, 512, "^GFA,%d,%d,%d,:Z64:", zpl_data_size, zpl_row * y0, zpl_row);
+        uint8_t* tmp = new uint8_t[strlen(_b) + zpl_data_size + 5];
         if (tmp != nullptr) {
             memcpy(tmp, _b, strlen(_b));
             memcpy(tmp + strlen(_b), zpl_data, zpl_data_size);
             delete[] zpl_data;
-            zpl_data_size += (uint32_t)strlen(_b);
+            zpl_data_size += (uint32_t)strlen(_b) + 5;
             zpl_data = tmp;
+
+            /* add crc */
+            _b[0] = ':';
+            for (int i = 0; i < 4; i++) {
+                uint8_t k = ((_crc >> (12 - (i*4))) & 0x000F);
+                _b[i+1] = ( k > 9) ? k + 55 : k + 48;
+            }
+            if(zpl_data != nullptr)
+                memcpy(zpl_data + zpl_data_size - 5, _b, 5);
         }
         else err |= 1;
     }

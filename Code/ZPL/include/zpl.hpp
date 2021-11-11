@@ -51,7 +51,7 @@ extern "C" {
 #include "miniz.h"
 }
 
-#define BUFFER_SIZE 300         //zpl header/footer string buffer
+#define BUFFER_SIZE 350         //zpl header/footer string buffer
 #define BUF_SIZE (1024 * 1024)  //lz77 working buffer
 
 // a=target variable, b=bit number to act upon 0-n 
@@ -205,9 +205,9 @@ private:
     bool _gen_zpl(void);
     bool _gen_head(void);
     bool _gen_foot(void);
-    bool _GFA_prefix(int32_t y0);
+    bool _GFA_graphic_bookend(int32_t y0, uint16_t _crc);
 
-
+    /* For Z64 output, driver replacement */
     bool _compress(uint8_t** ptr, uint32_t *len);
     bool _encode(uint8_t* ptr, uint32_t len);
 
