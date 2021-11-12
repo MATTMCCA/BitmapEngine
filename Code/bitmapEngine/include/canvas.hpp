@@ -231,6 +231,8 @@ public:
         return ptr;
     }
 
+    bool TEST(int _dpi); //M-COM RLE TEST, mode 2
+
     ~canvas();
 
     canvas& operator= (const canvas& c) {

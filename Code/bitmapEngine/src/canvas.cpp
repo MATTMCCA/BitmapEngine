@@ -1284,3 +1284,97 @@ bool canvas::scale(float x0, float y0)
     return err;
 }
 
+
+
+/*******  JUST A TEST, BUGGY CODE ********/
+bool canvas::TEST(int _dpi)
+{
+    bool err = 0;
+
+    // needed, must bethe size of a head 203 | 300
+    if ((_x != 1280) && (_x != 832))
+        return 1;
+
+    // needed for format
+    if (mirror(MIRROR::Horizontal))
+        return 1;
+
+    /* pack bool */
+    uint32_t image_y = _y;
+    uint32_t image_x = (uint32_t)(_x / 8.0);
+
+    if ((image_x * 8) < (uint32_t)_x)   image_x++;   //math fix
+    if (image_x == 0)                   image_x = 1; //non 0 byte width
+
+    uint8_t* BMPDATA = nullptr;
+    uint32_t q = image_x * image_y;
+    size_t BMPDATASIZE = q * sizeof(uint8_t);
+    BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
+
+    if (BMPDATA != nullptr) {
+        memset(BMPDATA, 0x00, BMPDATASIZE);
+
+        bool* in_line;
+        uint8_t* out_line;
+        uint32_t __y = 0, __x = 0;
+
+        image_y--;
+        for (__y = 0; __y < _y; __y++) {
+            in_line = &ptr[(__y * _x)];
+            out_line = &BMPDATA[(((image_y)-__y) * image_x)];
+            for (__x = 0; __x < _x; __x++)
+                if (in_line[__x] ^ _inv)
+                    BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
+        }
+    }
+    else err |= 1;
+    /**************************************************************************************/
+    /* MCOM RLE ALG, Mode 2 */
+    /* '''Compressed''' Raw Binary Image */
+    if (!err) 
+    {
+        uint32_t i = 0;
+        while(i < BMPDATASIZE) 
+        {
+            uint8_t temp = BMPDATA[i++];
+
+            if (i > BMPDATASIZE) 
+                break;
+
+            /* if hot byte */
+            if ((temp == 0x00) || (temp == 0xFF)) 
+            {
+                /* print byte */
+                printf("%02X ", temp);
+                
+                int cnt = 0;     
+                /* count till overflow */
+                while ( (i < BMPDATASIZE) && (BMPDATA[i] == temp) && (cnt < 0xFE)) 
+                {
+                    i++;
+                    cnt++;
+                }
+
+                /* print count */
+                printf("%02X ", cnt);                          
+            }
+            else
+            {
+                /* print byte */
+                printf("%02X ", temp);                
+            }
+        }
+    }
+    /* sudo */
+    /*
+        if byte not hot
+            print
+        else
+            print
+            cout untill overflow | end of run
+            print count    
+    */
+    /**************************************************************************************/
+
+    return err;
+}

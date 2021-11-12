@@ -117,10 +117,11 @@ bool canvas_rotate_15(const char* dir, const char* bmp, int cnt);
 
 int main(int argc, char* argv[])
 {
-    /*
-    DEBUG();
-    return 0;
-    */
+    
+    return DEBUG();
+    
+
+
 
     char* output_dir = (char*)TEST_DIR;
     char* tst_img = (char*)TEST_IMG;
@@ -874,5 +875,8 @@ bool canvas_scale_grow_width(const char* dir, const char* bmp, int cnt)
 
 int DEBUG(void)
 {
-    return 0;
+    canvas micro;
+    if(micro.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\Totoro203dpi_24.bmp", DITHER::Threshold) == 0)
+        return micro.TEST(0);
+    return 24;
 }
