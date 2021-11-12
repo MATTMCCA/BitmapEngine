@@ -210,7 +210,7 @@ bool zpl::add_graphic(bool* ptr, uint32_t x0, int32_t y0)
     if (!err) err |= _pack_bool(ptr, x0 * y0, x0);
     if (!err) err |= _compress(&temp, &temp_len);
     if (!err) err |= _encode(temp, temp_len);
-    if (!err) err |= _encode(temp, temp_len);
+    if (!err) CRC_16 = CRC16(zpl_data, zpl_data_size);    
     if (!err) err |= _GFA_graphic_bookend(y0, CRC_16);
 
     if (temp != nullptr) delete[] temp;
@@ -327,7 +327,8 @@ bool zpl::_compress(uint8_t** ptr, uint32_t* len)
                     uint32_t n = BUF_SIZE - stream.avail_out;
                   
                     if (*ptr != nullptr) {
-                        uint8_t* l = new uint8_t[n + *len];
+                        uint32_t q = n + *len;
+                        uint8_t* l = new uint8_t[q];
                         if (l != nullptr) {
                             memcpy(l, *ptr, *len);
                             memcpy(l + *len, s_outbuf, n);

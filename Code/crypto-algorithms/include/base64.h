@@ -19,10 +19,10 @@
 /*********************** FUNCTION DECLARATIONS **********************/
 // Returns the size of the output. If called with out = NULL, will just return
 // the size of what the output would have been (without a terminating NULL).
-size_t base64_encode(uint8_t *in, uint8_t *out, uint32_t len, int newline_flag);
+uint32_t base64_encode(uint8_t *in, uint8_t *out, uint32_t len, int newline_flag);
 
 // Returns the size of the output. If called with out = NULL, will just return
 // the size of what the output would have been (without a terminating NULL).
-size_t base64_decode(uint8_t *in, uint8_t *out, uint32_t len);
+uint32_t base64_decode(uint8_t *in, uint8_t *out, uint32_t len);
 
 #endif   // BASE64_H
