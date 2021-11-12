@@ -27,11 +27,13 @@
  *  then contact the author for an arrangement.
  */
 
+/*
 #ifdef DEBUG
 #include <stdio.h>
 #else
 #define NDEBUG
 #endif
+*/
 
 #include <stdlib.h>
 #include <string.h>

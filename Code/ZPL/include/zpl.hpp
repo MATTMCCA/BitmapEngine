@@ -45,13 +45,12 @@
 
 #include "crc.hpp"
 
-
 extern "C" {
 #include "base64.h"
 #include "miniz.h"
 }
 
-#define BUFFER_SIZE 350         //zpl header/footer string buffer
+#define BUFFER_SIZE 100         //zpl header/footer string buffer
 #define BUF_SIZE (1024 * 1024)  //lz77 working buffer
 
 // a=target variable, b=bit number to act upon 0-n 
@@ -70,17 +69,6 @@ extern "C" {
 // lz77 macros
 #define my_max(a,b) (((a) > (b)) ? (a) : (b))
 #define my_min(a,b) (((a) < (b)) ? (a) : (b))
-
-/* ZPL format & compression tables */
-static const int _frequency[39] = { 1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,
-                                   12,  13,  14,  15,  16,  17,  18,  19,
-                                   20,  40,  60,  80, 100, 120, 140, 160, 180, 200, 220,
-                                  240, 260, 280, 300, 320, 340, 360, 380, 400 };
-
-static const char _enc[39] = { 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
-                               'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
-                               'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
-                               'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
 
 /* ^MNa*/
 typedef struct {
@@ -199,8 +187,6 @@ public:
 
 private:
 
-    //const char* _freq_to_string(char val, int32_t freq);
-    //bool _bytes_to_zpl(void);
     bool _pack_bool(bool* ptr, uint32_t _size, uint32_t x0);
     bool _gen_zpl(void);
     bool _gen_head(void);
@@ -211,13 +197,11 @@ private:
     bool _compress(uint8_t** ptr, uint32_t *len);
     bool _encode(uint8_t* ptr, uint32_t len);
 
-
-
+    /******************************************************************/
     void _free_int_buf(void) {
         if (s_inbuf != nullptr)  delete[] s_inbuf;
         if (s_outbuf != nullptr) delete[] s_outbuf;
-        s_inbuf = nullptr;
-        s_outbuf = nullptr;
+        s_inbuf = s_outbuf = nullptr;
     };
 
     bool _alloc_int_buf(void) {
@@ -228,9 +212,18 @@ private:
         return 0;
     };
 
+    bool _free_all(void) {
+        _free_int_buf();
+        if (zpl_data != nullptr) delete[] zpl_data;
+        if (_zpl != nullptr)     delete[] _zpl;
+        zpl_data = _zpl = nullptr;       
+        return 0;
+    }
+    /******************************************************************/
 
 protected:
-
+    
+    /* Job Format */
     PARM job = {0x00};
     uint8_t* zpl_data = nullptr;
     uint32_t zpl_data_size = 0;
@@ -239,10 +232,11 @@ protected:
     uint8_t* _zpl = nullptr;
     uint32_t _zpl_size = 0;
 
-    /* TODO: make dynamic? */
-    char HEAD[BUFFER_SIZE] = { 0x00 };
-    char FOOT[BUFFER_SIZE] = { 0x00 };
+    /* book ends */
+    std::string head;
+    std::string foot;
 
+    /* lz77 buffer */
     uint8_t *s_inbuf = nullptr;
     uint8_t *s_outbuf = nullptr;
 
