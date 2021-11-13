@@ -14,6 +14,7 @@
 
 /*******************************************************************/
 // https://docs.microsoft.com/en-us/windows/win32/printdocs/sending-data-directly-to-a-printer
+// https://download.microsoft.com/download/platformsdk/utility/95/win98/en-us/rawprn.exe
 // 
 // RawDataToPrinter - sends binary data directly to a printer 
 //  
@@ -71,4 +72,33 @@ bool raw_print(const char* printer, uint8_t* ptr, uint32_t size, const char* doc
         (LPTSTR)CString(printer).AllocSysString(),
         (LPTSTR)CString(doc_name).AllocSysString(),
         ptr, size);
+}
+
+/* shamelessly CTRL+C && CTRL+V */
+// https://stackoverflow.com/questions/34279427/how-to-get-printer-manufacturer-and-model-from-win32-api
+
+void list_printers(void)
+{
+    int level = 2;
+    DWORD flags = PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS;
+    PRINTER_INFO_2* printerInfo;
+    DWORD memsize, printer_count;
+
+    EnumPrinters(flags, NULL, level, NULL, 0, &memsize, &printer_count);
+    if (memsize < 1) 
+        return;
+
+    BYTE* bytes = new BYTE[memsize];
+    if (EnumPrinters(flags, NULL, level, bytes, memsize, &memsize, &printer_count)) {
+        printerInfo = (PRINTER_INFO_2*)bytes;
+        for (UINT i = 0; i < printer_count; i++) {
+            std::wcout << "printer: "                  << printerInfo->pPrinterName  << "\n";
+            std::wcout << "printerInfo->Status: "      << printerInfo->Status        << "\n";
+            std::wcout << "printerInfo->pDriverName: " << printerInfo->pDriverName   << "\n";
+            std::wcout << "printerInfo->pShareName: "  << printerInfo->pShareName    << "\n";
+            std::wcout << "printerInfo->pPortName: "   << printerInfo->pPortName     << "\n\n";
+            printerInfo++;
+        }
+    }
+    delete[] bytes;
 }

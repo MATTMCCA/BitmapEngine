@@ -75,6 +75,8 @@ int32_t calc_offset(int32_t m, int32_t s)
 
 int main(int argc, char* argv[])
 {
+    list_printers(); //return 1;
+
     canvas* temp;
     canvas master;
 
@@ -140,8 +142,10 @@ int main(int argc, char* argv[])
         return 1;
     
     /* prints format in memory */
-    if (myJob.print_format(save_as)) //prints to a physical printer
+    if (myJob.print_format(save_as)) {//prints to a physical printer
+        printf("Could Not Print to %s\n", save_as);
         return 1;
+    }
 
     /*
     if (myJob.save_format(save_as))
