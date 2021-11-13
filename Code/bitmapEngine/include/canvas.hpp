@@ -224,6 +224,10 @@ public:
     bool savePBM(const char* fileName); //portable bitmap raw
     bool saveJBG(const char* fileName); //JBIG (Joint Bi-level Image Experts Group)
     bool saveXBM(const char* fileName, const char* structName);
+
+    /* MICROCOM COMPRESSION BINARY, Mode 2, no flash header */
+    // https://microcomcorp.com/downloads/bmp2mic.zip
+    bool saveMCB(const char* fileName, int headSize);
     
     bool scale(float x0, float y0);
 
@@ -231,7 +235,7 @@ public:
         return ptr;
     }
 
-    bool TEST(int _dpi); //M-COM RLE TEST, mode 2
+    bool TEST(int head_size); //M-COM RLE TEST, mode 2
 
     ~canvas();
 
@@ -267,6 +271,8 @@ private:
     bool atkinson(img* image);
     bool bayer(img* image, uint8_t matrix);
     bool cluster(img* image);
+
+    bool _pack_bool(uint8_t** BMPDATA, uint32_t* row, bool ort = 1, int byte_bound = 1);
 
 protected:
     bool _inv = 0;

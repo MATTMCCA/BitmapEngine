@@ -133,40 +133,22 @@ static void data_out(unsigned char* start, size_t len, void* file)
 bool canvas::saveJBG(const char* fileName)
 {
     bool err = 0;
+
+    uint32_t BMPDATASIZE = 0;
+    uint8_t* BMPDATA = nullptr;
+    uint32_t row = 0;
+
     if (ptr != nullptr) {
-        uint32_t image_y = _y;
-        uint32_t image_x = (uint32_t)(_x / 8.0);
-        if ((image_x * 8) < (uint32_t)_x)           image_x++;   //math fix
-        if (image_x == 0)                           image_x = 1; //non 0 byte width
 
-        uint8_t* BMPDATA = nullptr;
-        uint32_t q = image_x * image_y;
-        size_t BMPDATASIZE = q * sizeof(uint8_t);
-        BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
+        if ((err |= _pack_bool(&BMPDATA, &row)) == 0)
+            BMPDATASIZE = row * _y;
 
-        if (BMPDATA != nullptr) {
-            memset(BMPDATA, 0x00, BMPDATASIZE);
-
-            bool* in_line;
-            uint8_t* out_line;
-            uint32_t __y = 0, __x = 0;
-
-            for (__y = 0; __y < _y; __y++) {
-                in_line = &ptr[(__y * _x)];
-                out_line = &BMPDATA[(__y * image_x)];
-
-                for (__x = 0; __x < _x; __x++)
-                    if (in_line[__x] ^ _inv)
-                        BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
-            }
-
-            struct jbg85_enc_state s;
-            size_t bpl = image_x;
-            uint32_t width = _x, height = _y, y;
+        if ((BMPDATA != nullptr) && (err == 0)) {
+            uint32_t y;
+            struct jbg85_enc_state s;            
 
             FILE* fd;
-            //fopen(fileName, "wb");
-            fopen_s(&fd, fileName, "wb");
+            fopen_s(&fd, fileName, "wb"); //fopen(fileName, "wb");
 
             if (fd != NULL) {
                 jbg85_enc_init(&s, _x, _y, data_out, fd);
@@ -178,7 +160,7 @@ bool canvas::saveJBG(const char* fileName)
                     /* Use a 3-line ring buffer, because the encoder requires that the two
                      * previously supplied lines are still in memory when the next line is
                      * processed. */
-                    next_line = &BMPDATA[y * image_x];
+                    next_line = &BMPDATA[y * row];
 
                     /* JBIG compress another line and write out result via callback */
                     jbg85_enc_lineout(&s, next_line, prev_line, prevprev_line);
@@ -205,36 +187,20 @@ bool canvas::saveJBG(const char* fileName)
 bool canvas::savePBM(const char* fileName)
 {
     bool err = 0;
+
+    uint32_t BMPDATASIZE = 0;
+    uint8_t* BMPDATA = nullptr;
+    uint32_t row = 0;
+
     if (ptr != nullptr) {
-        uint32_t image_y = _y;
-        uint32_t image_x = (uint32_t)(_x / 8.0);
-        if ((image_x * 8) < (uint32_t)_x)   image_x++;   //math fix
-        if (image_x == 0)                   image_x = 1; //non 0 byte width
 
-        uint8_t* BMPDATA = nullptr;
-        uint32_t q = image_x * image_y;
-        size_t BMPDATASIZE = q * sizeof(uint8_t);
-        BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
+        if ((err |= _pack_bool(&BMPDATA, &row)) == 0)
+            BMPDATASIZE = row * _y;
 
-        if (BMPDATA != nullptr) {
-            memset(BMPDATA, 0x00, BMPDATASIZE);
-
-            bool* in_line;
-            uint8_t* out_line;
-            uint32_t __y = 0, __x = 0;
-
-            for (__y = 0; __y < _y; __y++) {
-                in_line = &ptr[(__y * _x)];
-                out_line = &BMPDATA[(__y * image_x)];
-
-                for (__x = 0; __x < _x; __x++)
-                    if (in_line[__x] ^ _inv)
-                        BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
-            }
+        if ((BMPDATA != nullptr) && (err == 0)) {
 
             FILE* fd;
-            //fopen(fileName, "wb");
-            fopen_s(&fd, fileName, "wb");
+            fopen_s(&fd, fileName, "wb"); //fopen(fileName, "wb");
 
             if (fd != NULL) {
                 fprintf(fd, "P4\n# Created by BitmapEngine\n%d %d\n", _x, _y);
@@ -256,25 +222,20 @@ bool canvas::savePBM(const char* fileName)
 bool canvas::saveXBM(const char* fileName, const char* structName)
 {
     bool err = 0;
+
+    uint32_t BMPDATASIZE = 0;
+    uint8_t* BMPDATA = nullptr;
+    uint32_t row = 0, k = 1;
+
     if (ptr != nullptr) {
-        uint32_t image_y = _y;
-        uint32_t image_x = (uint32_t)(_x / 8.0);
-        if ((image_x * 8) < (uint32_t)_x)            image_x++;   //math fix
-        if (image_x == 0)                            image_x = 1; //non 0 byte width
 
-        uint8_t* BMPDATA = nullptr;
-        uint32_t q = image_x * image_y;
-        size_t BMPDATASIZE = q * sizeof(uint8_t);
-        BMPDATA = new uint8_t[image_x]{ 0x00 };
+        if ((err |= _pack_bool(&BMPDATA, &row)) == 0)
+            BMPDATASIZE = row * _y;
 
-        if (BMPDATA != nullptr) {
-            bool* in_line;
-            uint8_t* out_line = &BMPDATA[0];
-            uint32_t __y = 0, __x = 0;
+        if ((BMPDATA != nullptr) && (err == 0)) {
 
-            FILE* fd;
-            //fopen(fileName, "wb");
-            fopen_s(&fd, fileName, "wb");
+            FILE* fd;            
+            fopen_s(&fd, fileName, "wb"); //fopen(fileName, "wb");
 
             if (fd != NULL) {
                 fprintf(fd, "#define IMG_width %d\n", _x);
@@ -282,7 +243,6 @@ bool canvas::saveXBM(const char* fileName, const char* structName)
                 fprintf(fd, "static unsigned char IMG_bits[] = {\n\t");
 
                 /* jank lookup table */
-                uint32_t k = 1;
                 uint8_t xbm_table[256];
                 for (int i = 0; i < 256; i++) {
                     int k = i;
@@ -295,20 +255,12 @@ bool canvas::saveXBM(const char* fileName, const char* structName)
                     xbm_table[i] &= 0xFF;
                 }
 
-                for (__y = 0; __y < _y; __y++) {
-                    in_line = &ptr[(__y * _x)];
-                    memset(out_line, 0x00, image_x);
-
-                    for (__x = 0; __x < _x; __x++)
-                        if (in_line[__x] ^ _inv)
-                            BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
-
-                    for (__x = 0; __x < image_x; __x++, k++) {
-                        fprintf(fd, "0x%.2x%s", xbm_table[out_line[__x]], k != BMPDATASIZE ? ", " : "\n};");
-                        if ((k % image_x) == 0)
-                            fprintf(fd, "\n\t");
-                    }
-                }                                
+                for (uint32_t i = 0, k = 1; i < BMPDATASIZE; i++, k++) {
+                    fprintf(fd, "0x%.2x%s", xbm_table[BMPDATA[i]], k != BMPDATASIZE ? ", " : "\n};");
+                    if ((k % row) == 0)
+                        fprintf(fd, "\n\t");
+                }
+                              
                 if ((fclose(fd) != 0) || ferror(fd))
                     err |= 1;
             }
@@ -325,57 +277,39 @@ bool canvas::saveXBM(const char* fileName, const char* structName)
 bool canvas::saveBMP(const char* fileName, int DPI)
 {
     bool err = 0;
+
+    uint32_t BMPDATASIZE = 0;
+    uint8_t* BMPDATA = nullptr;
+    uint32_t row = 0;
+
     if (ptr != nullptr) {
-        uint32_t image_y = _y;
-        uint32_t image_x = (uint32_t)(_x / 8.0);
 
-        if ((image_x * 8) < (uint32_t)_x)   image_x++;   //math fix
-        if (image_x == 0)                   image_x = 1; //non 0 byte width
-        while ((image_x % 4))               image_x++;   //4 byte padding
+        if((err |= _pack_bool(&BMPDATA, &row, 0, 4)) == 0)
+            BMPDATASIZE = row * _y;
 
-        header bmpHead;
-        bmpHead.Signature = 0x4D42;
-        bmpHead.FileSize = 54 /*header*/ + 8 /*color table*/ + (image_x * image_y) /*bytes*/;
-        bmpHead.reserved = 0x00;
-        bmpHead.DataOffset = 62;
+        if ((BMPDATA != nullptr) && (err == 0)) 
+        {
+            header bmpHead;
+            bmpHead.Signature = 0x4D42;
+            bmpHead.FileSize = 54 /*header*/ + 8 /*color table*/ + (BMPDATASIZE) /*bytes*/;
+            bmpHead.reserved = 0x00;
+            bmpHead.DataOffset = 62;
 
-        infoHeader bmpInfoHead;
-        bmpInfoHead.Size = 40;
-        bmpInfoHead.Width = _x;
-        bmpInfoHead.Height = _y;
-        bmpInfoHead.Planes = 0x01;
-        bmpInfoHead.Bits_Per_Pixel = 0x01;
-        bmpInfoHead.Compression = 0x00;
-        bmpInfoHead.ImageSize = image_x * image_y;
-        bmpInfoHead.XpixelsPerM = (uint32_t)(DPI * 39.3701);
-        bmpInfoHead.YpixelsPerM = (uint32_t)(DPI * 39.3701);
-        bmpInfoHead.Colors_Used = 0x00;
-        bmpInfoHead.Important_Colors = 0x00;
+            infoHeader bmpInfoHead;
+            bmpInfoHead.Size = 40;
+            bmpInfoHead.Width = _x;
+            bmpInfoHead.Height = _y;
+            bmpInfoHead.Planes = 0x01;
+            bmpInfoHead.Bits_Per_Pixel = 0x01;
+            bmpInfoHead.Compression = 0x00;
+            bmpInfoHead.ImageSize = BMPDATASIZE;
+            bmpInfoHead.XpixelsPerM = (uint32_t)(DPI * 39.3701);
+            bmpInfoHead.YpixelsPerM = (uint32_t)(DPI * 39.3701);
+            bmpInfoHead.Colors_Used = 0x00;
+            bmpInfoHead.Important_Colors = 0x00;
 
-        uint8_t* BMPDATA = nullptr;
-        uint32_t q = image_x * image_y;
-        size_t BMPDATASIZE = q * sizeof(uint8_t);
-        BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
-
-        if (BMPDATA != nullptr) {
-            memset(BMPDATA, 0xFF, BMPDATASIZE);
-
-            bool* in_line;
-            uint8_t* out_line;
-            uint32_t __y = 0, __x = 0;
-
-            image_y--;
-            for (__y = 0; __y < _y; __y++) {
-                in_line = &ptr[(__y * _x)];
-                out_line = &BMPDATA[(((image_y)-__y) * image_x)];
-                for (__x = 0; __x < _x; __x++) 
-                    if (in_line[__x] ^ _inv)
-                        BIT_CLEAR(out_line[(__x / 8)], (7 - (__x % 8)));
-            }
-
-            FILE* fd;
-            //fopen(fileName, "wb");
-            fopen_s(&fd, fileName, "wb");
+            FILE* fd;            
+            fopen_s(&fd, fileName, "wb"); //fopen(fileName, "wb");
 
             if (fd != NULL) {
                 fwrite(&bmpHead.Signature, sizeof(uint16_t), 1, fd);
@@ -401,6 +335,114 @@ bool canvas::saveBMP(const char* fileName, int DPI)
             }
             else err |= 1;
             delete[] BMPDATA; //release when done
+        }
+        else err |= 1;
+    }
+    else err |= 1;
+
+    return err;
+}
+
+/* MICROCOM COMPRESSION BINARY, Mode 2, no flash header */
+// https://microcomcorp.com/downloads/bmp2mic.zip
+bool canvas::saveMCB(const char* fileName, int headSize)
+{
+    bool err = 0;
+
+    uint32_t BMPDATASIZE = 0;
+    uint8_t* BMPDATA = nullptr;
+    uint32_t row = 0, i = 0;
+    uint8_t temp;
+
+    /* fit to head, messy..... */
+    canvas* tmp = new canvas;
+    err |= tmp->create(headSize, _y, 0);
+    err |= tmp->addSprite(this, ((headSize - _x) / 2), 0, 0);
+    delete[] ptr; ptr = nullptr;
+    err |= create(tmp->ptr, tmp->get_x(), tmp->get_y(), 0);
+    delete tmp;
+
+    // needed for format
+    err |= rotate(DEGREE::ROT_180); //idk why its rot-180
+
+    if ((err |= _pack_bool(&BMPDATA, &row)) == 0)
+        BMPDATASIZE = row * _y;
+
+    if ((BMPDATA != nullptr) && (err == 0)) {
+
+        FILE* fd;
+        fopen_s(&fd, fileName, "wb");
+        if (fd != NULL) {
+
+            while (i < BMPDATASIZE) {
+                temp = BMPDATA[i++];
+                if (i > BMPDATASIZE) break;
+                if ((temp == 0x00) || (temp == 0xFF)) {
+                    int cnt = 0;
+                    fwrite(&temp, sizeof(uint8_t), 1, fd);
+                    while ((i < BMPDATASIZE) && (BMPDATA[i] == temp) && (cnt < 0xFE)) {
+                        i++;
+                        cnt++;
+                    }
+                    temp = (uint8_t)cnt;
+                    fwrite(&temp, sizeof(uint8_t), 1, fd);
+                }
+                else {
+                    fwrite(&temp, sizeof(uint8_t), 1, fd);
+                }
+            }
+
+            if ((fclose(fd) != 0) || (ferror(fd)))
+                err |= 1;
+        }
+        else err |= 1;
+        delete[] BMPDATA; //release when done
+    }
+
+    return err;
+}
+
+bool canvas::_pack_bool(uint8_t** BMPDATA, uint32_t* row, bool ort, int byte_bound)
+{
+    bool err = 0; 
+    if (*BMPDATA != nullptr) delete[] *BMPDATA;
+    *BMPDATA = nullptr;
+
+    if (ptr != nullptr) {
+        uint32_t image_y = _y;
+        uint32_t image_x = (uint32_t)(_x / 8.0);
+
+        if ((image_x * 8) < (uint32_t)_x)   image_x++;   //math fix
+        if (image_x == 0)                   image_x = 1; //non 0 byte width
+        while ((image_x % byte_bound))      image_x++;   //byte binding
+        
+        uint32_t BMPDATASIZE = (image_x * image_y) * sizeof(uint8_t);
+
+        *row = image_x;
+        *BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };       
+
+        if (*BMPDATA != nullptr) {
+            if (ort == 0) {
+                image_y--;
+                memset(*BMPDATA, 0xFF, BMPDATASIZE);
+            }
+            else memset(*BMPDATA, 0x00, BMPDATASIZE);
+
+            bool* in_line;
+            uint8_t* out_line;
+            uint32_t __y = 0, __x = 0;
+
+            for (__y = 0; __y < _y; __y++) {
+                in_line = &ptr[(__y * _x)];
+                out_line = (ort == 0) ? (*BMPDATA + ((image_y - __y) * image_x)) : (*BMPDATA + (__y * image_x));
+
+                for (__x = 0; __x < _x; __x++) {
+                    if (in_line[__x] ^ _inv) {
+                        if (ort == 0) BIT_CLEAR(out_line[(__x / 8)], (7 - (__x % 8)));
+                        else         BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
+                    }
+                }
+            }
         }
         else err |= 1;
     }
@@ -1285,96 +1327,8 @@ bool canvas::scale(float x0, float y0)
 }
 
 
-
 /*******  JUST A TEST, BUGGY CODE ********/
-bool canvas::TEST(int _dpi)
+bool canvas::TEST(int head_size)
 {
-    bool err = 0;
-
-    // needed, must bethe size of a head 203 | 300
-    if ((_x != 1280) && (_x != 832))
-        return 1;
-
-    // needed for format
-    if (mirror(MIRROR::Horizontal))
-        return 1;
-
-    /* pack bool */
-    uint32_t image_y = _y;
-    uint32_t image_x = (uint32_t)(_x / 8.0);
-
-    if ((image_x * 8) < (uint32_t)_x)   image_x++;   //math fix
-    if (image_x == 0)                   image_x = 1; //non 0 byte width
-
-    uint8_t* BMPDATA = nullptr;
-    uint32_t q = image_x * image_y;
-    size_t BMPDATASIZE = q * sizeof(uint8_t);
-    BMPDATA = new uint8_t[BMPDATASIZE]{ 0x00 };
-
-    if (BMPDATA != nullptr) {
-        memset(BMPDATA, 0x00, BMPDATASIZE);
-
-        bool* in_line;
-        uint8_t* out_line;
-        uint32_t __y = 0, __x = 0;
-
-        image_y--;
-        for (__y = 0; __y < _y; __y++) {
-            in_line = &ptr[(__y * _x)];
-            out_line = &BMPDATA[(((image_y)-__y) * image_x)];
-            for (__x = 0; __x < _x; __x++)
-                if (in_line[__x] ^ _inv)
-                    BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
-        }
-    }
-    else err |= 1;
-    /**************************************************************************************/
-    /* MCOM RLE ALG, Mode 2 */
-    /* '''Compressed''' Raw Binary Image */
-    if (!err) 
-    {
-        uint32_t i = 0;
-        while(i < BMPDATASIZE) 
-        {
-            uint8_t temp = BMPDATA[i++];
-
-            if (i > BMPDATASIZE) 
-                break;
-
-            /* if hot byte */
-            if ((temp == 0x00) || (temp == 0xFF)) 
-            {
-                /* print byte */
-                printf("%02X ", temp);
-                
-                int cnt = 0;     
-                /* count till overflow */
-                while ( (i < BMPDATASIZE) && (BMPDATA[i] == temp) && (cnt < 0xFE)) 
-                {
-                    i++;
-                    cnt++;
-                }
-
-                /* print count */
-                printf("%02X ", cnt);                          
-            }
-            else
-            {
-                /* print byte */
-                printf("%02X ", temp);                
-            }
-        }
-    }
-    /* sudo */
-    /*
-        if byte not hot
-            print
-        else
-            print
-            cout untill overflow | end of run
-            print count    
-    */
-    /**************************************************************************************/
-
-    return err;
+    return 0;
 }

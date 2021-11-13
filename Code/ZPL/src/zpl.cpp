@@ -366,13 +366,13 @@ bool zpl::_compress(uint8_t** ptr, uint32_t* len)
 bool zpl::_pack_bool(bool* ptr, uint32_t _size, uint32_t x0)
 {
     bool err = 0;
-    if (ptr != nullptr) 
-    {
-        if (zpl_data == nullptr) {
-            delete[] zpl_data;
-            zpl_data_size = 0;
-        }
+        
+    if (zpl_data != nullptr) 
+        delete[] zpl_data;
+    zpl_data = nullptr;
+    zpl_data_size = 0;
 
+    if (ptr != nullptr) {
         uint32_t image_y = _size / x0;                    /* bool array y */
         uint32_t image_x = (uint32_t)(x0 / 8.0);          /* zpl array x */
         if ((image_x * 8) < (uint32_t)x0)   image_x++;    /* math fix */
