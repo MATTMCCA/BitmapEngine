@@ -199,7 +199,7 @@ bool zpl::get_print_quantity(uint32_t* q, uint32_t* p, uint32_t* r, char* o, cha
     return false;
 }
 
-bool zpl::add_graphic(bool* ptr, uint32_t x0, int32_t y0)
+bool zpl::add_graphic(bool* ptr, uint32_t x0, int32_t y0, bool inv)
 {
     bool err = 0;
 
@@ -207,7 +207,7 @@ bool zpl::add_graphic(bool* ptr, uint32_t x0, int32_t y0)
     uint16_t CRC_16 = 0;
     uint32_t temp_len = 0;
 
-    if (!err) err |= _pack_bool(ptr, x0 * y0, x0);
+    if (!err) err |= _pack_bool(ptr, x0 * y0, x0, inv);
     if (!err) err |= _compress(&temp, &temp_len);
     if (!err) err |= _encode(temp, temp_len);
     if (!err) CRC_16 = CRC16(zpl_data, zpl_data_size);    
@@ -363,12 +363,11 @@ bool zpl::_compress(uint8_t** ptr, uint32_t* len)
     return err;
 }
 
-bool zpl::_pack_bool(bool* ptr, uint32_t _size, uint32_t x0)
+bool zpl::_pack_bool(bool* ptr, uint32_t _size, uint32_t x0, bool inv)
 {
     bool err = 0;
         
-    if (zpl_data != nullptr) 
-        delete[] zpl_data;
+    if (zpl_data != nullptr) delete[] zpl_data;
     zpl_data = nullptr;
     zpl_data_size = 0;
 
@@ -393,7 +392,7 @@ bool zpl::_pack_bool(bool* ptr, uint32_t _size, uint32_t x0)
                 in_line = &ptr[(y * x0)];
                 out_line = &zpl_data[(y * image_x)];
                 for (x = 0; x < x0; x++) {
-                    if (in_line[x])
+                    if (in_line[x] ^ inv)
                         BIT_SET(out_line[(x / 8)], (7 - (x % 8)));
                 }
             }

@@ -245,7 +245,7 @@ bool save_zpl(canvas* ptr, const char* dir, int cnt)
 
     zpl job(thisjob);
     bool err = 0;
-    err |= job.add_graphic(ptr->get_pointer(), ptr->get_x(), ptr->get_y());
+    err |= job.add_graphic(ptr->get_pointer(), ptr->get_x(), ptr->get_y(), ptr->getInvert());
     err |= job.generate_format();
  
     std::string output = std::string(dir) + std::to_string(cnt) + std::string(".zpl");
@@ -804,6 +804,7 @@ bool image_save_zpl(const char* dir, const char* bmp, int cnt)
     bool err = 0;
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Threshold);
+    //c.invert(1);
     err |= save_zpl(&c, dir, cnt);
     print_pass_fail("ZPL_TEST", err);
     return err;

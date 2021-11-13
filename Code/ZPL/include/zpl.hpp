@@ -178,7 +178,7 @@ public:
     bool get_field_origin(uint32_t* x0, uint32_t* y0, uint32_t* z0);                    /* ^FOx,y,z */
     bool set_print_quantity(uint32_t q, uint32_t p, uint32_t r, char o, char e);        /* ^PQq,p,r,o,e */
     bool get_print_quantity(uint32_t* q, uint32_t* p, uint32_t* r, char* o, char* e);   /* ^PQq,p,r,o,e */
-    bool add_graphic(bool* ptr, uint32_t x0, int32_t y0);                               /* ^GFA,b,c,d,data */
+    bool add_graphic(bool* ptr, uint32_t x0, int32_t y0, bool inv = 0);                               /* ^GFA,b,c,d,data */
     bool save_format(const char* fileName);
     bool get_format(uint8_t** ptr, uint32_t* len);
     bool generate_format(void);
@@ -187,7 +187,7 @@ public:
 
 private:
 
-    bool _pack_bool(bool* ptr, uint32_t _size, uint32_t x0);
+    bool _pack_bool(bool* ptr, uint32_t _size, uint32_t x0, bool inv);
     bool _gen_zpl(void);
     bool _gen_head(void);
     bool _gen_foot(void);

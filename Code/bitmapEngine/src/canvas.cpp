@@ -379,7 +379,7 @@ bool canvas::saveMCB(const char* fileName, int headSize)
                 if (i > BMPDATASIZE) break;
                 if ((temp == 0x00) || (temp == 0xFF)) {
                     int cnt = 0;
-                    fwrite(&temp, sizeof(uint8_t), 1, fd);
+                    fwrite(&temp, sizeof(uint8_t), 1, fd);                    
                     while ((i < BMPDATASIZE) && (BMPDATA[i] == temp) && (cnt < 0xFE)) {
                         i++;
                         cnt++;
