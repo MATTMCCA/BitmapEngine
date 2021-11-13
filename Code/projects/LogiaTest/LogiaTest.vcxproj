@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../zint/inc;../../jbigkit-2.1/libjbig;../../ZPL/include;../../CRC_CCITT/include;../../crypto-algorithms/include;../../miniz-2.2.0/include;../../WRPW/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../zint/inc;../../jbigkit-2.1/libjbig;../../ZPL/include;../../CRC_CCITT/include;../../crypto-algorithms/include;../../miniz-2.2.0/include;../../WRPW/include;../../bit_def/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -109,7 +109,7 @@ xcopy /y /d "..\..\zint\Release\*.dll" "$(OutDir)"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../zint/inc;../../jbigkit-2.1/libjbig;../../ZPL/include;../../CRC_CCITT/include;../../crypto-algorithms/include;../../miniz-2.2.0/include;../../WRPW/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../zint/inc;../../jbigkit-2.1/libjbig;../../ZPL/include;../../CRC_CCITT/include;../../crypto-algorithms/include;../../miniz-2.2.0/include;../../WRPW/include;../../bit_def/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

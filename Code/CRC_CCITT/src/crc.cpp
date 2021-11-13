@@ -25,7 +25,7 @@ void CRC16Init()
 uint16_t CRC16(uint8_t* ptr, uint32_t length)
 {
 	uint32_t cnt;
-	uint16_t crc16 = 0x0000; //zero init! uber important! for ZPL!!!! UBER! IMPORTANT! !!!! more  of  these '!'.... !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	uint16_t crc16 = 0x0000; //zero init! uber important!
 	
 	for ( cnt = 0; cnt < length; cnt++)	{
 		uint8_t item = ptr[cnt];
