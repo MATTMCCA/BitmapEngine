@@ -14,7 +14,6 @@ Example projects are located in the `BitmapEngine\Code\projects` directory.
 
 ### Samples include:
 - libtest [ Library function test ]
-- ReceiptStack [ an awful demo ]
 - usps_demo [ label maker demo ]
 - zint_test [ QR code test ]
 - skeletonApp [ base for dev ]
