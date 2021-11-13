@@ -39,6 +39,11 @@
 #include <cstdint>
 #include <cctype>
 
+/* windows junk */
+#include <atlstr.h>
+#include <tchar.h>
+#include <Windows.h>
+
 #include <zint.h>
 
 #include "canvas.hpp"
@@ -68,6 +73,9 @@ int getQRcode(canvas* can, const char* str);
 int getTextA(canvas* can, int DPI, const char* str);
 int getImage(canvas* can, const char* fileName);
 
+//https://docs.microsoft.com/en-us/windows/win32/printdocs/sending-data-directly-to-a-printer
+BOOL RawDataToPrinter(LPTSTR szPrinterName, LPBYTE lpData, DWORD dwCount);
+
 int32_t calc_offset(int32_t m, int32_t s)
 {
     return (m - s) / 2;
@@ -75,27 +83,6 @@ int32_t calc_offset(int32_t m, int32_t s)
 
 int main(int argc, char* argv[])
 {
-
-    /*
-    char yyy[] = "testing this shit";
-    char* ttt = nullptr;
-    size_t ns = base64_encode((uint8_t*)yyy, (uint8_t*)ttt, strlen(yyy), 0);
-    printf("newsize: %d\n", ns);
-
-    ttt = new char[ns];
-    if (ttt != nullptr) {
-        ns = base64_encode((uint8_t*)yyy, (uint8_t*)ttt, strlen(yyy), 0);
-    }
-
-    for (int i = 0; i < ns; i++) {
-        printf("%c", ttt[i]);
-    }
-    printf("\n");
-
-    return 0;
-    */
-
-
     canvas* temp;
     canvas master;
 
@@ -104,7 +91,7 @@ int main(int argc, char* argv[])
     int dpi, rate, count, dark;
 
     if (argc < 9) {
-        printf("%s dark, rate, dpi, w h count txt img_in save_as.zpl\n", argv[0]);
+        printf("%s dark, rate, dpi, w h count txt img_in printerName\n", argv[0]);
         return 1;
     }
 
@@ -159,7 +146,16 @@ int main(int argc, char* argv[])
     if (myJob.generate_format())
         return 1;
 
+    /*
     if (myJob.save_format(save_as))
+        return 1;
+    */
+
+    uint8_t* tmp; uint32_t tmp_size;
+    if (myJob.get_format(&tmp, &tmp_size))
+        return 1;
+    
+    if (!RawDataToPrinter((LPTSTR)CString(save_as).AllocSysString(), tmp, tmp_size))
         return 1;
 
     /********** spew format **************
@@ -233,3 +229,57 @@ int catch_barcode_error(int zerr, char* cptr)
     }
     return 0;
 }
+
+/*******************************************************************/
+// https://docs.microsoft.com/en-us/windows/win32/printdocs/sending-data-directly-to-a-printer
+// 
+// RawDataToPrinter - sends binary data directly to a printer 
+//  
+// szPrinterName: NULL-terminated string specifying printer name 
+// lpData:        Pointer to raw data bytes 
+// dwCount        Length of lpData in bytes 
+//  
+// Returns: TRUE for success, FALSE for failure. 
+//  
+BOOL RawDataToPrinter(LPTSTR szPrinterName, LPBYTE lpData, DWORD dwCount)
+{
+    BOOL       bStatus = FALSE;
+    HANDLE     hPrinter = NULL;
+    DOC_INFO_1 DocInfo;
+    DWORD      dwJob = 0L;
+    DWORD      dwBytesWritten = 0L;
+
+    // Open a handle to the printer. 
+    bStatus = OpenPrinter(szPrinterName, &hPrinter, NULL);
+    if (bStatus) {
+        // Fill in the structure with info about this "document." 
+        DocInfo.pDocName = (LPTSTR)_T("Test Document");
+        DocInfo.pOutputFile = NULL;
+        DocInfo.pDatatype = (LPTSTR)_T("RAW");
+
+        // Inform the spooler the document is beginning. 
+        dwJob = StartDocPrinter(hPrinter, 1, (LPBYTE)&DocInfo);
+        if (dwJob > 0) {
+            // Start a page. 
+            bStatus = StartPagePrinter(hPrinter);
+            if (bStatus) {
+                // Send the data to the printer. 
+                bStatus = WritePrinter(hPrinter, lpData, dwCount, &dwBytesWritten);
+                EndPagePrinter(hPrinter);
+            }
+            // Inform the spooler that the document is ending. 
+            EndDocPrinter(hPrinter);
+        }
+        // Close the printer handle. 
+        ClosePrinter(hPrinter);
+    }
+    // Check to see if correct number of bytes were written. 
+    if (!bStatus || (dwBytesWritten != dwCount)) {
+        bStatus = FALSE;
+    }
+    else {
+        bStatus = TRUE;
+    }
+    return bStatus;
+}
+/*******************************************************************/
