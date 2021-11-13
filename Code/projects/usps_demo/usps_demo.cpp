@@ -58,9 +58,9 @@
 using namespace std::chrono;
 using namespace aria::csv;
 
-const char ARIAL_FONT[] = "C:\\Windows\\Fonts\\arial.ttf";
+const char ARIAL_FONT[] =      "C:\\Windows\\Fonts\\arial.ttf";
 const char ARIAL_FONT_BOLD[] = "C:\\Windows\\Fonts\\arialbd.ttf";
-const char TEST_FILE[] = "A:\\Users\\Matt\\Pictures\\TRASH\\static_test\\test.csv";
+const char TEST_FILE[] =       "A:\\Users\\Matt\\Pictures\\TRASH\\static_test\\test.csv";
 const int DPI = 300;
 
 typedef struct

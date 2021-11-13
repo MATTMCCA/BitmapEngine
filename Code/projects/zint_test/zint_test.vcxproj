@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../jbigkit-2.1/libjbig;../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../zint/inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../jbigkit-2.1/libjbig;../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../zint/inc;../../bit_def/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -109,7 +109,7 @@ xcopy /y /d "..\..\zint\Release\*.dll" "$(OutDir)"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../jbigkit-2.1/libjbig;../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../zint/inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../jbigkit-2.1/libjbig;../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../zint/inc;../../bit_def/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

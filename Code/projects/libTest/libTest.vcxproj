@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../CRC_CCITT/include;../../crypto-algorithms/include;../../miniz-2.2.0/include;../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../ZPL/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../CRC_CCITT/include;../../crypto-algorithms/include;../../miniz-2.2.0/include;../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../ZPL/include;../../bit_def/include;../../WRPW/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../CRC_CCITT/include;../../crypto-algorithms/include;../../miniz-2.2.0/include;../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../ZPL/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../CRC_CCITT/include;../../crypto-algorithms/include;../../miniz-2.2.0/include;../../bitmapEngine/include;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../ZPL/include;../../bit_def/include;../../WRPW/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -170,6 +170,7 @@
     <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig85.c" />
     <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig_ar.c" />
     <ClCompile Include="..\..\miniz-2.2.0\src\miniz.c" />
+    <ClCompile Include="..\..\WRPW\src\wrpw.cpp" />
     <ClCompile Include="..\..\ZPL\src\zpl.cpp" />
     <ClCompile Include="libTest.cpp" />
   </ItemGroup>
@@ -181,6 +182,7 @@
     <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig85.h" />
     <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig_ar.h" />
     <ClInclude Include="..\..\miniz-2.2.0\include\miniz.h" />
+    <ClInclude Include="..\..\WRPW\include\wrpw.hpp" />
     <ClInclude Include="..\..\ZPL\include\zpl.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

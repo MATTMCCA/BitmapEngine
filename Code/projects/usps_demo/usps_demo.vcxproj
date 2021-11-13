@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../bit_def/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -111,7 +111,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../bit_def/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -42,6 +42,9 @@
 #include "canvas.hpp"
 #include "font.hpp"
 
+#include "zpl.hpp"
+
+#define MY_PRINTER      "Logia Printer"
 #define FONT_ARIAL      "C:\\Windows\\Fonts\\arialbd.ttf"
 
 //#define SAVE_AS         "A:\\Users\\Matt\\Pictures\\TRASH\\LLOUT\\"
@@ -61,6 +64,10 @@ typedef struct {
 } CHECK_PLAY;
 
 const int DPI = 203;        //used for bitmap
+
+
+int scale_to_printer(canvas* can); //I wana print um lol
+
 
 int catch_barcode_error(int zerr, char* cptr);
 int add_barcode_to_canvas(canvas* can, zint_symbol* my_symbol);
@@ -194,6 +201,12 @@ int main(int argc, char* argv[])
 
     /* Save as MONO Thermal Bitmap */
     if (master.saveBMP(FILE_PATH.c_str(), DPI) == 1)                return 1;
+
+    /* print to my printer for fun */
+    /*
+    if (scale_to_printer(&master))
+        printf("- Print Error, is this really Matts printer?\n");
+    */
 
     return 0;
 }
@@ -569,4 +582,41 @@ int add_barcode_to_canvas(canvas* can, zint_symbol* my_symbol)
             if (my_symbol->bitmap[i] == '1')
                 can->setPixle(col, row, 1);
     return err;
+}
+
+
+int scale_to_printer(canvas* can)
+{
+    bool err = 0;
+
+    PARM thisjob = {
+        {'A', 0},       /* ^MNa         */
+        {0,0},          /* ^LHx,y       */
+        {'T', 'N'},     /* ^MMa,b       */
+        {4 * 300},      /* ^PWa         */
+        {0},            /* ^LSa         */
+        {'N'},          /* ^POa         */
+        {6 * 300},      /* ^LLy         */
+        {8,0,2},        /* ^PRp,s,b     */
+        {6},            /* ~SD##        */
+        {0,0,0},        /* ^FOx,y,z     */
+        /***** Bitmap Data Goes Here ****/
+        {1,0,0,'N','Y'} /* ^PQq,p,r,o,e */
+    };
+
+    //scale 812 x 1827
+    //to
+    //1200 x 1800
+    float factor = (float)(1800.0 / 1827.0);
+
+    canvas _new;
+    err |= can->scale(factor, factor);    
+    err |= _new.create(1200, 1800);
+    err |= _new.addSprite(can, calc_offset(_new.get_x(), can->get_x()), 0, 0);
+
+    zpl job(thisjob);
+    err |= job.add_graphic(_new.get_pointer(), _new.get_x(), _new.get_y(), _new.getInvert());
+    err |= job.generate_format();
+
+    return err |= job.print_format(MY_PRINTER);
 }

@@ -55,8 +55,6 @@ const int DPI = 300;
 std::string JBIG_TESTIMG;
 std::string PBM_TESTIMG;
 
-int DEBUG(void);
-
 bool save_bmp(canvas* ptr, const char* dir, int cnt);
 bool save_pbm(canvas* ptr, const char* dir, int cnt);
 bool save_jbg(canvas* ptr, const char* dir, int cnt);
@@ -887,12 +885,4 @@ bool canvas_scale_grow_width(const char* dir, const char* bmp, int cnt)
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("Canvas (scale)", err);
     return err;
-}
-
-int DEBUG(void)
-{
-    canvas micro;
-    if(micro.import_24bit("A:\\Users\\Matt\\Pictures\\TRASH\\Lena.bmp", DITHER::Threshold) == 0)
-        return micro.TEST(832);
-    return 24;
 }

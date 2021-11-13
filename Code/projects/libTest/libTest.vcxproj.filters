@@ -42,6 +42,9 @@
     <ClCompile Include="..\..\crypto-algorithms\src\base64.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\WRPW\src\wrpw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\bitmapEngine\include\canvas.hpp">
@@ -66,6 +69,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\crypto-algorithms\include\base64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\WRPW\include\wrpw.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
