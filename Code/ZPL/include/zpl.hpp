@@ -44,6 +44,7 @@
 #include <string>
 
 #include "crc.hpp"
+#include "wrpw.hpp" //windows raw print wrapper
 
 extern "C" {
 #include "base64.h"
@@ -178,10 +179,13 @@ public:
     bool get_field_origin(uint32_t* x0, uint32_t* y0, uint32_t* z0);                    /* ^FOx,y,z */
     bool set_print_quantity(uint32_t q, uint32_t p, uint32_t r, char o, char e);        /* ^PQq,p,r,o,e */
     bool get_print_quantity(uint32_t* q, uint32_t* p, uint32_t* r, char* o, char* e);   /* ^PQq,p,r,o,e */
-    bool add_graphic(bool* ptr, uint32_t x0, int32_t y0, bool inv = 0);                               /* ^GFA,b,c,d,data */
+    bool add_graphic(bool* ptr, uint32_t x0, int32_t y0, bool inv = 0);                 /* ^GFA,b,c,d,data */
     bool save_format(const char* fileName);
     bool get_format(uint8_t** ptr, uint32_t* len);
     bool generate_format(void);
+
+    /* call generate_format() before printing */
+    bool print_format(const char* pname, const char* dname = "ZPL");
 
     ~zpl();
 

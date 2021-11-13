@@ -257,6 +257,13 @@ bool zpl::generate_format(void)
     return _gen_zpl();
 }
 
+bool zpl::print_format(const char* pname, const char* dname)
+{
+    if (_zpl != nullptr)
+        return raw_print(pname, _zpl, _zpl_size, dname);
+    return 1;
+}
+
 zpl::~zpl()
 {
     _free_all();
