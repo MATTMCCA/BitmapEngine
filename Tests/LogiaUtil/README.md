@@ -36,6 +36,7 @@ Options:
   -s ......... Print Speed          [1 - 8]
   -d ......... Darkness             [1 - 8]
   -q ......... Quantity             [1 - nth]
+  -g ......... Continuous Media     [Default: Auto]
   -t ......... Dither Type          [0 - 9]
          0 --> Threshold
          1 --> FloydSteinberg

@@ -98,6 +98,7 @@ void printUsage(const char *c)
     printf("  -s ......... Print Speed          [1 - 8]\n");
     printf("  -d ......... Darkness             [1 - 8]\n");
     printf("  -q ......... Quantity             [1 - nth]\n");
+    printf("  -g ......... Continuous Media     [Default: Auto]\n");
     printf("  -t ......... Dither Type          [0 - 9]\n");
     printf("         0 --> Threshold\n");
     printf("         1 --> FloydSteinberg\n");
@@ -155,7 +156,7 @@ int main(int argc, char* argv[])
     }
 
     try {
-        while ((opt = getopt(argc, argv, "p:z:w:l:s:d:q:n:t:b:c:m:a:e:f:j:r:ixv")) != -1) {
+        while ((opt = getopt(argc, argv, "p:z:w:l:s:d:q:n:t:b:c:m:a:e:f:j:r:ixvg")) != -1) {
             switch (opt)
             {
             case 'p':
@@ -220,6 +221,9 @@ int main(int argc, char* argv[])
                 break;
             case 'i':
                 invert = 1;
+                break;
+            case 'g':
+                DEFAULT.media_tracking.media_being_used = 'N';
                 break;
             case 'v':
                 verbose = 1;
