@@ -80,9 +80,13 @@ Other Example:
 # Stupid Printer Tricks 
 
 [How to Assign a USB Printer to a LPT Port](https://supportcommunity.zebra.com/s/article/How-to-Assign-USB-Printers-to-LPT-Ports?language=en_US)
+
 [Print RAW File From CMD](https://supportcommunity.zebra.com/s/article/Print-RAW-File-From-CMD?language=en_US)
+
 [Capture Print Driver Output](https://supportcommunity.zebra.com/s/article/Capture-Printer-Output-to-a-File-using-FILE-port?language=en_US)
+
 [ZPL Viewer](http://labelary.com/viewer.html)
+
 [Send Data Directly to a GDI Printer](https://docs.microsoft.com/en-us/windows/win32/printdocs/sending-data-directly-to-a-printer)
 
 #### Batch file for printing RAW over VCP/Serial
