@@ -1,4 +1,4 @@
-λ LogiaUtil.exe -h
+λ LogiaUtil.exe
 
  _                  _          ______   _____   _____  ______  ______  _
 (_)                (_)        (_____ \ (_____) (_____)(______)(_____ \| |
@@ -10,17 +10,22 @@
                                 (Not Affiliated With Logiaprinters)
 -------------------------------------------------------------------------
 Options:
-  -p ......... Printer Name     (Print)
-  -z ......... ZPL file Name    (Save)
-  -m ......... BMP file Name    (save)
-  -n ......... PNG file Name    (Input File)
-  -x ......... List Printers    (Debug Option)
-  -w ......... Print Width      [DOTS] (dpi x inch)
-  -l ......... Label Length     [DOTS] (dpi x inch)
-  -s ......... Print Speed      [1 - 8]
-  -d ......... Darkness         [1 - 8]
-  -q ......... Quantity         [1 - nth]
-  -t ......... Dither Type      [0 - 9]
+  -p ......... Printer Name         (Print)
+  -z ......... ZPL file Name        (Save)
+  -m ......... BMP file Name        (save)
+  -a ......... MCB file Name        (save) (Requires -j)
+     -j ...... MCB HeadSize         [DOTS] (1280 or 832)
+  -e ......... PBM file Name        (save)
+  -f ......... XBM file Name        (save) (Requires -r)
+     -r ...... XBM Struct Name
+  -n ......... PNG file Name        (Input File)
+  -x ......... List Printers        (Debug Option)
+  -w ......... Print Width          [DOTS] (dpi x inch)
+  -l ......... Label Length         [DOTS] (dpi x inch)
+  -s ......... Print Speed          [1 - 8]
+  -d ......... Darkness             [1 - 8]
+  -q ......... Quantity             [1 - nth]
+  -t ......... Dither Type          [0 - 9]
          0 --> Threshold
          1 --> FloydSteinberg
          2 --> Stucki

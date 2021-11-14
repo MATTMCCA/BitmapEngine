@@ -223,7 +223,7 @@ public:
     bool scale(float x0, float y0);
 
     bool* get_pointer(void) {
-        return ptr;
+        return this->ptr;
     }
 
     bool TEST(int head_size); //M-COM RLE TEST, mode 2

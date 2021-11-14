@@ -41,14 +41,14 @@ canvas::canvas()
 
 bool canvas::create(int32_t x, int32_t y, bool invert)
 {
-    if (ptr == nullptr) {
-        _x = x;
-        _y = y;
-        _inv = invert;
-        uint32_t q = (_x * _y);
+    if (this->ptr == nullptr) {
+        this->_x = x;
+        this->_y = y;
+        this->_inv = invert;
+        uint32_t q = (this->_x * this->_y);
         size_t _asize = q * sizeof(bool);
-        ptr = new bool[_asize] {0};
-        if (ptr == nullptr)
+        this->ptr = new bool[_asize] {0};
+        if (this->ptr == nullptr)
             return 1;
     }
     return 0;
@@ -57,10 +57,10 @@ bool canvas::create(int32_t x, int32_t y, bool invert)
 bool canvas::create(bool* raw, int32_t x, int32_t y, bool invert)
 {
     if (!create(x, y, invert)) {
-        if (ptr != nullptr) {
-            uint32_t q = (_x * _y);
-            memcpy(ptr, raw, q * sizeof(bool));
-            if (ptr == nullptr)
+        if (this->ptr != nullptr) {
+            uint32_t q = (this->_x * this->_y);
+            memcpy(this->ptr, raw, q * sizeof(bool));
+            if (this->ptr == nullptr)
                 return 1;
             return 0;
         }
@@ -71,9 +71,9 @@ bool canvas::create(bool* raw, int32_t x, int32_t y, bool invert)
 
 bool canvas::getSize(int32_t* x, int32_t* y)
 {
-    if (ptr != nullptr) {
-        *x = _x;
-        *y = _y;
+    if (this->ptr != nullptr) {
+        *x = this->_x;
+        *y = this->_y;
         return 0;
     }
     return 1;
@@ -81,11 +81,11 @@ bool canvas::getSize(int32_t* x, int32_t* y)
 
 bool canvas::fill(bool val)
 {
-    if (ptr != nullptr) {
-        uint32_t q = (_x * _y);
+    if (this->ptr != nullptr) {
+        uint32_t q = (this->_x * this->_y);
         size_t _asize = q * sizeof(bool);
-        memset(ptr, val, _asize);
-        if (ptr == nullptr)
+        memset(this->ptr, val, _asize);
+        if (this->ptr == nullptr)
             return 1;
         return 0;
     }
@@ -94,17 +94,17 @@ bool canvas::fill(bool val)
 
 int32_t canvas::get_y(void)
 {
-    return _y;
+    return this->_y;
 }
 
 int32_t canvas::get_x(void)
 {
-    return _x;
+    return this->_x;
 }
 
 bool canvas::addSprite(canvas* src, int32_t x, int32_t y, bool alpha)
 {
-    if ((src->ptr != nullptr) && (ptr != nullptr)) {
+    if ((src->ptr != nullptr) && (this->ptr != nullptr)) {
         uint32_t __y = 0, __x = 0;
         for (__y = 0; __y < src->_y; __y++)
             for (__x = 0; __x < src->_x; __x++)
@@ -138,10 +138,10 @@ bool canvas::saveJBG(const char* fileName)
     uint8_t* BMPDATA = nullptr;
     uint32_t row = 0;
 
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
 
         if ((err |= _pack_bool(&BMPDATA, &row)) == 0)
-            BMPDATASIZE = row * _y;
+            BMPDATASIZE = row * this->_y;
 
         if ((BMPDATA != nullptr) && (err == 0)) {
             uint32_t y;
@@ -151,12 +151,12 @@ bool canvas::saveJBG(const char* fileName)
             fopen_s(&fd, fileName, "wb"); //fopen(fileName, "wb");
 
             if (fd != NULL) {
-                jbg85_enc_init(&s, _x, _y, data_out, fd);
+                jbg85_enc_init(&s, this->_x, this->_y, data_out, fd);
                 jbg85_enc_options(&s, JBG_TPBON, 0, -1);
 
                 unsigned char* next_line = nullptr, * prev_line = nullptr, * prevprev_line = nullptr;
 
-                for (y = 0; y < _y; y++) {
+                for (y = 0; y < this->_y; y++) {
                     /* Use a 3-line ring buffer, because the encoder requires that the two
                      * previously supplied lines are still in memory when the next line is
                      * processed. */
@@ -168,8 +168,8 @@ bool canvas::saveJBG(const char* fileName)
                     prev_line = next_line;
 
                     /* adjust final image height via NEWLEN */
-                    if (y == _y)
-                        jbg85_enc_newlen(&s, _y);
+                    if (y == this->_y)
+                        jbg85_enc_newlen(&s, this->_y);
                 }
                 if ((fclose(fd) != 0) || (ferror(fd)))
                     err |= 1;
@@ -192,10 +192,10 @@ bool canvas::savePBM(const char* fileName)
     uint8_t* BMPDATA = nullptr;
     uint32_t row = 0;
 
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
 
         if ((err |= _pack_bool(&BMPDATA, &row)) == 0)
-            BMPDATASIZE = row * _y;
+            BMPDATASIZE = row * this->_y;
 
         if ((BMPDATA != nullptr) && (err == 0)) {
 
@@ -203,7 +203,7 @@ bool canvas::savePBM(const char* fileName)
             fopen_s(&fd, fileName, "wb"); //fopen(fileName, "wb");
 
             if (fd != NULL) {
-                fprintf(fd, "P4\n# Created by BitmapEngine\n%d %d\n", _x, _y);
+                fprintf(fd, "P4\n# Created by BitmapEngine\n%d %d\n", this->_x, this->_y);
                 fwrite(BMPDATA, sizeof(uint8_t), BMPDATASIZE, fd);
                 if ((fclose(fd) != 0) || (ferror(fd)))
                     err |= 1;
@@ -227,10 +227,10 @@ bool canvas::saveXBM(const char* fileName, const char* structName)
     uint8_t* BMPDATA = nullptr;
     uint32_t row = 0, k = 1;
 
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
 
         if ((err |= _pack_bool(&BMPDATA, &row)) == 0)
-            BMPDATASIZE = row * _y;
+            BMPDATASIZE = row * this->_y;
 
         if ((BMPDATA != nullptr) && (err == 0)) {
 
@@ -238,8 +238,8 @@ bool canvas::saveXBM(const char* fileName, const char* structName)
             fopen_s(&fd, fileName, "wb"); //fopen(fileName, "wb");
 
             if (fd != NULL) {
-                fprintf(fd, "#define IMG_width %d\n", _x);
-                fprintf(fd, "#define IMG_height %d\n", _y);
+                fprintf(fd, "#define IMG_width %d\n", this->_x);
+                fprintf(fd, "#define IMG_height %d\n", this->_y);
                 fprintf(fd, "static unsigned char IMG_bits[] = {\n\t");
 
                 /* jank lookup table */
@@ -282,10 +282,10 @@ bool canvas::saveBMP(const char* fileName, int DPI)
     uint8_t* BMPDATA = nullptr;
     uint32_t row = 0;
 
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
 
         if((err |= _pack_bool(&BMPDATA, &row, 0, 4)) == 0)
-            BMPDATASIZE = row * _y;
+            BMPDATASIZE = row * this->_y;
 
         if ((BMPDATA != nullptr) && (err == 0)) 
         {
@@ -297,8 +297,8 @@ bool canvas::saveBMP(const char* fileName, int DPI)
 
             infoHeader bmpInfoHead;
             bmpInfoHead.Size = 40;
-            bmpInfoHead.Width = _x;
-            bmpInfoHead.Height = _y;
+            bmpInfoHead.Width = this->_x;
+            bmpInfoHead.Height = this->_y;
             bmpInfoHead.Planes = 0x01;
             bmpInfoHead.Bits_Per_Pixel = 0x01;
             bmpInfoHead.Compression = 0x00;
@@ -352,24 +352,18 @@ bool canvas::saveMCB(const char* fileName, int headSize)
     uint32_t BMPDATASIZE = 0;
     uint8_t* BMPDATA = nullptr;
     uint32_t row = 0, i = 0;
-    uint8_t temp;
 
-    /* fit to head, messy..... */
-    canvas* tmp = new canvas;
-    err |= tmp->create(headSize, _y, 0);
-    err |= tmp->addSprite(this, ((headSize - _x) / 2), 0, 0);
-    delete[] ptr; ptr = nullptr;
-    err |= create(tmp->ptr, tmp->get_x(), tmp->get_y(), 0);
+    canvas* tmp = new canvas;;
+    err |= tmp->create(headSize, this->_y, 0);
+    err |= tmp->addSprite(this, ((headSize - this->_x) / 2), 0, 0);
+    err |= tmp->rotate(DEGREE::ROT_180);
+
+    if ((err |= tmp->_pack_bool(&BMPDATA, &row)) == 0)
+        BMPDATASIZE = row * this->_y;
     delete tmp;
-
-    // needed for format
-    err |= rotate(DEGREE::ROT_180); //idk why its rot-180
-
-    if ((err |= _pack_bool(&BMPDATA, &row)) == 0)
-        BMPDATASIZE = row * _y;
-
+    
     if ((BMPDATA != nullptr) && (err == 0)) {
-
+        uint8_t temp;
         FILE* fd;
         fopen_s(&fd, fileName, "wb");
         if (fd != NULL) {
@@ -379,7 +373,7 @@ bool canvas::saveMCB(const char* fileName, int headSize)
                 if (i > BMPDATASIZE) break;
                 if ((temp == 0x00) || (temp == 0xFF)) {
                     int cnt = 0;
-                    fwrite(&temp, sizeof(uint8_t), 1, fd);                    
+                    fwrite(&temp, sizeof(uint8_t), 1, fd);
                     while ((i < BMPDATASIZE) && (BMPDATA[i] == temp) && (cnt < 0xFE)) {
                         i++;
                         cnt++;
@@ -398,7 +392,8 @@ bool canvas::saveMCB(const char* fileName, int headSize)
         else err |= 1;
         delete[] BMPDATA; //release when done
     }
-
+    else err |= 1;
+    
     return err;
 }
 
@@ -408,13 +403,13 @@ bool canvas::_pack_bool(uint8_t** BMPDATA, uint32_t* row, bool ort, int byte_bou
     if (*BMPDATA != nullptr) delete[] *BMPDATA;
     *BMPDATA = nullptr;
 
-    if (ptr != nullptr) {
-        uint32_t image_y = _y;
-        uint32_t image_x = (uint32_t)(_x / 8.0);
+    if (this->ptr != nullptr) {
+        uint32_t image_y = this->_y;
+        uint32_t image_x = (uint32_t)(this->_x / 8.0);
 
-        if ((image_x * 8) < (uint32_t)_x)   image_x++;   //math fix
-        if (image_x == 0)                   image_x = 1; //non 0 byte width
-        while ((image_x % byte_bound))      image_x++;   //byte binding
+        if ((image_x * 8) < (uint32_t)this->_x)   image_x++;   //math fix
+        if (image_x == 0)                         image_x = 1; //non 0 byte width
+        while ((image_x % byte_bound))            image_x++;   //byte binding
         
         uint32_t BMPDATASIZE = (image_x * image_y) * sizeof(uint8_t);
 
@@ -432,14 +427,14 @@ bool canvas::_pack_bool(uint8_t** BMPDATA, uint32_t* row, bool ort, int byte_bou
             uint8_t* out_line;
             uint32_t __y = 0, __x = 0;
 
-            for (__y = 0; __y < _y; __y++) {
-                in_line = &ptr[(__y * _x)];
+            for (__y = 0; __y < this->_y; __y++) {
+                in_line = &this->ptr[(__y * this->_x)];
                 out_line = (ort == 0) ? (*BMPDATA + ((image_y - __y) * image_x)) : (*BMPDATA + (__y * image_x));
 
-                for (__x = 0; __x < _x; __x++) {
-                    if (in_line[__x] ^ _inv) {
+                for (__x = 0; __x < this->_x; __x++) {
+                    if (in_line[__x] ^ this->_inv) {
                         if (ort == 0) BIT_CLEAR(out_line[(__x / 8)], (7 - (__x % 8)));
-                        else         BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
+                        else          BIT_SET(out_line[(__x / 8)], (7 - (__x % 8)));
                     }
                 }
             }
@@ -453,43 +448,43 @@ bool canvas::_pack_bool(uint8_t** BMPDATA, uint32_t* row, bool ort, int byte_bou
 
 bool canvas::invert(bool invert)
 {
-    _inv = invert;
+    this->_inv = invert;
     return 0;
 }
 
 bool canvas::getPixle(uint32_t x, uint32_t y)
 {
-    if (ptr == nullptr) return 1;
+    if (this->ptr == nullptr) return 1;
 
-    if ((y < _y) && (x < _x)) 
-        return ptr[(y * _x) + x];
+    if ((y < this->_y) && (x < this->_x))
+        return this->ptr[(y * this->_x) + x];
     return 0;
 }
 
 bool canvas::getInvert(void)
 {
-    return _inv;
+    return this->_inv;
 }
 
 bool canvas::setPixle(uint32_t x, uint32_t y, bool val)
 {
-    if (ptr == nullptr) return 1;
+    if (this->ptr == nullptr) return 1;
 
-    if ((y < _y) && (x < _x))
-        ptr[(y * _x) + x] = val;
+    if ((y < this->_y) && (x < this->_x))
+        this->ptr[(y * this->_x) + x] = val;
     return 0;
 }
 
 canvas::~canvas()
 {
-    if (ptr != nullptr)
-        delete[] ptr;
-    ptr = nullptr;
+    if (this->ptr != nullptr)
+        delete[] this->ptr;
+    this->ptr = nullptr;
 }
 
 bool canvas::drawHorizontalLine(int32_t x0, int32_t y0, int32_t width, int32_t thick, bool val)
 {
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
         int32_t x = 0, y = 0;
         for (x = 0; x < width; x++)
             for (y = 0; y < thick; y++)
@@ -501,7 +496,7 @@ bool canvas::drawHorizontalLine(int32_t x0, int32_t y0, int32_t width, int32_t t
 
 bool canvas::drawVerticalLine(int32_t x0, int32_t y0, int32_t length, int32_t thick, bool val)
 {
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
         int32_t x = 0, y = 0;
         for (y = 0; y < length; y++)
             for (x = 0; x < thick; x++)
@@ -523,7 +518,7 @@ bool canvas::drawBox(int32_t x0, int32_t y0, int32_t length, int32_t width, int3
 
 bool canvas::drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val)
 {
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
         int32_t x = 0, y = 0;
         for (y = 0; y < length; y++)
             for (x = 0; x < width; x++)
@@ -688,11 +683,11 @@ uint8_t* canvas::bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
         double lum = 0;
         uint8_t blue, green, red;
         uint8_t* row = nullptr, * tmp = nullptr;
-        uint32_t __y = 0, __x = 0, x1 = 0, _fb = 0, _x = *_size / *y0;       
+        uint32_t __y = 0, __x = 0, x1 = 0, _fb = 0, _xx = *_size / *y0;       
 
         for (__y = 0; __y < *y0; __y++) {
             x1 = 0;
-            row = &image[_x * __y];
+            row = &image[_xx * __y];
             for (__x = 0; __x < *x0; __x++) {
                 tmp = &image[_fb++];
                 blue = row[x1++];
@@ -731,11 +726,11 @@ uint8_t* canvas::png_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
         double lum = 0;
         uint8_t blue, green, red;
         uint8_t* row = nullptr, * tmp = nullptr;
-        uint32_t __y = 0, __x = 0, x1 = 0, _fb = 0, _x = *_size / *y0;
+        uint32_t __y = 0, __x = 0, x1 = 0, _fb = 0, _xx = *_size / *y0;
 
         for (__y = 0; __y < *y0; __y++) {
             x1 = 0;
-            row = &image[_x * __y];
+            row = &image[_xx * __y];
             for (__x = 0; __x < *x0; __x++) {
                 tmp = &image[_fb++];
                 red = row[x1++];
@@ -825,17 +820,17 @@ bool canvas::import_jbg(const char* fileName)
     if (image != nullptr) {
         uint8_t* tmp;
         uint32_t x1 = s / y;
-        uint32_t q, _y, _x = 0;
+        uint32_t q, _yy, _xx = 0;
 
         if ((err |= create(x, y, 0)) != 1) {
-            for (_y = 0; _y < y; _y++) {
-                q = x1 * _y;
+            for (_yy = 0; _yy < y; _yy++) {
+                q = x1 * _yy;
                 tmp = image + q;
 
                 uint8_t bit = 0;
-                for (_x = 0; _x < x; _x++) {
-                    if (BIT_CHECK(tmp[_x / 8], 7-bit))
-                        setPixle(_x, _y, 1);
+                for (_xx = 0; _xx < x; _xx++) {
+                    if (BIT_CHECK(tmp[_xx / 8], 7-bit))
+                        setPixle(_xx, _yy, 1);
                     bit = (bit + 1) % 8;
                 }
             }
@@ -851,7 +846,7 @@ bool canvas::import_24bit(const char* fileName, DITHER type, int b_level, int c_
     float* tmp;
     bool err = 0;
     uint32_t x = 0, y = 0, s = 0, q = 0;
-    uint32_t _x = 0, _y = 0, _yi;
+    uint32_t _xx = 0, _yy = 0, _yi;
     uint8_t* image = bmp_open(fileName, &x, &y, &s);
 
     if (b_level != 0) err |= adj_brightness(image, x, y, b_level);
@@ -867,13 +862,13 @@ bool canvas::import_24bit(const char* fileName, DITHER type, int b_level, int c_
             if ((err |= dither(&_img, type)) != 1) {
                 _yi = y - 1;
                 if ((err |= create(x, y, 0)) != 1) {
-                    for (_y = 0; _y < y; _y++) {
-                        for (_x = 0; _x < x; _x++) {
-                            q = ((((_yi)-_y) * x)) + _x;
+                    for (_yy = 0; _yy < y; _yy++) {
+                        for (_xx = 0; _xx < x; _xx++) {
+                            q = ((((_yi)-_yy) * x)) + _xx;
                             tmp = _img.__img + q;
                             s = (uint32_t)*tmp;
                             if (s == 0) 
-                                setPixle(_x, _y, 1);
+                                setPixle(_xx, _yy, 1);
                         }
                     }
                 }
@@ -895,18 +890,18 @@ bool canvas::import_pbm(const char* fileName)
 
     if (image_pbm != nullptr) {
         uint32_t x1 = s / y;
-        uint32_t q, _y, _x = 0;
+        uint32_t q, _yy, _xx = 0;
         uint8_t* tmp;
 
         if ((err |= create(x, y, 0)) != 1) {
-            for (_y = 0; _y < y; _y++) {
-                q = x1 * _y;
+            for (_yy = 0; _yy < y; _yy++) {
+                q = x1 * _yy;
                 tmp = image_pbm + q;
 
                 uint8_t bit = 0;
-                for (_x = 0; _x < x; _x++) {
-                    if (BIT_CHECK(tmp[_x / 8], 7 - bit))
-                        setPixle(_x, _y, 1);
+                for (_xx = 0; _xx < x; _xx++) {
+                    if (BIT_CHECK(tmp[_xx / 8], 7 - bit))
+                        setPixle(_xx, _yy, 1);
                     bit = (bit + 1) % 8;
                 }
             }
@@ -922,7 +917,7 @@ bool canvas::import_png(const char* fileName, DITHER type, int b_level, int c_le
     float* tmp;
     bool err = 0;
     uint32_t x = 0, y = 0, s = 0, q = 0;
-    uint32_t _x = 0, _y = 0;
+    uint32_t _xx = 0, _yy = 0;
     uint8_t* image = png_open(fileName, &x, &y, &s);
 
     if (b_level != 0) err |= adj_brightness(image, x, y, b_level);
@@ -937,13 +932,13 @@ bool canvas::import_png(const char* fileName, DITHER type, int b_level, int c_le
             img _img = { _d, x, y };
             if ((err |= dither(&_img, type)) != 1) {
                 if ((err |= create(x, y, 0)) != 1) {
-                    for (_y = 0; _y < y; _y++) {
-                        for (_x = 0; _x < x; _x++) {
-                            q = (_y * x) + _x;
+                    for (_yy = 0; _yy < y; _yy++) {
+                        for (_xx = 0; _xx < x; _xx++) {
+                            q = (_yy * x) + _xx;
                             tmp = _img.__img + q;
                             s = (uint32_t)*tmp;
                             if (s == 0)
-                                setPixle(_x, _y, 1);
+                                setPixle(_xx, _yy, 1);
                         }
                     }
                 }
@@ -964,14 +959,14 @@ bool canvas::mirror(MIRROR m)
         bool* g;
         bool* tmp;
         if (m == MIRROR::Horizontal) {
-            tmp = new bool[_x * sizeof(bool)];
+            tmp = new bool[this->_x * sizeof(bool)];
             if (tmp != nullptr) {
-                for (uint32_t y = 0; y < _y; y++) {
-                    g = &ptr[y * _x];
-                    for (uint32_t x = 0; x < _x; x++) {
+                for (uint32_t y = 0; y < this->_y; y++) {
+                    g = &this->ptr[y * this->_x];
+                    for (uint32_t x = 0; x < this->_x; x++) {
                         tmp[(_x - 1) - x] = g[x];
                     }
-                    memcpy(g, tmp, _x * sizeof(bool));
+                    memcpy(g, tmp, this->_x * sizeof(bool));
                 }
                 delete[] tmp;
                 return 0;
@@ -980,13 +975,13 @@ bool canvas::mirror(MIRROR m)
         }
         else if (m == MIRROR::Vertical) //TODO: fix, make "more better"
         {
-            uint32_t q = _x * _y;
+            uint32_t q = this->_x * this->_y;
             tmp = new bool[q * sizeof(bool)];
             if (tmp != nullptr) {
-                memcpy(tmp, ptr, q * sizeof(bool));
-                for (uint32_t y = 0; y < _y; y++) {
-                    g = &ptr[(_y - 1 - y) * _x];
-                    memcpy(g, &tmp[y * _x], _x * sizeof(bool));
+                memcpy(tmp, this->ptr, q * sizeof(bool));
+                for (uint32_t y = 0; y < this->_y; y++) {
+                    g = &this->ptr[(_y - 1 - y) * this->_x];
+                    memcpy(g, &tmp[y * this->_x], this->_x * sizeof(bool));
                 }
                 delete[] tmp;
                 return 0;
@@ -1004,7 +999,7 @@ bool canvas::rotate(DEGREE rot)
         uint32_t y = 0, x = 0;
         uint32_t y1 = 0, x1 = 0;
 
-        uint32_t _y_new = _y, _x_new = _x;
+        uint32_t _y_new = this->_y, _x_new = this->_x;
         uint32_t q = _x_new * _y_new;
         size_t _asize = q * sizeof(bool);
 
@@ -1012,30 +1007,30 @@ bool canvas::rotate(DEGREE rot)
             return 0;
 
         if (rot == DEGREE::ROT_90 || rot == DEGREE::ROT_270) {
-            _y_new = _x;
-            _x_new = _y;
+            _y_new = this->_x;
+            _x_new = this->_y;
         }
 
         bool* tmp;
         bool* new_ptr = new bool[_asize] {0};
 
         if (new_ptr != nullptr) {
-            for (y = 0; y < _y; y++) {
-                for (x = 0; x < _x; x++) {
-                    if (rot == DEGREE::ROT_90)  { x1 = (_y - 1) - y; y1 = x; }
-                    if (rot == DEGREE::ROT_180) { x1 = (_x - 1) - x; y1 = (_y - 1) - y; }
-                    if (rot == DEGREE::ROT_270) { x1 = y;            y1 = (_x - 1) - x; }
+            for (y = 0; y < this->_y; y++) {
+                for (x = 0; x < this->_x; x++) {
+                    if (rot == DEGREE::ROT_90)  { x1 = (this->_y - 1) - y; y1 = x; }
+                    if (rot == DEGREE::ROT_180) { x1 = (this->_x - 1) - x; y1 = (this->_y - 1) - y; }
+                    if (rot == DEGREE::ROT_270) { x1 = y;                  y1 = (this->_x - 1) - x; }
 
                     q = (y1 * _x_new);
                     tmp = new_ptr + q + x1;
-                    *tmp = ptr[(y * _x) + x];
+                    *tmp = this->ptr[(y * this->_x) + x];
                 }
             }
 
-            delete[] ptr;
-            ptr = new_ptr;
-            _y = _y_new;
-            _x = _x_new;
+            delete[] this->ptr;
+            this->ptr = new_ptr;
+            this->_y = _y_new;
+            this->_x = _x_new;
             return 0;
         }
         return 1;
@@ -1066,17 +1061,17 @@ bool canvas::rotate_full(int angle)
     bool err = 0;
     canvas temp;
 
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
 
         /* min-max search */
         int32_t MAX_X = 0, MAX_Y = 0;
         int32_t MIN_X = 0, MIN_Y = 0;
 
-        int32_t __x[4] = { 0,            0, (int32_t) _x, (int32_t) _x };
-        int32_t __y[4] = { 0, (int32_t) _y,            0, (int32_t) _y };
+        int32_t __x[4] = { 0,            0, (int32_t)this->_x, (int32_t)this->_x };
+        int32_t __y[4] = { 0, (int32_t)this->_y,            0, (int32_t)this->_y };
 
         for (int i = 0; i < 4; i++) {
-            rot_calc(&__x[i], &__y[i], _x, _y, angle);
+            rot_calc(&__x[i], &__y[i], this->_x, this->_y, angle);
             if (__x[i] < MIN_X) MIN_X = __x[i];
             if (__y[i] < MIN_Y) MIN_Y = __y[i];
             if (__x[i] > MAX_X) MAX_X = __x[i];
@@ -1094,17 +1089,17 @@ bool canvas::rotate_full(int angle)
         int32_t xs = 0;
         int32_t ys = 0;
 
-        for (uint32_t y = 0; y < _y; y++) {
-            for (uint32_t x = 0; x < _x; x++) {
+        for (uint32_t y = 0; y < this->_y; y++) {
+            for (uint32_t x = 0; x < this->_x; x++) {
                 xs = x;
                 ys = y;
-                rot_calc(&xs, &ys, _x, _y, angle);
+                rot_calc(&xs, &ys, this->_x, this->_y, angle);
                 temp.setPixle(xs + MIN_X, ys + MIN_Y, getPixle(x, y));
             }
         }
 
-        delete[] ptr;
-        ptr = nullptr;
+        delete[] this->ptr;
+        this->ptr = nullptr;
         err |= create(temp.get_pointer(), MAX_X, MAX_Y, 0);
     }
 
@@ -1350,7 +1345,7 @@ bool canvas::adj_brightness(uint8_t* ptr, uint32_t x0, uint32_t y0, int val)
     uint8_t* p;
     uint32_t y = 0, x = 0;
 
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
         for (y = 0; y < y0; y++) {
             for (x = 0; x < x0; x++) {
                 p = &ptr[(x * y0) + y];
@@ -1371,7 +1366,7 @@ bool canvas::adj_contrast(uint8_t* ptr, uint32_t x0, uint32_t y0, int val)
     uint32_t y = 0, x = 0;
     float _P = 0.0, F = (259.0F * (val + 255.0F)) / (255.0F * (259.0F - val));
 
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
         for (y = 0; y < y0; y++) {
             for (x = 0; x < x0; x++) {
                 p = &ptr[(x * y0) + y];
@@ -1394,9 +1389,9 @@ bool canvas::scale(float x0, float y0)
     if (x0 <= 0 || y0 <= 0)
         return 1;
 
-    if (ptr != nullptr) {
-        uint32_t newX = (int32_t)(_x * x0);
-        uint32_t newY = (int32_t)(_y * y0);
+    if (this->ptr != nullptr) {
+        uint32_t newX = (int32_t)(this->_x * x0);
+        uint32_t newY = (int32_t)(this->_y * y0);
 
         if (temp.create(newX, newY, 0) == 1)
             return 1;
@@ -1405,8 +1400,8 @@ bool canvas::scale(float x0, float y0)
             for (uint32_t x = 0; x < newX; x++)
                 temp.setPixle(x, y, getPixle((uint32_t)(x/x0), (uint32_t)(y/y0)));
 
-        delete[] ptr;
-        ptr = nullptr;
+        delete[] this->ptr;
+        this->ptr = nullptr;
         err |= create(temp.get_pointer(), newX, newY, 0);
     }
 

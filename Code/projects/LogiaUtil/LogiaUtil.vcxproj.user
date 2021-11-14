@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>-m "moo.bmp" -w 1200 -l 1800 -s 8 -d 8 -q 1 -t 1 -n "Lena.png" -i</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments> -n cat.png -w 1200 -l 1800 -t 3 -m BMP.bmp -a MCB.bin -j 1280 -e PBM.pbm -f XBM.xbm -r cat -z ZPL.zpl</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

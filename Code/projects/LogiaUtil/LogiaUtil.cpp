@@ -83,17 +83,22 @@ void printUsage(const char *c)
     printf("%s", logo);
     printf("-------------------------------------------------------------------------\n");
     printf("Options:\n");
-    printf("  -p ......... Printer Name     (Print)\n");
-    printf("  -z ......... ZPL file Name    (Save)\n");
-    printf("  -m ......... BMP file Name    (save)\n");
-    printf("  -n ......... PNG file Name    (Input File)\n");
-    printf("  -x ......... List Printers    (Debug Option)\n");
-    printf("  -w ......... Print Width      [DOTS] (dpi x inch)\n");
-    printf("  -l ......... Label Length     [DOTS] (dpi x inch)\n");
-    printf("  -s ......... Print Speed      [1 - 8]\n");
-    printf("  -d ......... Darkness         [1 - 8]\n");
-    printf("  -q ......... Quantity         [1 - nth]\n");
-    printf("  -t ......... Dither Type      [0 - 9]\n");
+    printf("  -p ......... Printer Name         (Print)\n");
+    printf("  -z ......... ZPL file Name        (Save)\n");
+    printf("  -m ......... BMP file Name        (save)\n");
+    printf("  -a ......... MCB file Name        (save) (Requires -j)\n");
+    printf("     -j ...... MCB HeadSize         [DOTS] (1280 or 832)\n");
+    printf("  -e ......... PBM file Name        (save)\n");
+    printf("  -f ......... XBM file Name        (save) (Requires -r)\n");
+    printf("     -r ...... XBM Struct Name \n");
+    printf("  -n ......... PNG file Name        (Input File)\n");
+    printf("  -x ......... List Printers        (Debug Option)\n");
+    printf("  -w ......... Print Width          [DOTS] (dpi x inch)\n");
+    printf("  -l ......... Label Length         [DOTS] (dpi x inch)\n");
+    printf("  -s ......... Print Speed          [1 - 8]\n");
+    printf("  -d ......... Darkness             [1 - 8]\n");
+    printf("  -q ......... Quantity             [1 - nth]\n");
+    printf("  -t ......... Dither Type          [0 - 9]\n");
     printf("         0 --> Threshold\n");
     printf("         1 --> FloydSteinberg\n");
     printf("         2 --> Stucki\n");
@@ -132,11 +137,17 @@ int main(int argc, char* argv[])
     std::string INPUT;
     std::string ZPLOUTPUT;
     std::string BMPOUTPUT;
-    int32_t CONTRAST = 0;
-    int32_t BRIGHT = 0;
-    int32_t DITHERTYPE = 0;
-    bool invert = 0;
-    bool verbose = 0;
+    std::string MCBOUTPUT;
+    std::string PBMOUTPUT;
+    std::string XBMOUTPUT;
+    std::string XBMSTRUCT;
+
+    int32_t CONTRAST     = 0;
+    int32_t BRIGHT       = 0;
+    int32_t DITHERTYPE   = 0;
+    int32_t HEADSIZE     = 832;
+    bool invert          = 0;
+    bool verbose         = 0;
 
     if (argc <= 1) {
         printUsage(argv[0]);
@@ -144,7 +155,7 @@ int main(int argc, char* argv[])
     }
 
     try {
-        while ((opt = getopt(argc, argv, "p:z:w:l:s:d:q:n:t:b:c:m:ixv")) != -1) {
+        while ((opt = getopt(argc, argv, "p:z:w:l:s:d:q:n:t:b:c:m:a:e:f:j:r:ixv")) != -1) {
             switch (opt)
             {
             case 'p':
@@ -155,6 +166,18 @@ int main(int argc, char* argv[])
                 break;
             case 'm':
                 BMPOUTPUT = optarg;
+                break;
+            case 'a':
+                MCBOUTPUT = optarg;
+                break;
+            case 'e':
+                PBMOUTPUT = optarg;
+                break;
+            case 'f':
+                XBMOUTPUT = optarg;
+                break;
+            case 'r':
+                XBMSTRUCT = optarg;
                 break;
             case 'w':
                 optionSelected = std::stoi(optarg, &inputValLen);
@@ -178,6 +201,10 @@ int main(int argc, char* argv[])
                 break;
             case 'n':
                 INPUT = optarg;
+                break;
+            case 'j':
+                optionSelected = std::stoi(optarg, &inputValLen);
+                HEADSIZE = optionSelected;
                 break;
             case 't':
                 optionSelected = std::stoi(optarg, &inputValLen);
@@ -227,6 +254,15 @@ int main(int argc, char* argv[])
 
     if (!BMPOUTPUT.empty())
         err |= master.saveBMP(BMPOUTPUT.c_str(), 72);
+
+    if (!MCBOUTPUT.empty())
+        err |= master.saveMCB(MCBOUTPUT.c_str(), HEADSIZE);
+
+    if (!PBMOUTPUT.empty())
+        err |= master.savePBM(PBMOUTPUT.c_str());
+
+    if ((!XBMOUTPUT.empty()) && (!XBMSTRUCT.empty()))
+        err |= master.saveXBM(XBMOUTPUT.c_str(), XBMSTRUCT.c_str());
 
     zpl myJob(DEFAULT);
     err |= myJob.add_graphic(master.get_pointer(), master.get_x(), master.get_y());
