@@ -47,18 +47,17 @@ using namespace std::chrono;
 const char ARIAL_FONT[] = "C:\\Windows\\Fonts\\arial.ttf";
 const char TEST_DIR[] = "A:\\Users\\Matt\\Pictures\\TRASH\\libtest\\";
 const char TEST_IMG[] = "A:\\Users\\Matt\\Pictures\\TRASH\\Lena.bmp";
-//const char TEST_IMG[] = "A:\\Users\\Matt\\Pictures\\TRASH\\logo.bmp";
-//const char TEST_IMG[] = "A:\\Users\\Matt\\Pictures\\TRASH\\hi.bmp";
 
 const int DPI = 300;
 
 std::string JBIG_TESTIMG;
 std::string PBM_TESTIMG;
 
+void TEST(void);
+
 bool save_bmp(canvas* ptr, const char* dir, int cnt);
 bool save_pbm(canvas* ptr, const char* dir, int cnt);
 bool save_jbg(canvas* ptr, const char* dir, int cnt);
-bool save_ba(canvas* ptr, const char* dir, int cnt);
 bool save_zpl(canvas* ptr, const char* dir, int cnt);
 bool save_mcb(canvas* ptr, const char* dir, int cnt);
 
@@ -105,6 +104,7 @@ bool image_save_PBM(const char* dir, const char* bmp, int cnt);
 bool image_save_JBIG(const char* dir, const char* bmp, int cnt);          //JBIG compressed bitmap
 bool import_jbg_file(char* dir, const char* bmp, int cnt);
 bool import_pbm_file(char* dir, const char* bmp, int cnt);
+bool import_png_file(char* dir, const char* bmp, int cnt);
 bool image_save_xbm(const char* dir, const char* bmp, int cnt);
 bool image_save_zpl(const char* dir, const char* bmp, int cnt);
 bool image_save_mcb(const char* dir, const char* bmp, int cnt);
@@ -117,7 +117,7 @@ bool canvas_rotate_15(const char* dir, const char* bmp, int cnt);
 
 int main(int argc, char* argv[])
 {    
-    //return DEBUG();
+    TEST();
 
     char* output_dir = (char*)TEST_DIR;
     char* tst_img = (char*)TEST_IMG;
@@ -172,6 +172,7 @@ int main(int argc, char* argv[])
     image_save_JBIG(output_dir, tst_img, tc++);
     import_jbg_file(output_dir, JBIG_TESTIMG.c_str(), tc++);
     import_pbm_file(output_dir, PBM_TESTIMG.c_str(), tc++);
+    import_png_file(output_dir, tst_img, tc++);
     image_save_xbm(output_dir, tst_img, tc++);
     image_save_zpl(output_dir, tst_img, tc++); //zebra print lang
     image_save_mcb(output_dir, tst_img, tc++); //microcom compressed binary
@@ -716,7 +717,6 @@ bool canvas_mirrorH(const char* dir, const char* bmp, int cnt)
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Jarvis);
     err |= c.mirror(MIRROR::Horizontal);
-
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("Canvas (MIRROR::Horizontal)", err);
     return err;
@@ -728,7 +728,6 @@ bool canvas_mirrorV(const char* dir, const char* bmp, int cnt)
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Jarvis);
     err |= c.mirror(MIRROR::Vertical);
-
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("Canvas (MIRROR::Vertical)", err);
     return err;
@@ -740,7 +739,6 @@ bool image_save_PBM(const char* dir, const char* bmp, int cnt)
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Threshold);
     //err |= c.invert(1);
-
     err |= save_pbm(&c, dir, cnt);
     print_pass_fail("PBM_TEST", err);
 
@@ -754,7 +752,6 @@ bool image_save_JBIG(const char* dir, const char* bmp, int cnt)
     bool err = 0;
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Threshold);
-
     err |= save_jbg(&c, dir, cnt);
     print_pass_fail("JBG_TEST", err);
 
@@ -768,7 +765,6 @@ bool import_jbg_file(char* dir, const char* bmp, int cnt)
     bool err = 0;
     canvas c;
     err |= c.import_jbg(bmp);
-
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("jbg_import_export", err);
     return err;
@@ -779,9 +775,21 @@ bool import_pbm_file(char* dir, const char* bmp, int cnt)
     bool err = 0;
     canvas c;
     err |= c.import_pbm(bmp);
-
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("pbm_import_export", err);
+    return err;
+}
+
+bool import_png_file(char* dir, const char* bmp, int cnt)
+{
+    bool err = 0;
+    canvas c;
+    std::string tmp = std::string(bmp);
+    tmp.resize(tmp.size() - 3);
+    tmp += "png";
+    err |= c.import_png(tmp.c_str(), DITHER::Threshold);
+    err |= save_bmp(&c, dir, cnt);
+    print_pass_fail("png_import_export", err);
     return err;
 }
 
@@ -789,9 +797,7 @@ bool image_save_xbm(const char* dir, const char* bmp, int cnt)
 {
     bool err = 0;
     canvas c;
-
     err |= c.import_24bit(bmp, DITHER::Threshold);
-
     err |= save_xbm(&c, dir, cnt);
     print_pass_fail("XBM_TEST", err);
     return err;
@@ -833,7 +839,6 @@ bool image_contrast_adj(const char* dir, const char* bmp, int cnt)
     bool err = 0;
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Jarvis, 0, -50);
-
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("image (contrast - 50)", err);
     return err;
@@ -844,8 +849,7 @@ bool canvas_rotate_15(const char* dir, const char* bmp, int cnt)
     bool err = 0;
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Jarvis);
-    c.rotate_full(15);
-
+    err |= c.rotate_full(15);
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("Canvas (bitmap_rot_45)", err);
     return err;
@@ -856,8 +860,7 @@ bool canvas_scale_grow(const char* dir, const char* bmp, int cnt)
     bool err = 0;
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Jarvis);
-    c.scale(2.0, 2.0);
-
+    err |= c.scale(2.0, 2.0);
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("Canvas (scale X 2)", err);
     return err;
@@ -868,8 +871,7 @@ bool canvas_scale_shrink(const char* dir, const char* bmp, int cnt)
     bool err = 0;
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Jarvis);
-    c.scale(0.5, 0.5);
-
+    err |= c.scale(0.5, 0.5);
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("Canvas (scale X 1/2)", err);
     return err;
@@ -880,9 +882,14 @@ bool canvas_scale_grow_width(const char* dir, const char* bmp, int cnt)
     bool err = 0;
     canvas c;
     err |= c.import_24bit(bmp, DITHER::Jarvis);
-    c.scale(2.0, 1);
-
+    err |= c.scale(2.0, 1);
     err |= save_bmp(&c, dir, cnt);
     print_pass_fail("Canvas (scale)", err);
     return err;
+}
+
+
+void TEST(void)
+{
+    ;
 }

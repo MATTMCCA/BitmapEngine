@@ -44,6 +44,7 @@
 #include <cmath>
 #include <string> //ugh
 
+#include "lodepng.hpp"
 #include "bit_def.hpp"
 
 extern "C" {
@@ -205,6 +206,7 @@ public:
     bool drawBoxFill(int32_t x0, int32_t y0, int32_t length, int32_t width, bool val);
 
     bool import_24bit(const char* fileName, DITHER type = DITHER::Threshold, int b_level = 0, int c_level = 0);
+    bool import_png(const char* fileName, DITHER type = DITHER::Threshold, int b_level = 0, int c_level = 0);
 
     bool import_jbg(const char* fileName);
     bool import_pbm(const char* fileName);
@@ -247,6 +249,7 @@ private:
     uint8_t* bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
     uint8_t* jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
     uint8_t* pbm_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
+    uint8_t* png_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
 
     /* DITHER */
     bool dither(img* image, DITHER type);

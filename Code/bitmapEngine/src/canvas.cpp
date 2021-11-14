@@ -686,6 +686,50 @@ uint8_t* canvas::bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
     /* convert to grayscale */
     if (image != nullptr) {
         double lum = 0;
+        uint8_t blue, green, red;
+        uint8_t* row = nullptr, * tmp = nullptr;
+        uint32_t __y = 0, __x = 0, x1 = 0, _fb = 0, _x = *_size / *y0;       
+
+        for (__y = 0; __y < *y0; __y++) {
+            x1 = 0;
+            row = &image[_x * __y];
+            for (__x = 0; __x < *x0; __x++) {
+                tmp = &image[_fb++];
+                blue = row[x1++];
+                green = row[x1++];
+                red = row[x1++];
+                //https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
+                lum = /*blue*/(blue * 0.11) + /*green*/(green * 0.59) + /*red*/(red * 0.30);
+                if (lum < 0) lum = 0;
+                if (lum > 255) lum = 255;
+                *tmp = (uint8_t)lum;
+            }
+        }
+        *_size = _fb;
+    }
+
+    return image;
+}
+
+uint8_t* canvas::png_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size)
+{
+    *x0 = *y0 = *_size = 0;
+    uint32_t image_size = 0;
+    uint8_t* image = nullptr;
+
+    std::vector<unsigned char> img; //the raw pixels    
+    if (lodepng::decode(img, *x0, *y0, fileName, LCT_RGB, 8))
+        return image; 
+
+    *_size = *x0 * *y0 * 3;
+    image = new uint8_t[*_size];
+
+    /* convert to grayscale */
+    if (image != nullptr) {
+        memcpy(image, img.data(), *_size);
+
+        double lum = 0;
+        uint8_t blue, green, red;
         uint8_t* row = nullptr, * tmp = nullptr;
         uint32_t __y = 0, __x = 0, x1 = 0, _fb = 0, _x = *_size / *y0;
 
@@ -694,8 +738,11 @@ uint8_t* canvas::bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint
             row = &image[_x * __y];
             for (__x = 0; __x < *x0; __x++) {
                 tmp = &image[_fb++];
+                red = row[x1++];
+                green = row[x1++];
+                blue = row[x1++];
                 //https://stackoverflow.com/questions/4147639/converting-color-bmp-to-grayscale-bmp
-                lum = /*blue*/(row[x1++] * 0.11) + /*green*/(row[x1++] * 0.59) + /*red*/(row[x1++] * 0.30);
+                lum = /*blue*/(blue * 0.11) + /*green*/(green * 0.59) + /*red*/(red * 0.30);
                 if (lum < 0) lum = 0;
                 if (lum > 255) lum = 255;
                 *tmp = (uint8_t)lum;
@@ -866,6 +913,46 @@ bool canvas::import_pbm(const char* fileName)
         }
         delete[] image_pbm;
     }
+
+    return err;
+}
+
+bool canvas::import_png(const char* fileName, DITHER type, int b_level, int c_level)
+{
+    float* tmp;
+    bool err = 0;
+    uint32_t x = 0, y = 0, s = 0, q = 0;
+    uint32_t _x = 0, _y = 0;
+    uint8_t* image = png_open(fileName, &x, &y, &s);
+
+    if (b_level != 0) err |= adj_brightness(image, x, y, b_level);
+    if (c_level != 0) err |= adj_contrast(image, x, y, c_level);
+
+    if (image != nullptr) {
+        float* _d = new float[s];
+        if (_d != nullptr) {
+            for (uint32_t i = 0; i < s; i++)
+                _d[i] = (float)image[i];
+            delete[] image;
+            img _img = { _d, x, y };
+            if ((err |= dither(&_img, type)) != 1) {
+                if ((err |= create(x, y, 0)) != 1) {
+                    for (_y = 0; _y < y; _y++) {
+                        for (_x = 0; _x < x; _x++) {
+                            q = (_y * x) + _x;
+                            tmp = _img.__img + q;
+                            s = (uint32_t)*tmp;
+                            if (s == 0)
+                                setPixle(_x, _y, 1);
+                        }
+                    }
+                }
+            }
+            delete[] _d;
+        }
+        else delete[] image;
+    }
+    else return 1;
 
     return err;
 }
