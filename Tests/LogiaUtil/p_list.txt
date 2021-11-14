@@ -1,0 +1,48 @@
+? LogiaUtil.exe -x
+printer: Microsoft XPS Document Writer
+printerInfo->Status: 0
+printerInfo->pDriverName: Microsoft XPS Document Writer v4
+printerInfo->pShareName:
+printerInfo->pPortName: PORTPROMPT:
+
+printer: Microsoft Print to PDF
+printerInfo->Status: 0
+printerInfo->pDriverName: Microsoft Print To PDF
+printerInfo->pShareName:
+printerInfo->pPortName: PORTPROMPT:
+
+printer: Logia Printer
+printerInfo->Status: 0
+printerInfo->pDriverName: Logia Printer
+printerInfo->pShareName: logia
+printerInfo->pPortName: USB001
+
+printer: Generic / Text Only
+printerInfo->Status: 0
+printerInfo->pDriverName: Generic / Text Only
+printerInfo->pShareName:
+printerInfo->pPortName: FILE:
+
+printer: Fax
+printerInfo->Status: 0
+printerInfo->pDriverName: Microsoft Shared Fax Driver
+printerInfo->pShareName:
+printerInfo->pPortName: SHRFAX:
+
+printer: Brother HL-L2340D series
+printerInfo->Status: 0
+printerInfo->pDriverName: Brother HL-L2340D series
+printerInfo->pShareName:
+printerInfo->pPortName: <REMOVED>
+
+printer: 4BARCODE 4B-3044A
+printerInfo->Status: 0
+printerInfo->pDriverName: 4BARCODE 4B-3044A
+printerInfo->pShareName:
+printerInfo->pPortName: FILE:
+
+printer: 360C
+printerInfo->Status: 0
+printerInfo->pDriverName: 360C PCL6
+printerInfo->pShareName:
+printerInfo->pPortName: FILE:
