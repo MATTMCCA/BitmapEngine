@@ -1,4 +1,4 @@
-? LogiaUtil.exe -x
+λ LogiaUtil.exe -x
 printer: Microsoft XPS Document Writer
 printerInfo->Status: 0
 printerInfo->pDriverName: Microsoft XPS Document Writer v4
