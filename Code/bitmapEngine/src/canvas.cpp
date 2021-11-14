@@ -954,7 +954,7 @@ bool canvas::import_png(const char* fileName, DITHER type, int b_level, int c_le
 
 bool canvas::mirror(MIRROR m)
 {
-    if (ptr != nullptr)
+    if (this->ptr != nullptr)
     {
         bool* g;
         bool* tmp;
@@ -964,7 +964,7 @@ bool canvas::mirror(MIRROR m)
                 for (uint32_t y = 0; y < this->_y; y++) {
                     g = &this->ptr[y * this->_x];
                     for (uint32_t x = 0; x < this->_x; x++) {
-                        tmp[(_x - 1) - x] = g[x];
+                        tmp[(this->_x - 1) - x] = g[x];
                     }
                     memcpy(g, tmp, this->_x * sizeof(bool));
                 }
@@ -980,7 +980,7 @@ bool canvas::mirror(MIRROR m)
             if (tmp != nullptr) {
                 memcpy(tmp, this->ptr, q * sizeof(bool));
                 for (uint32_t y = 0; y < this->_y; y++) {
-                    g = &this->ptr[(_y - 1 - y) * this->_x];
+                    g = &this->ptr[(this->_y - 1 - y) * this->_x];
                     memcpy(g, &tmp[y * this->_x], this->_x * sizeof(bool));
                 }
                 delete[] tmp;
@@ -995,7 +995,7 @@ bool canvas::mirror(MIRROR m)
 
 bool canvas::rotate(DEGREE rot)
 {
-    if (ptr != nullptr) {
+    if (this->ptr != nullptr) {
         uint32_t y = 0, x = 0;
         uint32_t y1 = 0, x1 = 0;
 
@@ -1067,8 +1067,8 @@ bool canvas::rotate_full(int angle)
         int32_t MAX_X = 0, MAX_Y = 0;
         int32_t MIN_X = 0, MIN_Y = 0;
 
-        int32_t __x[4] = { 0,            0, (int32_t)this->_x, (int32_t)this->_x };
-        int32_t __y[4] = { 0, (int32_t)this->_y,            0, (int32_t)this->_y };
+        int32_t __x[4] = { 0,                 0, (int32_t)this->_x, (int32_t)this->_x };
+        int32_t __y[4] = { 0, (int32_t)this->_y,                 0, (int32_t)this->_y };
 
         for (int i = 0; i < 4; i++) {
             rot_calc(&__x[i], &__y[i], this->_x, this->_y, angle);

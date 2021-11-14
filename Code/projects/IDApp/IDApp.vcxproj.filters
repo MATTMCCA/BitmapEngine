@@ -30,6 +30,9 @@
     <ClCompile Include="..\..\bitmapEngine\src\font.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\lodepng\src\lodepng.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig_ar.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\bitmapEngine\include\font.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lodepng\include\lodepng.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../bit_def/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../bit_def/include;../../lodepng/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -111,7 +111,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../bit_def/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../bitmapEngine/include;../../parser;../../libfreetype2/include/freetype2;../../jbigkit-2.1/libjbig;../../bit_def/include;../../lodepng/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -177,6 +177,7 @@
     <ClCompile Include="..\..\bitmapEngine\src\font.cpp" />
     <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig85.c" />
     <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig_ar.c" />
+    <ClCompile Include="..\..\lodepng\src\lodepng.cpp" />
     <ClCompile Include="usps_demo.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +185,7 @@
     <ClInclude Include="..\..\bitmapEngine\include\font.hpp" />
     <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig85.h" />
     <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig_ar.h" />
+    <ClInclude Include="..\..\lodepng\include\lodepng.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

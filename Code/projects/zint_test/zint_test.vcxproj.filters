@@ -30,6 +30,9 @@
     <ClCompile Include="..\..\jbigkit-2.1\libjbig\jbig85.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\lodepng\src\lodepng.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\bitmapEngine\include\canvas.hpp">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\jbigkit-2.1\libjbig\jbig85.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\lodepng\include\lodepng.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
