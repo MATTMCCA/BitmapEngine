@@ -93,7 +93,7 @@ Other Example:
 ```
 REM Raw Print Batch
 MODE COM21 BAUD=115200 PARITY=n DATA=8
-COPY yourfile.txt \B \\.\COM21 \B
+COPY yourfile.txt /B \\.\COM21 /B
 PAUSE
 ```
 
