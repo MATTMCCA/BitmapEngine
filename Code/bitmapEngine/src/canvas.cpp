@@ -1339,16 +1339,16 @@ bool canvas::cluster(img* image)
     return 1;
 }
 
-bool canvas::adj_brightness(uint8_t* ptr, uint32_t x0, uint32_t y0, int val)
+bool canvas::adj_brightness(uint8_t* _ptr, uint32_t x0, uint32_t y0, int val)
 {
     int pix;
     uint8_t* p;
     uint32_t y = 0, x = 0;
 
-    if (this->ptr != nullptr) {
+    if (_ptr != nullptr) {
         for (y = 0; y < y0; y++) {
             for (x = 0; x < x0; x++) {
-                p = &ptr[(x * y0) + y];
+                p = &_ptr[(x * y0) + y];
                 pix = *p + val;
                 if (pix > 255) pix = 255;
                 if (pix < 0) pix = 0;
@@ -1360,16 +1360,16 @@ bool canvas::adj_brightness(uint8_t* ptr, uint32_t x0, uint32_t y0, int val)
     return 1;
 }
 
-bool canvas::adj_contrast(uint8_t* ptr, uint32_t x0, uint32_t y0, int val)
+bool canvas::adj_contrast(uint8_t* _ptr, uint32_t x0, uint32_t y0, int val)
 {
     uint8_t* p;
     uint32_t y = 0, x = 0;
     float _P = 0.0, F = (259.0F * (val + 255.0F)) / (255.0F * (259.0F - val));
 
-    if (this->ptr != nullptr) {
+    if (_ptr != nullptr) {
         for (y = 0; y < y0; y++) {
             for (x = 0; x < x0; x++) {
-                p = &ptr[(x * y0) + y];
+                p = &_ptr[(x * y0) + y];
                 _P = (F * (*p - 128.0F)) + 128.0F;
                 if (_P > 255.0F) _P = 255.0F;
                 if (_P < 0.0F) _P = 0.0F;

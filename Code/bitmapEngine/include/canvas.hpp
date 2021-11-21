@@ -243,8 +243,8 @@ private:
 
     bool rot_calc(int32_t* x0, int32_t* y0, uint32_t x_size, uint32_t y_size, int angle);
 
-    bool adj_brightness(uint8_t *ptr, uint32_t x0, uint32_t y0, int val);
-    bool adj_contrast(uint8_t* ptr, uint32_t x0, uint32_t y0, int val);
+    bool adj_brightness(uint8_t* _ptr, uint32_t x0, uint32_t y0, int val);
+    bool adj_contrast(uint8_t* _ptr, uint32_t x0, uint32_t y0, int val);
 
     uint8_t* bmp_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
     uint8_t* jbg_open(const char* fileName, uint32_t* x0, uint32_t* y0, uint32_t* _size);
