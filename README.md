@@ -20,3 +20,5 @@ Example projects are located in the `BitmapEngine\Code\projects` directory.
 - IDApp [demo temp ID application]
 - LogiaTest [App for printing test - ZPL]
 
+
+### Borrowed works maintain original license.
